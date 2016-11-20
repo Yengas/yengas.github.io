@@ -1,4 +1,43 @@
+DefaultContentLanguage: "en"
+
 baseurl: "https://yengas.github.io/"
-title: "Yengas"
 languageCode: "en-us"
 theme: "redlounge"
+
+social: &default_social
+  - { pre: '<i class="fa fa-twitter"></i>', url: "https://twitter.com/YigitcanUCUM", identifier: "twitter" }
+  - { pre: '<i class="fa fa-facebook"></i>', url: "https://facebook.com/YigitcanUCUM", identifier: "facebook" }
+  - { pre: '<i class="fa fa-github"></i>', url: "https://github.com/Yengas", identifier: "github" }
+  - { pre: '<i class="fa fa-linkedin"></i>', url: "https://linkedin.com/in/YigitcanUCUM", identifier: "linkedin" }
+
+Languages:
+  en:
+    weight: 1
+    menu:
+      main:
+        - { name: "About", url: "/about" }
+      social: *default_social
+      footer:
+        - { name: "Blog'u Türkçe oku.", url: "/tr/"}
+  tr:
+    weight: 2
+    menu:
+      main:
+        - { name: "Hakkımda", url: "/tr/about" }
+      social: *default_social
+      footer:
+        - { name: "Read the blog in English.", url: "/"}
+
+# Default variables.
+title: "Yengas"
+taxonomies:
+  tag: "tags"
+  category: "categories"
+  series: "series"
+params:
+  sidebartitle: "Yengas"
+  sidebartagline: "Definitely not a romantic."
+  socialsharing: "true"
+  languages:
+    - { name: "en", href: "/" }
+    - { name: "tr", href: "/tr/" }

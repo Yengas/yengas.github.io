@@ -10,7 +10,8 @@ build:
       name: Initialize submodules
       code: |
         git submodule update --init --recursive
-    - arjen/hugo-build: {}
+    - arjen/hugo-build:
+      version: "0.17"
 deploy:
   steps:
     - install-packages:
