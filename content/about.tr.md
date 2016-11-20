@@ -4,6 +4,7 @@ date = "2016-11-19T00:00:00+03:00"
 Categories = ["Kişisel"]
 Tags = ["hakkında", "yengas"]
 +++
+
 Merhaba, ben Yiğitcan! Lise yıllarımdan beri yazılımla ilgileniyorum. Şuanda **Trakya Üniversitesi**'nde **Bilgisayar Teknolojisi ve Bilişim Sistemleri** okumaktayım.
 
 Son 5 yılda, bir çok dil ve teknoloji ile haşır neşir oldum. Web, Mobil ve Masaüstü olmak üzere bir çok platformda yazılım yapma şansı yakaladım.

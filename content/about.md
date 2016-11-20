@@ -4,7 +4,8 @@ date = "2016-11-19T00:00:00+03:00"
 Categories = ["Personal"]
 Tags = ["about", "yengas"]
 +++
-Hello, I'm Yiğitcan! I have been programming sincem my late highschool years. I'm currently studying **Computer Science** at **Trakya University**.
+
+Hello, I'm Yiğitcan! I have been programming since my late highschool years. I'm currently studying **Computer Science** at **Trakya University**.
 
 I've played with various technologies and programming languages for the past 5 years. I've had the chance of working with Web, Mobile and Desktop platforms.
 
