@@ -7,7 +7,7 @@ Tags = ["wercker", "github", "markdown", "hugo", "golang", "ghpages"]
 
 I haven't been designing any GUI's since i switched from Web development to other platforms. Most of the projects i've worked on for the last few years were either single page designs, or they worked in the background.
 
-Even though i'm not very up-to-date with web technologies(except trying out `React`&`Rexux` for a few weeks), i always wanted to experiment with Static Website Generators. After investigating a little bit, i decided to make this blog using `Hugo` and `Github Pages`.
+Even though i'm not very up-to-date with web technologies(except trying out `React`&`Redux` for a few weeks), i always wanted to experiment with Static Website Generators. After investigating a little bit, i decided to make this blog using `Hugo` and `Github Pages`.
 
 I created 2 projects called `personal-website` and `yengas.github.io`. `personal-website` included my Hugo configurations, blog posts and static assets, and the `yengas.github.io` was for hosting the output of my Hugo builds. I wanted to automate this process so i could post from anywhere(specially mobile) and my blog would automatically update.
 
