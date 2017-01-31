@@ -69,7 +69,7 @@ services:
 ```
 
 ## Service Discovery
-You should make all of your remote dependencies host names and ports configurable. Use the suggested single configuratiion file strategy to hold your host name and port information. You can use static ip addresses like `localhost` or public ips in one environment configuration, and use custom hostnames like `database` in another to let it resolve through a DNS.
+You should make all of your remote dependencies host names and ports configurable. Use the suggested single configuration file strategy to hold your host name and port information. You can use static ip addresses like `localhost` or public ips in one environment configuration, and use custom hostnames like `database` in another to let it resolve through a DNS.
 
 Docker supports DNS resolving of containers that run in the same network. You can easily run 2 different services called `database` and `application` and both will see each other in their given name, thanks to the DNS service supplied by Docker. You can also add extra hosts with static ip resolutions using `extra_hosts`.
 
@@ -94,8 +94,8 @@ services:
 
 Only problem with this setup is when you would like to spin up multiple instances of a given container. You can spin up a reverse proxy container to load balance the recv requests to itself and forward them to other services defined in the docker-compose file. With Kubernetes, you can use a `Service`.
 
-## Hot Reloading
-Most of the continuous integration pipelines are built to output a single docker image that could be run as if were a single binary. This means adding your source code into the image, installing all dependencies and making the main file of your project the entrypoint. However a Dockerfile designed for this process is not very useful when working locally. Since the source code is added to the image in the `docker build` process, changes you make on your code after the build phase will not change how the containers created by the previously built image will behave.
+## Auto Restarting
+Most of the continuous integration pipelines are built to output a single docker image that could be run as if the whole project were a single binary. This means adding your source code into the image, installing all dependencies and making the main file of your project the entrypoint. However a Dockerfile designed for this process is not very useful when working locally. Since the source code is added to the image in the `docker build` process, changes you make on your code after the build phase will not change how the containers created by the previously built images behaves.
 
 This is why i have 2 different Dockerfiles, one for building `binary` images and one for development. The trick with development Dockerfile is that we add our source code into the container, not into the image. This means mounting the source directory from the Host to the Docker container. Things you need to take into consideration here is as follows;
 
@@ -138,7 +138,7 @@ EXPOSE 80
 CMD forever --spinSleepTime 10000 --minUptime 5000 -c 'nodemon --exitcrash -L --watch /application/src' /application/src/index.js
 ```
 
-This will create an image that will have all the dependencies installed for a given nodejs service. You can then mount the source code from your host to a container which was created by this image, and you will have a hotreloading nodejs microservice that restart everytime you make a change.
+This will create an image that will have all the dependencies installed for a given nodejs service. You can then mount the source code from your host to a container which was created by this image, and you will have a autorestarting nodejs microservice that restarts everytime you make a change.
 
 An accompanying docker-compose file should be like this:
 ```yaml
@@ -150,8 +150,10 @@ services:
        - ./application/src:/application/src 
 ```
 
+However you shouldn't use forever while building a `binary` image. The process of restarting your application once it crashes/fails should be handled in your operations layer aswell. Most of the container runtimes like `Docker Swarm` and `Kubernetes` have this option by default. Check [restart_policy](https://docs.docker.com/compose/compose-file/#/restartpolicy) that came out with docker-compose v3 and [Deployments](https://kubernetes.io/docs/user-guide/deployments/) in Kubernetes.
+
 ## Conclusion
-We talked about what we can gain using DevOps. Instead of manually scripting solutions into our business logic, we can use containers and container runtimes to make it easy to reason about general problems of microservices. We showed that we didn't need any complex setups or configurations to start coding our services in a way that makes them more readable, and easier to migrate to container runtimes.
+We talked about what we can gain using DevOps. Instead of manually scripting solutions into our business logic, we can use containers and container runtimes to make it easy to reason about general problems of microservices. We showed that we didn't need any complex setups or configurations to start coding our services in a way that makes them more readable, and easier to migrate to a container runtimes.
  
 With the advance of technologies such as Docker and Kubernetes, your services should only include code about your business logic. Not about your infrastructure.
 
@@ -177,7 +179,7 @@ services:
     volumes:
       # Make the data persistent in a named volume.
       - database-storage:/var/lib/mysql
-      # Add startup state for the Mariadb container.
+      # Add startup data for the Mariadb container.
       - ./database/backup:/docker-entrypoint-initdb.d
     networks:
       # Add to the server network
@@ -209,4 +211,6 @@ services:
       - database
 ```
 
+### Sample Project with a pre-populated database.
+You can check [Yengas/nodejs-docker-bootstrap](https://github.com/Yengas/nodejs-docker-bootstrap) which is a starter application i've made by following the above recommendations. It also includes a samples section that shows how to deploy a Nodejs application made this way into Kubernetes.
 
