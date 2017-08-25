@@ -99,7 +99,24 @@ To do this calculation. Lets say you have 300.000 different cities, and you hold
 ### Gotchas, not many performance improvements... Slow deletes, reads.
 KairosDB isn't the most optimized database when it comes to executing your queries on Cassandra. One of the most apparent feature it lacks, is that when you make a query with same metric name, but different tags, it queries the `row_key_index` table multiple times. And considering this metric name is populated, this may cause a lot of slow downs on your system. This can happen both with reads and deletes.
 
-Lets keep going with our example where we had 3 different metrics `Temperature`, `Humidity` and `Wind` and we had 1 tag named city, which holds the city name. If we were to run a delete query which deletes all of the metrics for 2 different cities `Antalya` and `Istanbul`, this will cause 2 scans on all of our `row_key_index`. Lets think a scenario where we run this kind of query for deleting a big number of cities... This could cause a serious slowdown with the current schema(s).
+Lets keep going with our example where we had 3 different metrics `Temperature`, `Humidity` and `Wind` and we had 1 tag named city, which holds the city name. If we were to run a delete query which deletes all of the metrics for 2 different cities `Antalya` and `Istanbul`, this will cause 2 scans on all of our `row_key_index`. Lets think a scenario where we run this kind of query for deleting a big number of cities... This could cause a serious slowdown with the current schema(s) if you were to make a naive query with multiple metrics. To make this query more performant and make it read the `row_key_index` table once, try using group by as mentioned by Brian Hawkins on [this kairosdb group post](https://groups.google.com/d/msg/kairosdb-group/MlwSRmZjhdU/WndUNMi1AwAJ). Example query:
+
+```
+{
+    "start_absolute": ...,
+    "end_absolute": ...,
+    "metrics": [{ 
+        "name": "Temperature",
+        "tags": { "city": ["Antalya", "Istanbul"] }, 
+        "group_by": [
+            {
+              "name": "tag",
+              "tags": [ "city" ]
+            }
+        ]
+    }]
+}
+```
 
 ### Don't have too many tombstones
 Cassandra doesn't delete records when you execute a delete query. It just marks them as tombstones and deletes them in the next compaction. Until this compaction happens, every query you make to these sstables, will need to filter out tombstones records and this may cause problem such as your read queries not responding or getting slower. You should keep in mind KairosDB stores 3 weeks of metric data in a row for each specific metric/tag combinations. If you delete some data in the row you are actively using, you may get slow downs/halts/aborts. Please see this [stackoverflow question](https://stackoverflow.com/questions/21755286/what-exactly-happens-when-tombstone-limit-is-reached), regarding this problem.
