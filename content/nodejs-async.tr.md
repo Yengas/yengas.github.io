@@ -200,9 +200,30 @@ Yukarıdaki callback, daha düzgün bir şekilde, yeni fonksiyonlar tanımlanara
 
 Promiselerin dönüş yapısı sync fonksiyonların exception throwlamasına benzetilebilir. Ve gelecekte değer döndürme belirtmek ve beklemek için özel anahtar kelimeler kullanılabilir. Async/Await tamamen bunu yapmak için yaratılmıştır. Basit anlamda düşünürsek, sizin sync'e benzer şekilde yazdığınız kodu, Promise'lerdeki `.then` ve `.catch` yapısına çevirir. Promise'ler ile tamamen uyumlu şekilde çalışırlar.
 
-Daha önceki örnekte bahsettiğim gibi, eğer bir Promise'e fonksiyon vererek, içinde sync işlem yapsanız bile, sonuçta elinizde gene bir Promise olacak. Async/Await'de bu mantıkla çalışmaktadır. Await kelimesi sadece Async fonksiyonlar yani Promise'ler içinde kullanılabilir.
+Daha önceki örnekte bahsettiğim gibi, eğer bir Promise'e fonksiyon vererek, içinde sync işlem yapsanız bile, sonuçta elinizde gene bir Promise olacak. Async/Await'de bu mantıkla çalışmaktadır. Await kelimesi sadece async fonksiyonlar(yani Promise'ler) içinde kullanılabilir ve async fonksiyonlar Promise'den başka bir şey döndüremez.
 
-Şimdi yukarıdaki Promise ve Error First Callbacklere alternatif olarak, kodumuzu tekrar yazarsak;
+bir async fonksiyonun, promise olarak nasıl göründüğünü daha iyi anlıyalım.
+```js
+async function z(){
+  return 4;
+}
+async function x(){
+  const r = await z();
+  const r2 = await z();
+  return r + r2 + 5;
+}
+
+// async/await olmasaydı... iç içe .then yaptığımız bir promise gibi düşünebilirdik.
+function x2(){
+  return Promise.resolve().then(() => z().then(r => z().then(r2 => r + r2 + 5)))
+}
+
+x().then(console.log)
+x2().then(console.log)
+```
+hem x, hemde x2 fonksiyonu, sonuç olarak 13 döndürecektir.
+
+Async/Await hakkında bilgi sahibi olduktan sonra, yukarıdaki Promise ve Error First Callbacklere alternatif olarak, kodumuzu tekrar yazarsak;
 ```js
 async function main(){
 	const buffer = await readFilePromise('../data/ghibli_movies.txt');
@@ -253,7 +274,7 @@ undefined
 ```
 Burada görüldüğü üzere, `Main fonksiyonu çağrıldı!` yazısı, main fonksiyonu çağrıldıktan sonra yazılmış olsa bile, main fonksiyonu bloklamadığı için, ilk önce bu yazıyı görüyoruz. Daha sonra ağ isteğimiz sonuçlanıyor, film bilgileri yazdırılıyor ve main fonksiyonumuzun döndürdüğü Promise sonlanıyor. Main fonksiyonundan herhangi bir değer döndürmediğimiz için, sonuç undefined oluyor ve `.then` fonksiyonunda bu undefined değeri ekrana yazdırılıyor.
 
-İlk sync versiyonumuza çok benzer bir şekilde, tamamen async bir kod yazmış olduk.
+İlk sync versiyonumuza çok benzer bir şekilde, ağ işlemi; async olan bir kod yazmış olduk.
 
 ## Async olarak, birden fazla film ile işlem yapmak
 İşlerin biraz kafa karıştırıcı hal aldığı durum burası. Aync/await kodun sync'e benzerliği sayesinde, kolayca birden fazla filmi async olarak işleyebiliriz.
@@ -294,7 +315,7 @@ main().then(console.log, console.log);
 console.log('Main fonksiyonu çağrıldı!');
 ```
 
-Bu kodu çalıştırdığımızda, tamamen async olmasına rağmen, beklediğimizden yavaş çalıştığını göreceğiz. Hani async sayesinde birden fazla ağ isteğini aynı anda yapabilecektik? İlk geleni işleyecektik? Buradaki sıkıntı async/await'in, promise'e dönüştürülürken, takip etmesi gereken adımlar. Şuanda bu yapı ile özet olarak şu şekilde bir yapıya sahip oluyoruz:
+Bu kodu çalıştırdığımızda, ağ işleminin async olmasına rağmen, beklediğimizden yavaş çalıştığını göreceğiz. Hani async sayesinde birden fazla ağ isteğini aynı anda yapabilecektik? İlk geleni işleyecektik? Buradaki sıkıntı async/await'in, promise'e dönüştürülürken, takip etmesi gereken adımlar. Şuanda bu yapı ile özet olarak şu şekilde bir yapıya sahip oluyoruz:
 
 ```js
 let promise = Promise.resolve();
@@ -303,7 +324,13 @@ for(let movieID of movieIDs){
 }
 ```
 
-yani tek bir Promise zinciri oluşturuluyor. Bunu düzeltmek için async/await fonksiyonları ile Promise bilgilerimizi birbiri ile birleştirip, ortaya bir karışım çıkarmamız gerkiyor. Bundan önce, uygulamamızı fonksiyonlara ayrıştırıp, kodumuzu daha düzenli hale getirelim. Ve son olarak, promise ile daha performanslı olarak yazmaya çalışalım.
+yani tek bir Promise zinciri oluşturuluyor. Bu yüzden network isteklerimizden biri bitmeden, bir sonraki başlamıyor. Burada uygulamanın yavaş çalışmasına rağmen, not düşmek istediğim bir konu var. Tüm ağ isteklerini, sırayla başlatmak yerine, hepsini aynı anda başlatabiliriz. Ama bu bizim Node.js uygulamamızı blokladığımız zamanı değiştirmeyecek. Sadece bu işlemin daha hızlı sonlanmasını/toplamda daha az zaman almasını sağlayacak. Burada ne demek istiyorum?
+
+Diyelim ki, her gönderdiğimiz istek 300 milisaniye alıyor, ve gelen cevabın işlenip ekrana yazdırılması ise 10 ms sürüyor. 300 milisaniyelik ağ isteği async olduğu için, nodejs işlemimiz bu ağ isteği gönderildikten sonra, çalışmasına devam edebilir, başka bir yerde, CPU harcayan bir kodunuz varsa(şuan bizim scriptimizde yok) onu çalıştırabilir. Ama ağ isteğinden cevap geldikten ve sıra işleme/yazdırma kodumuza geldiğinde 10 ms boyunca CPU'yu bu fonksiyonumuz bloklayacak. Daha sonra 300 milisaniye süren, yeni bir ağ isteği başlatılacak, ve yine CPU kullanmak isteyen farklı bir kod parçacağı varsa o çağrılabilecek. Yani biz aslında bu kod ile, her film id'si için sadece 10 milisaniye bloklamış oluyoruz. Ve toplam CPU bloklama süremiz, `10 * film id sayısı` milisaniye oluyor. Fakat algoritmamız: `ağ isteği gönder, cevabın gelmesini bekle, işle ve yazdır, ağ isteği gönder...` şeklinde olduğu için, toplam işlem süremiz:  `(300 + 10) * film id sayısı` milisaniye oluyor.
+
+Bu durumu, algoritmamımızı: `bir filmid için; ağ isteği başlatıp, sonucu işleyen ve yazdıran bir promise zinciri oluştur, tüm film id için bu promise zincirlerini aynı anda başlat` şeklinde değiştirirsek, bloklama süremiz yine değişmeyecek. Her işlemi işlemesi ve yazdırması 10 milisaniye süreceği için, gene `10 * film id sayısı` milisaniye CPU bloklamış olacağız. Fakat ağ istekleri aynı anda başlatıldığı için, hepsi farklı sürede bitecek, ve en uzun süren isteğin 500 ms olduğunu varsayarsak, `500 + (10 * film id sayısı)` milisaniye sonra, programımız sonlanmış olacak. Bu da script'in çalışma süresinde çok büyük bir düşüşe sebep olmuş olacak. Hatta kendi bilgisayarımdan ve internet bağlantımdan örnek vermem gerekirse; şuanki kod 25 saniyede çalışırken, optimize edilmiş şekilde yazdığım kod, 1.5 saniye sürüyor. 20 tane film id'si olduğunu varsayarsak, demek ki tek bir isteğin sonuçlanması ortalama 1.25 saniye sürüyor, ve tüm ağ isteklerini aynı anda başlattığımda, en uzun süren işlem 1.5 saniye tutuyor. Burada unutmamamız gereken, bloklama süresinin iki örnek içinde aynı olduğu. Yani eğer ağ istekleri 10 milisaniye tutsaydı, ve CPU işlemleri 1.5 saniye tutsaydı, iki örnekte benzer sürede bitecekti.
+ 
+Bu işlemin, daha hızlı biten versiyonunu yazabilmek için async/await fonksiyonları ile Promise bilgilerimizi birbiri ile birleştirip, ortaya bir karışım çıkarmamız gerkiyor. Bundan önce, uygulamamızı fonksiyonlara ayrıştırıp, kodumuzu daha düzenli hale getirelim. Ve son olarak, promise ile daha performanslı olarak yazmaya çalışalım.
 
 ### Fonksiyonlara ayrıştırmak
 Sync veya Async nasıl kodlarsak kodlayalım, uygulamamızın bazı kısımları tamamen saf, sync olarak çalışacak mantıklar içermektedir. Örnek vermek gerekirse, dosya okuma işlememiz sync/async olabilir ama, sonuç olarak elimizde olan değer string olduğu için, dosyayı dizi listesine çevirme işlemimiz hep aynı sync kod ile yapılıyor.
