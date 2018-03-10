@@ -5,7 +5,9 @@ Categories = ["Node.JS", "Programming Paradigms"]
 Tags = ["node.js", "promise", "async/await", "event loop", "performance", "rxjs"]
 +++
 
-Bu makalede Event Loop, Sync/Async, Promise, Async/Await, RxJS kavramlarını anlatmaya çalışacağım. Tüm bu kavramları tek bir örnek üzerinde kodlayarak göstermeye çalışacağım. Kendi sisteminizde denemeler yapmak istiyorsanız Node versiyonunuzun 8'in üzerinde olduğundan emin olun.
+Bu makalede Event Loop, Sync/Async, Promise, Async/Await, RxJS kavramlarını anlatmaya ve tüm bu kavramları tek bir örnek üzerinde kodlayarak göstermeye çalışacağım. Kendi sisteminizde denemeler yapmak istiyorsanız Node versiyonunuzun 8'in üzerinde olduğundan emin olun.
+
+Bu makalede yazılan tüm kodların, çalışır hallerine, [yengas/async-blog-post](https://github.com/Yengas/async-blog-post)@Github adresinden ulaşabilirsiniz.
 
 ## Problem
 İlk önce problemimiz ile başlayalım... Elimde daha önce izlemek için kaydettiğim Ghibli filmlerinin id'leri var. Bu filmlerin hepsinin adını ve açıklamasını almak istiyorum.
@@ -64,7 +66,7 @@ Filmin açıklaması: The orphan Sheeta inherited a mysterious crystal that link
 görüyorum. Tamda istediğimiz şey! Tek bir film id için, filmin başlığını ve açıklamasını aldık. Artık bir sonraki adıma geçip, tüm id'ler için bu işlemi yapabiliriz!
 
 ## Birden fazla film, sync olarak işlem yapmak.
-Düz mantık devam ettiğim zaman, kodumda, pek bir şey değişmemesi lazım, tek yapmam gereken; tek bir film yerine, dosyamda bulunan her bir film için aynı kodu çalıştırmak. Kodumu düzenleyip, baktığımda, durum gerçektende böyle. Tek yapmamız gereken koda 2 şey eklemek oldu.
+Düz mantık devam ettiğim zaman, kodumda pek bir şey değişmemesi lazım. Tek yapmam gereken; tek bir film yerine, dosyamda bulunan her bir film için aynı kodu çalıştırmak. Kodumu düzenleyip, baktığımda, durum gerçektende böyle. Tek yapmamız gereken koda 2 şey eklemek oldu.
 
 Sabit bir film id'si yerine, tüm dosyayı okuyup, her satırı diziye atamak:
 ```js
@@ -168,7 +170,7 @@ fs.readFile('../data/ghibli_movies.txt', function(err, buffer){
 // Buffer döndüren bir Promise'i, Id listesi döndüren bir Promise'e dönüştürür.
 readFilePromise('../data/ghibli_movies.txt').then(idListesineCevir)
 ```
-Burada dikkat çekmek istediğim şey, sync olarak bu fonksiyonumuzu kullandığımız zaman direk olarak, fonksiyon parametresi olarak Buffer veriyoruz. Promise kullanımı buna yakın ve temiz görünürken, eski tarz Node.js error first callback kullandığımız zaman, tamamen bu yapıya özel ekstra kod yazmamız gerekiyor. Error first callback kullanırken, hata olma durumunu kontrol etmek bizim sorumluluğumuzdayken, Promise'lerde başarılı sonuçlanma, ve hata durumları için ayrı fonksiyonlar tanımlayabiliyoruz. Aynı zamanda Promise'leri birbiri aradına bağlıyarak kullanabilirken, error first callbackler ile bunu yapmak biraz daha uğraş verici oluyor. 
+Burada dikkat çekmek istediğim şey, sync olarak bu fonksiyonumuzu kullandığımız zaman direk olarak, fonksiyon parametresi olarak Buffer veriyoruz. Promise kullanımı buna yakın ve temiz görünürken, eski tarz Node.js error first callback kullandığımız zaman, tamamen bu yapıya özel ekstra kod yazmamız gerekiyor. Error first callback kullanırken, hata olma durumunu kontrol etmek bizim sorumluluğumuzdayken, Promise'lerde başarılı sonuçlanma, ve hata durumları için ayrı fonksiyonlar tanımlayabiliyoruz. Aynı zamanda Promise'leri birbiri ardına bağlayarak kullanabilirken, error first callbackler ile bunu yapmak biraz daha uğraş verici oluyor. 
 
 Örnek vermek gerekirse:
 ```js
@@ -196,7 +198,7 @@ fs.readFile('../data/ghibli_movies.txt', (err, buffer) => {
 
 ```
 
-Yukarıdaki callback, daha düzgün bir şekilde, yeni fonksiyonlar tanımlanarak yazılabilir. Veya yardımcı bir kütüphane kullanılarak, daha düz hale getirilebilir, fakat... Promiseler için en önemli ve kritik özellik, Node'un son versiyonlarında, kullanabilmeye başladığımız, async/await anahtar kelimeleri. Promise'ler, temelde düşünüldüğü zaman, sync fonksiyonlar ile async fonksiyonlar arasında bağlantı sağlayan, sync olarak parametre verilerek başlayan, gelecekte ya başarılı bir değer, yada hata döndüren birer fonksiyondur.
+Yukarıdaki callback, daha düzgün bir şekilde, yeni fonksiyonlar tanımlanarak yazılabilir. Veya yardımcı bir kütüphane kullanılarak, daha düz hale getirilebilir, fakat... Promiseler için en önemli ve kritik özellik, Node'un son versiyonlarında, kullanabilmeye başladığımız, async/await anahtar kelimeleri. Promise'ler, temelde düşünüldüğü zaman, sync fonksiyonlar ile async fonksiyonlar arasında bağlantı sağlayan, sync olarak parametre verilerek başlayan, gelecekte ya başarılı bir değer, ya da hata döndüren birer fonksiyondur.
 
 Promiselerin dönüş yapısı sync fonksiyonların exception throwlamasına benzetilebilir. Ve gelecekte değer döndürme belirtmek ve beklemek için özel anahtar kelimeler kullanılabilir. Async/Await tamamen bunu yapmak için yaratılmıştır. Basit anlamda düşünürsek, sizin sync'e benzer şekilde yazdığınız kodu, Promise'lerdeki `.then` ve `.catch` yapısına çevirir. Promise'ler ile tamamen uyumlu şekilde çalışırlar.
 
@@ -234,7 +236,7 @@ async function main(){
 // Main bir async fonksiyon, yani Promise olduğu için, .then ve .catch kullanabiliriz.
 main().then(console.log).catch(console.log)
 ```
-Bu kodun, ilk yazdığımız Sync örneğe ne kadar benzediğini kolayca görebilirsiniz. Async faydalarının hepsini Promise yapısını kullanarak, yine elde ediyoruz. Fakat, async/await kullanarak sync kod'a oldukca benzeyen bir yapı'ya sahip oluyoruz! Oldukca güzel bir özellik!
+Bu kodun, ilk yazdığımız Sync örneğe ne kadar benzediğini kolayca görebilirsiniz. Async faydalarının hepsini Promise yapısını kullanarak, yine elde ediyoruz. Fakat, async/await kullanarak sync kod'a oldukca benzeyen bir yapıya sahip oluyoruz! Oldukca güzel bir özellik!
 
 ## Async olarak, tek bir film ile işlem yapmak.
 Şimdi problemimize geri dönelim. Yaptığımız işlemlerin sync olduğunu, ve async kullanmamız gerektiğini söylemiştik. Şimdi async/await kullanarak kodumuz tekrar yazalım.
@@ -476,6 +478,7 @@ Son oluşturduğumuz script'de küçük bir hata'da bulunmaktadır! Yaptığım�
 - Node.JS'in tek çekirdekli yapısı, dili parallelikten yoksun bırakırken, async olarak çalışmayı kolaylaştırmaktadır.
 - Node.JS scriptleri birden fazla işlem olarak çalıştırılarak paralellik elde edilebilir.
 - Sync/Async durumlara bağlı olmayan işlemlerinizi ayrıştırarak, ortak kullanılabilen fonksiyonlar oluşturabilirsiniz.
+- Promise gibi yapılara dil seviyesinde uyumluluk sağlanarak, daha okunulabilir kod yazılabilir. Örn. async/await.
 - Async tekli veriler için Promise kullanabilirsiniz. Async/Await syntaxı ile Promiseler ile, Sync kod'a benzer bir yapıya sahip olabilirsiniz, ama performans için her zaman iyi olmayabilir.
 - Async/Await kullanırken, performans veya okunulabilirlik için Promise fonksiyonları kullanabilirsiniz.
 - Sonlu veya sonsuz, async olarak işlenebilecek veri akışları için, Node.JS Stream'lerine alternatif olarak RxJS kullanabilirsiniz.
