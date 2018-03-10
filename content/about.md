@@ -9,6 +9,6 @@ Hello, I'm Yiğitcan! I have been programming since my late highschool years. I'
 
 I've played with various technologies and programming languages for the past 5 years. I've had the chance of working with Web, Mobile and Desktop platforms.
 
-Even though it was hard to decide and dedicate myself on something; i chose to improve myself on `Microservice` architecture and `Container` technologies, using `Golang`, `Python` and `NodeJS` as my main languages. I'm currently focusing on `DevOps` and `Backend` development.
+Even though it was hard to decide and dedicate myself on something; i chose to improve myself on `Microservice` architecture and `Container` technologies, using `Scala` and `NodeJS` as my main languages. I'm currently focusing on `DevOps` and `Backend` development.
 
 You can follow my projects and codes on [Github](https://github.com/Yengas), and read my opinions/tutorials about various programming topics on this blog!
