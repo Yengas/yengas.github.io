@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Yengas</title>
+    <link>https://yengas.github.io/tags/about/index.xml</link>
+    <description>Recent content on Yengas</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <atom:link href="https://yengas.github.io/tags/about/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>About</title>
+      <link>https://yengas.github.io/about/</link>
+      <pubDate>Sat, 19 Nov 2016 00:00:00 +0300</pubDate>
+      
+      <guid>https://yengas.github.io/about/</guid>
+      <description>&lt;p&gt;Hello, I&amp;rsquo;m Yiğitcan! I have been programming since my late highschool years. I&amp;rsquo;m currently studying &lt;strong&gt;Computer Science&lt;/strong&gt; at &lt;strong&gt;Trakya University&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;I&amp;rsquo;ve played with various technologies and programming languages for the past 5 years. I&amp;rsquo;ve had the chance of working with Web, Mobile and Desktop platforms.&lt;/p&gt;
+
+&lt;p&gt;Even though it was hard to decide and dedicate myself on something; i chose to improve myself on &lt;code&gt;Microservice&lt;/code&gt; architecture and &lt;code&gt;Container&lt;/code&gt; technologies, using &lt;code&gt;Scala&lt;/code&gt; and &lt;code&gt;NodeJS&lt;/code&gt; as my main languages. I&amp;rsquo;m currently focusing on &lt;code&gt;DevOps&lt;/code&gt; and &lt;code&gt;Backend&lt;/code&gt; development.&lt;/p&gt;
+
+&lt;p&gt;You can follow my projects and codes on &lt;a href=&#34;https://github.com/Yengas&#34;&gt;Github&lt;/a&gt;, and read my opinions/tutorials about various programming topics on this blog!&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

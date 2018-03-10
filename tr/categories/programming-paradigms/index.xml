@@ -1,0 +1,516 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Yengas</title>
+    <link>https://yengas.github.io/tr/categories/programming-paradigms/index.xml</link>
+    <description>Recent content on Yengas</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <atom:link href="https://yengas.github.io/tr/categories/programming-paradigms/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Node.JS Event Loop, Sync/Async, Promise, Async/Await ve RxJS üzerine...</title>
+      <link>https://yengas.github.io/tr/nodejs-async/</link>
+      <pubDate>Sat, 10 Mar 2018 03:28:00 +0300</pubDate>
+      
+      <guid>https://yengas.github.io/tr/nodejs-async/</guid>
+      <description>
+
+&lt;p&gt;Bu makalede Event Loop, Sync/Async, Promise, Async/Await, RxJS kavramlarını anlatmaya ve tüm bu kavramları tek bir örnek üzerinde kodlayarak göstermeye çalışacağım. Kendi sisteminizde denemeler yapmak istiyorsanız Node versiyonunuzun 8&amp;rsquo;in üzerinde olduğundan emin olun.&lt;/p&gt;
+
+&lt;p&gt;Bu makalede yazılan tüm kodların, çalışır hallerine, &lt;a href=&#34;https://github.com/Yengas/async-blog-post&#34;&gt;yengas/async-blog-post&lt;/a&gt;@Github adresinden ulaşabilirsiniz.&lt;/p&gt;
+
+&lt;h2 id=&#34;problem&#34;&gt;Problem&lt;/h2&gt;
+
+&lt;p&gt;İlk önce problemimiz ile başlayalım&amp;hellip; Elimde daha önce izlemek için kaydettiğim Ghibli filmlerinin id&amp;rsquo;leri var. Bu filmlerin hepsinin adını ve açıklamasını almak istiyorum.&lt;/p&gt;
+
+&lt;p&gt;İlk önce elimdeki dosyanın formatına bakalım&amp;hellip;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;2baf70d1-42bb-4437-b551-e5fed5a87abe
+12cfb892-aac0-4c5b-94af-521852e46d6a
+58611129-2dbc-4a81-a72f-77ddfc1b1b49
+ea660b10-85c4-4ae3-8a5f-41cea3648e3e
+4e236f34-b981-41c3-8c65-f8c9000b94e7
+ebbb6b7c-945c-41ee-a792-de0e43191bd8
+1b67aa9a-2e4a-45af-ac98-64d6ad15b16c
+ff24da26-a969-4f0e-ba1e-a122ead6c6e3
+0440483e-ca0e-4120-8c50-4c8cd9b965d6
+45204234-adfd-45cb-a505-a8e7a676b114
+dc2e6bd1-8156-4886-adff-b39e6043af0c
+90b72513-afd4-4570-84de-a56c312fdf81
+cd3d059c-09f4-4ff3-8d63-bc765a5184fa
+112c1e67-726f-40b1-ac17-6974127bb9b9
+758bf02e-3122-46e0-884e-67cf83df1786
+2de9426b-914a-4a06-a3a0-5e6d9d3886f6
+45db04e4-304a-4933-9823-33f389e8d74d
+67405111-37a5-438f-81cc-4666af60c800
+578ae244-7750-4d9f-867b-f3cd3d6fecf4
+5fdfb320-2a02-49a7-94ff-5ca418cae602
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Her satır, açıklamasını ve başlığını almak istediğim filmin id&amp;rsquo;sini ifade ediyor. Güzel&amp;hellip; Yeni satır karakteri &amp;lsquo;\n&amp;rsquo; ile, satırları birbirinden ayırmam yetecek. Ama ilk önce tüm listeyi işlemeye başlamadan önce, tek bir id için başlık ve açıklama alabileceğimden emin olmam lazım.&lt;/p&gt;
+
+&lt;h2 id=&#34;tek-bir-film-sync-olarak-işlem-yapmak&#34;&gt;Tek bir film, sync olarak işlem yapmak.&lt;/h2&gt;
+
+&lt;p&gt;Algoritma basit. Bir değişkende, bilgilerini bulmak istediğim filmin id&amp;rsquo;sini tutacağım, API&amp;rsquo;ye bir istek göndereceğim, gelen cevabı JSON olarak işleyip, obje&amp;rsquo;ye dönüştüreceğim, ve obje&amp;rsquo;min içindeki başlık ve açıklama bilgisini ekrana yazdıracağım! Tamamen düz mantık.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;// Sync olarak request yapmamızı sağlayacak, kütüphane.
+const request = require(&#39;sync-request&#39;);
+// bilgilerini almak istediğimiz filmin id&#39;si.
+const movieID = &#39;2baf70d1-42bb-4437-b551-e5fed5a87abe&#39;;
+
+// API&#39;ye yaptığımız istek
+const result = request(&#39;GET&#39;, `https://ghibliapi.herokuapp.com/films/${movieID}`);
+// API&#39;den gelen string cevabı, javascript objesini çevirmek için JSON parse işlemi
+const body = JSON.parse(result.body.toString());
+// obje içerisindeki title ve description değerlerinin, aynı isimle değişkene atanması.
+const { title, description } = body;
+
+// Artık sonucu ekrana yazdırabiliriz, umarız şimdiye kadar hata olmamıştır...
+console.log(`Film Adı: ${title}`);
+console.log(`Filmin açıklaması: ${description}`);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;bu script&amp;rsquo;i çalıştırdığım zaman, çıktı olarak&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Film Adı: Castle in the Sky
+Filmin açıklaması: The orphan Sheeta inherited a mysterious crystal that links her to the mythical sky-kingdom of Laputa. With the help of resourceful Pazu and a rollicking band of sky pirates, she makes her way to the ruins of the once-great civilization. Sheeta and Pazu must outwit the evil Muska, who plans to use Laputa&#39;s science to make himself ruler of the world.
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;görüyorum. Tamda istediğimiz şey! Tek bir film id için, filmin başlığını ve açıklamasını aldık. Artık bir sonraki adıma geçip, tüm id&amp;rsquo;ler için bu işlemi yapabiliriz!&lt;/p&gt;
+
+&lt;h2 id=&#34;birden-fazla-film-sync-olarak-işlem-yapmak&#34;&gt;Birden fazla film, sync olarak işlem yapmak.&lt;/h2&gt;
+
+&lt;p&gt;Düz mantık devam ettiğim zaman, kodumda pek bir şey değişmemesi lazım. Tek yapmam gereken; tek bir film yerine, dosyamda bulunan her bir film için aynı kodu çalıştırmak. Kodumu düzenleyip, baktığımda, durum gerçektende böyle. Tek yapmamız gereken koda 2 şey eklemek oldu.&lt;/p&gt;
+
+&lt;p&gt;Sabit bir film id&amp;rsquo;si yerine, tüm dosyayı okuyup, her satırı diziye atamak:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;// Tüm film id&#39;lerini, dosyamızı okuyarak ve &#39;\n&#39; karakterinden split yaparak, bir diziye atıyalım.
+const movieIDs = fs.readFileSync(&#39;../data/ghibli_movies.txt&#39;).toString().split(&#39;\n&#39;);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Ve istek gönderdiğimiz satırdan itibaren, tüm kodumu, for/let of döngüsü içine almak:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;for(let movieID of movieIDs){
+    const result = ...
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Elimizdeki kodun son hali:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;// Dosya okumak için node.js kütüphanemizi alalım.
+const fs = require(&#39;fs&#39;);
+// Sync olarak request yapmamızı sağlayacak, kütüphane.
+const request = require(&#39;sync-request&#39;);
+// Tüm film id&#39;lerini, dosyamızı okuyarak ve &#39;\n&#39; karakterinden split yaparak, bir diziye atıyalım.
+const movieIDs = fs.readFileSync(&#39;../data/ghibli_movies.txt&#39;).toString().split(&#39;\n&#39;);
+
+for(let movieID of movieIDs){
+  // API&#39;ye yaptığımız istek
+  const result = request(&#39;GET&#39;, `https://ghibliapi.herokuapp.com/films/${movieID}`);
+  // API&#39;den gelen string cevabı, javascript objesini çevirmek için JSON parse işlemi
+  const body = JSON.parse(result.body.toString());
+  // obje içerisindeki title ve description değerlerinin, aynı isimle değişkene atanması.
+  const { title, description } = body;
+
+  // Artık sonucu ekrana yazdırabiliriz, umarız şimdiye kadar hata olmamıştır...
+  console.log(`Film Adı: ${title}`);
+  console.log(`Filmin açıklaması: ${description}`);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Sonuç olarak, artık kodumuz tüm film id&amp;rsquo;leri için başlık ve açıklamaları aldı ve bize gösterdi. Sorunumuz artık çözüldü. Bu problem için daha fazla kod yazmak gereksiz bile. Ama bir şeyi çok yanlış yapıyoruz. Bunu anlamak için, bir Node.js işleminin çalışma mantığına ve Event Loop&amp;rsquo;a değinelim.&lt;/p&gt;
+
+&lt;h2 id=&#34;node-js-işlemi-ve-async&#34;&gt;Node.js işlemi ve Async&lt;/h2&gt;
+
+&lt;p&gt;Yazdığımız Javascript kodunun, bir şekilde bilgisayarın anlayabileceği makine koduna dönüşmesi ve çalışması lazım. Tarayıcı&amp;rsquo;da bunu bizim için tarayıcının kendisi yaparken, Node.js kullanırken, &lt;code&gt;node &amp;lt;script_dosyamiz&amp;gt;.js&lt;/code&gt; komutunu kullanarak bu işlemi başlatıyoruz. Bu komut çalıştırıldığında, işletim sistemimiz&amp;rsquo;de, bizim Javascript kodumuzu çalıştıran bir işlem oluşuyor. Ve Node.js&amp;rsquo;in yardımları sayesinde, işletim sistemimizi kullanarak; dosya okuyabiliyoruz ve ağ üzerinden istekler gönderebiliyoruz.&lt;/p&gt;
+
+&lt;p&gt;Buraya kadar olan kısım, şuana kadar yazdığımız kodu açıklıyor. Fakat burada daha optimize bir kod yazmamız için düşünmemiz gereken şey şu; bizim dosya okuma işlemimiz Harddisk veya SSD tarafından, ağ üzerinden yaptığımız istekler ise, ağ donanımımız üzerinden yapılıyor. Aslında sadece; dosyadan okuduğumuz değerleri diziye dönüştürmek, her bir dizi elemanı için yapılan istekleri &lt;code&gt;JSON.parse&lt;/code&gt; ile obje&amp;rsquo;ye dönüştürmek ve içerisindeki değerleri bu objeden çıkarıp, değişkene atamak için CPU&amp;rsquo;muzu kullanıyoruz.&lt;/p&gt;
+
+&lt;p&gt;Ama kodumuzdaki düz mantığa geri döndüğümüzde, her bir isteğin gönderilmeden önce, bir önceki isteğin bitmesini ve ekrana yazdırılmasını beklediğimizi görüyoruz. Bu durumdan kurtulmak, şu anki problemimize baktığımızda; bütün programlama yöntemlerimizi değiştirmemize değmeyecek gibi görünsede, ideal bir dünyada yapmak istediğimiz şey; tüm bilgisayar donanımlarımızı optimal şekilde kullanmaktır.&lt;/p&gt;
+
+&lt;p&gt;Yani, bir kullanıcınıza ağ üzerinden veri gönderirken, diğerinin sadece CPU kullanacak işlemini bekletmek istemezsiniz. Burada bizi kurtaracak olan terim Async. Async işlem yapmak demek, birden fazla iş parçacağının birbiri ile kesişen zamanlarda çalışabilmesi demektir. Node.JS için bu, &amp;ldquo;aynı anda&amp;rdquo; çalışmak anlamına gelmez.&lt;/p&gt;
+
+&lt;p&gt;Şöyle örnek vermek gerekirse; biz ağ donanımımız işlem yaparken, CPU ile işlem yapabiliriz ama, CPU&amp;rsquo;muz birden fazla çekirdeğe sahip olsa bile, aynı anda 2 tane CPU gerektiren işlemi çalıştıramayız. Çünkü Node.JS bunu aynı işlem içinde desteklememektedir. Bu tek bir Node.js işleminin maksimum performans sınırını düşürmektedir. Fakat beraberinde birden fazla çekirdek kullanmanın getirebileceği sorunları çözmekte, ve bir çok async işleme kavramını kolaylaştırmaktadır. Sektörde Node.JS&amp;rsquo;in bu sorunu çözmek için ortaya attığı tek çekirdekli Async yapı dışında, birden fazla çekirdek ile ve async çalışmayı kolaylaştıran yazılım paradigmaları bulunmaktadır(örn. green threading, channels, functional programming).&lt;/p&gt;
+
+&lt;p&gt;Çoğu basit seviyede uygulama, CPU&amp;rsquo;dan çok, diğer donanımları beklerken zaman harcamaktadır. Kaldı ki, bir Node.JS uygulamasında, sıkıntınız CPU olduğu zaman, birden fazla Node.JS işlemi çalıştırarak, birden fazla CPU kullanabilirsiniz. Burada dikkate alınması gereken durumlar tabiki olacaktır ama, bu bölümü kısa tutmak için, load balancing, state yönetimi gibi konulara girmek istemiyorum.&lt;/p&gt;
+
+&lt;p&gt;Özet olarak, elimizdeki uygulamanın performansını iyileştirmek için, bir ağ isteği bitmeden, bir başkasını başlatabilir, ve ilk hangisi sonuçlanırsa onu işleyebiliriz. Ve bu işlem, Node.JS&amp;rsquo;in tek çekirdek kullanan yapısında, oldukca basit olacaktır.&lt;/p&gt;
+
+&lt;h2 id=&#34;event-loop&#34;&gt;Event Loop&lt;/h2&gt;
+
+&lt;p&gt;Bir farklı detayına girmek istemediğim, ve basitleştirme yaparak anlatmak istediğim konu ise, Event Loop. Node.JS çalışmak isteyen tüm fonksiyonları, kendi içinde bir sıraya koyar. Uygulamanızı ilk başlattığınız kod sayfanız, ilk çalışan fonksiyonunuz olarak düşünülür. Daha sonra, bu ana fonksiyonunuz içinde yaptığınız her &amp;ldquo;bloklayıcı(sync)&amp;rdquo; fonksiyon çağrısı, bitmesi beklenecek şekilde çalıştırılır. Eğer async olarak çalışacak olan bir fonksiyon çağrılırsa, bu async işlem bittiğinde çalışması için başka bir fonksiyon daha verebilirsiniz. Node.JS arkaplanda bu fonksiyonu sıraya koyarak, çalıştırmakta olduğu fonksiyona devam edecek, daha sonra çalışmakta olan fonksiyon ve async işlem bittikten sonra çalışması için verdiğiniz fonksiyonu çağırıcaktır.&lt;/p&gt;
+
+&lt;p&gt;Bunu daha iyi anlayabilmek için basit bir örnek yapalım, daha sonra async programlama kısmına geçiş yapalım.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;setTimeout(function yuzMilisaniyeSonra(){ console.log(&#39;1&#39;); }, 100);
+setImmediate(function birSonrakiFonksiyon(){ console.log(&#39;2&#39;); });
+setImmediate(function birSonrakiFonksiyon(){ console.log(&#39;4&#39;); });
+console.log(&#39;start!&#39;);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Bu kodu çalıştırdığımız zaman ekranda göreceğimiz çıktı:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;start!
+2
+4
+1
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;olacaktır. Tüm scriptimizi tek bir fonksiyon olarak kabul edelim. İlk önce 1. satır, &lt;code&gt;setTimeout&lt;/code&gt; fonksiyonu ile 100 milisaniye sonra çalışması için bir fonksiyonu sıraya koyuyoruz, &lt;code&gt;setImmediate&lt;/code&gt; ile event loop&amp;rsquo;a direk olarak 2 fonksiyonu arka arkaya ekliyoruz. Bu fonksiyonlar sadece Event Loop&amp;rsquo;a eklendi, ve daha çalışmadı. &lt;code&gt;setTimeout&lt;/code&gt; ve &lt;code&gt;setImmediate&lt;/code&gt; fonksiyonları sonlandıktan sonra, ana fonksiyonumuza hep geri dönüyoruz. Ve en son satırımızdaki &lt;code&gt;console.log&lt;/code&gt; fonksiyonu çağrılıp, ekrana &lt;code&gt;start!&lt;/code&gt; yazdırıldıktan sonra, sırasıyla Event Loop&amp;rsquo;daki fonksiyonlar çalışmaya başlıyor.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;setTimeout&lt;/code&gt; ile sıraya koyduğumuz fonksiyonumuz, 100 ms saniye geçmeden çalışamıyacağı için, sırasıyla event loop&amp;rsquo;a giren 2 yazdırma, 4 yazdırma fonksiyonları yazdırılıyor. Ve 100 ms geçtikten sonra ekrana 1 yazdırılıyor ve programımız sonlanıyor.&lt;/p&gt;
+
+&lt;p&gt;İlk kodumuza döndüğümüz zaman, &lt;code&gt;fs.readFileSync(&#39;../data/ghibli_movieis.txt&#39;)&lt;/code&gt; satırımızı görebiliriz. Burada bu fonksiyon, dosya okuma işlemi bitene kadar, event loop&amp;rsquo;daki diğer fonksiyonların çalışmasını engellemiş oluyor. Hoş, bizim örneğimizde, event loopda başka bir fonksiyon olmadığı, ve programın çalışmaya devam etmesi için bu dosyayı okumamız gerektiği için bir önemi yok ama; &lt;code&gt;fs.readFile(&#39;../data/ghibli_movies.txt&#39;, function(err, data){ console.log(err, data); })&lt;/code&gt; yaparak; dosya okuma işlemini başlatıp, işlem bittikten sonra çağrılmak üzere bir fonksiyonu event loop&amp;rsquo;a ekleyebiliriz. Böylece dosya okuma işlemi, işletim sistemi tarafından, donanıma iletilir ve yapılırken, CPU ve Event Loop üzerinde başka fonksiyonlar çağırabiliriz. Alternatif olarak kısaca &lt;code&gt;fs.readFile(&#39;../data/ghibli_movies.txt&#39;, console.log);&lt;/code&gt;&amp;lsquo;da yapabiliriz. &lt;code&gt;console.log&lt;/code&gt;&amp;lsquo;da bir fonksiyon olduğu için, yazdığımız isimsiz fonksiyon gibi, dosya okuma işlemi bittikten sonra, sonuç parametreleri ile birlikte çağrılacaktır.&lt;/p&gt;
+
+&lt;h2 id=&#34;promiseler-ve-async-await&#34;&gt;Promiseler ve Async/Await&lt;/h2&gt;
+
+&lt;p&gt;Şimdi geldik, esas ilginç bölüme. Async değerler ile çalışmak için, Event Loop&amp;rsquo;a fonksiyon koymamız gerektiğini söyledik. Ama bunu eski, error first Node.js yöntemi ile yapmak zorunda değiliz. Çünkü bu yöntem, bizi; kod seviyesinde, Node.JS&amp;rsquo;in uydurduğu bir yapıya uymaya ve tüm async fonksiyonlara, standart tipte (hata, sonuç) tipinde parametreler kabul eden, fonksiyonlar vermeye zorluyor. Halbüki, sync çalışıyormuş gibi fonksiyonlar yazıp, sadece gerektiği yerde, async kavramları işin içine karıştırmamızı sağlayan bir yapı bulunmaktadır. Buna Promise denir.&lt;/p&gt;
+
+&lt;p&gt;Örnek vermek gerekirse:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;// Bu fonksiyonun tek bildiği, Buffer tipiinde bir parametre aldığı ve her satırdan bir dizi oluşturması
+function idListesineCevir(dosyaIcerigiBuffer){
+	return dosyaIcerigiBuffer.toString().split(&#39;\n&#39;);
+}
+
+// bu fonksiyonu sync olarak kullanabiliriz.
+idListesineCevir(fs.readFileSync(&#39;../data/ghibli_movies.txt&#39;))
+
+// bu fonksiyonu async olarak callback ile kullanabiliriz
+fs.readFile(&#39;../data/ghibli_movies.txt&#39;, function(err, buffer){
+	if(err) ...
+	const sonuc = idListesineCevir(buffer);
+});
+
+// bu fonksiyonu async olarak, Promise ile kullanabiliriz
+// Buffer döndüren bir Promise&#39;i, Id listesi döndüren bir Promise&#39;e dönüştürür.
+readFilePromise(&#39;../data/ghibli_movies.txt&#39;).then(idListesineCevir)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Burada dikkat çekmek istediğim şey, sync olarak bu fonksiyonumuzu kullandığımız zaman direk olarak, fonksiyon parametresi olarak Buffer veriyoruz. Promise kullanımı buna yakın ve temiz görünürken, eski tarz Node.js error first callback kullandığımız zaman, tamamen bu yapıya özel ekstra kod yazmamız gerekiyor. Error first callback kullanırken, hata olma durumunu kontrol etmek bizim sorumluluğumuzdayken, Promise&amp;rsquo;lerde başarılı sonuçlanma, ve hata durumları için ayrı fonksiyonlar tanımlayabiliyoruz. Aynı zamanda Promise&amp;rsquo;leri birbiri ardına bağlayarak kullanabilirken, error first callbackler ile bunu yapmak biraz daha uğraş verici oluyor.&lt;/p&gt;
+
+&lt;p&gt;Örnek vermek gerekirse:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;// Promise veya callback olmadan, sync kullanım. Eğer bir hata olursa, exception throwlanır.
+const ids = idListesineCevir(fs.readFileSync(&#39;../data/ghibli_movies.txt&#39;);
+console.log(islemYap(ids[0]));
+
+// zincirleme şekilde dosya okuma sonucunu id listesine çevir, ilk film id&#39;si için işlem başlat, sonucu ekrana yazdır
+readFilePromise(&#39;../data/ghibli_movies.txt&#39;)
+	.then(idListesineCevir)
+	.then((ids) =&amp;gt; islemYap(ids[0]))
+	.then(console.log)
+	// Herhangi bir adımda hata oluşurse, bu fonksiyon çağırılacak.
+	.catch(console.log);
+
+// aynı işlemi callback ile yapmak istediğimizde sonuç:
+fs.readFile(&#39;../data/ghibli_movies.txt&#39;, (err, buffer) =&amp;gt; {
+	if(err) console.log(err);
+	const id = idListesineCevir(buffer)[0];
+	islemYap(id, function(err, result){
+		if(err) return console.log(err);
+		console.log(result);
+	});
+})
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Yukarıdaki callback, daha düzgün bir şekilde, yeni fonksiyonlar tanımlanarak yazılabilir. Veya yardımcı bir kütüphane kullanılarak, daha düz hale getirilebilir, fakat&amp;hellip; Promiseler için en önemli ve kritik özellik, Node&amp;rsquo;un son versiyonlarında, kullanabilmeye başladığımız, async/await anahtar kelimeleri. Promise&amp;rsquo;ler, temelde düşünüldüğü zaman, sync fonksiyonlar ile async fonksiyonlar arasında bağlantı sağlayan, sync olarak parametre verilerek başlayan, gelecekte ya başarılı bir değer, ya da hata döndüren birer fonksiyondur.&lt;/p&gt;
+
+&lt;p&gt;Promiselerin dönüş yapısı sync fonksiyonların exception throwlamasına benzetilebilir. Ve gelecekte değer döndürme belirtmek ve beklemek için özel anahtar kelimeler kullanılabilir. Async/Await tamamen bunu yapmak için yaratılmıştır. Basit anlamda düşünürsek, sizin sync&amp;rsquo;e benzer şekilde yazdığınız kodu, Promise&amp;rsquo;lerdeki &lt;code&gt;.then&lt;/code&gt; ve &lt;code&gt;.catch&lt;/code&gt; yapısına çevirir. Promise&amp;rsquo;ler ile tamamen uyumlu şekilde çalışırlar.&lt;/p&gt;
+
+&lt;p&gt;Daha önceki örnekte bahsettiğim gibi, eğer bir Promise&amp;rsquo;e fonksiyon vererek, içinde sync işlem yapsanız bile, sonuçta elinizde gene bir Promise olacak. Async/Await&amp;rsquo;de bu mantıkla çalışmaktadır. Await kelimesi sadece async fonksiyonlar(yani Promise&amp;rsquo;ler) içinde kullanılabilir ve async fonksiyonlar Promise&amp;rsquo;den başka bir şey döndüremez.&lt;/p&gt;
+
+&lt;p&gt;bir async fonksiyonun, promise olarak nasıl göründüğünü daha iyi anlıyalım.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;async function z(){
+  return 4;
+}
+async function x(){
+  const r = await z();
+  const r2 = await z();
+  return r + r2 + 5;
+}
+
+// async/await olmasaydı... iç içe .then yaptığımız bir promise gibi düşünebilirdik.
+function x2(){
+  return Promise.resolve().then(() =&amp;gt; z().then(r =&amp;gt; z().then(r2 =&amp;gt; r + r2 + 5)))
+}
+
+x().then(console.log)
+x2().then(console.log)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;hem x, hemde x2 fonksiyonu, sonuç olarak 13 döndürecektir.&lt;/p&gt;
+
+&lt;p&gt;Async/Await hakkında bilgi sahibi olduktan sonra, yukarıdaki Promise ve Error First Callbacklere alternatif olarak, kodumuzu tekrar yazarsak;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;async function main(){
+	const buffer = await readFilePromise(&#39;../data/ghibli_movies.txt&#39;);
+	const id = idListesineCevir(buffer)[0];
+	console.log(await islemYap(id)); 
+}
+
+// Main bir async fonksiyon, yani Promise olduğu için, .then ve .catch kullanabiliriz.
+main().then(console.log).catch(console.log)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Bu kodun, ilk yazdığımız Sync örneğe ne kadar benzediğini kolayca görebilirsiniz. Async faydalarının hepsini Promise yapısını kullanarak, yine elde ediyoruz. Fakat, async/await kullanarak sync kod&amp;rsquo;a oldukca benzeyen bir yapıya sahip oluyoruz! Oldukca güzel bir özellik!&lt;/p&gt;
+
+&lt;h2 id=&#34;async-olarak-tek-bir-film-ile-işlem-yapmak&#34;&gt;Async olarak, tek bir film ile işlem yapmak.&lt;/h2&gt;
+
+&lt;p&gt;Şimdi problemimize geri dönelim. Yaptığımız işlemlerin sync olduğunu, ve async kullanmamız gerektiğini söylemiştik. Şimdi async/await kullanarak kodumuz tekrar yazalım.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;// promise döndürecek şekilde async istek yapmamızı sağlayacak olan kütüphane.
+const request = require(&#39;request-promise-native&#39;);
+
+// sync benzeri kod yazabilmek için, async (promise döndüren) bir fonksiyon yazalım.
+async function main(){
+  const movieID = &amp;quot;2baf70d1-42bb-4437-b551-e5fed5a87abe&amp;quot;;
+
+  // API&#39;ye yaptığımız istek
+  const resultStr = await request(`https://ghibliapi.herokuapp.com/films/${movieID}`);
+  // API&#39;den gelen string cevabı, javascript objesini çevirmek için JSON parse işlemi
+  const body = JSON.parse(resultStr);
+  // obje içerisindeki title ve description değerlerinin, aynı isimle değişkene atanması.
+  const { title, description } = body;
+
+  // Artık sonucu ekrana yazdırabiliriz.
+  console.log(`Film Adı: ${title}`);
+  console.log(`Filmin açıklaması: ${description}`);
+}
+
+// main fonksiyonunu çalıştır, ve dönen promise değerinde sonuç ve hata olması durumunda, konsola çıktı ver.
+main().then(console.log, console.log);
+// main fonksiyonunun bloklamadığını kanıtlamak için, ekrana yazı yazalım.
+console.log(&#39;Main fonksiyonu çağrıldı!&#39;);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Bu scripti çalıştırdığımız zaman, çıktı olarak gözlemleyeceğimiz şey;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Main fonksiyonu çağrıldı!
+Film Adı: Castle in the Sky
+Filmin açıklaması: The orphan Sheeta inherited a mysterious crystal that links her to the mythical sky-kingdom of Laputa. With the help of resourceful Pazu and a rollicking band of sky pirates, she makes her way to the ruins of the once-great civilization. Sheeta and Pazu must outwit the evil Muska, who plans to use Laputa&#39;s science to make himself ruler of the world.
+undefined
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Burada görüldüğü üzere, &lt;code&gt;Main fonksiyonu çağrıldı!&lt;/code&gt; yazısı, main fonksiyonu çağrıldıktan sonra yazılmış olsa bile, main fonksiyonu bloklamadığı için, ilk önce bu yazıyı görüyoruz. Daha sonra ağ isteğimiz sonuçlanıyor, film bilgileri yazdırılıyor ve main fonksiyonumuzun döndürdüğü Promise sonlanıyor. Main fonksiyonundan herhangi bir değer döndürmediğimiz için, sonuç undefined oluyor ve &lt;code&gt;.then&lt;/code&gt; fonksiyonunda bu undefined değeri ekrana yazdırılıyor.&lt;/p&gt;
+
+&lt;p&gt;İlk sync versiyonumuza çok benzer bir şekilde, ağ işlemi; async olan bir kod yazmış olduk.&lt;/p&gt;
+
+&lt;h2 id=&#34;async-olarak-birden-fazla-film-ile-işlem-yapmak&#34;&gt;Async olarak, birden fazla film ile işlem yapmak&lt;/h2&gt;
+
+&lt;p&gt;İşlerin biraz kafa karıştırıcı hal aldığı durum burası. Aync/await kodun sync&amp;rsquo;e benzerliği sayesinde, kolayca birden fazla filmi async olarak işleyebiliriz.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;// Dosya okumak için node.js kütüphanemizi alalım.
+const fs = require(&#39;fs&#39;);
+// node.js error-first callbackleri Promise&#39;e çevirmemize yardımcı olan fonksiyon
+const { promisify } = require(&#39;util&#39;);
+// readFile error first async fonksiyonunu, promise döndürecek şekilde çeviriyoruz.
+const readFilePromise = promisify(fs.readFile);
+// promise döndürecek şekilde async istek yapmamızı sağlayacak olan kütüphane.
+const request = require(&#39;request-promise-native&#39;);
+
+// sync benzeri kod yazabilmek için, async (promise döndüren) bir fonksiyon yazalım.
+async function main(){
+  // Dosya okuyan async kodu başlatalım, sonuctaki her bir satırı, dizi elemanı olarak alalım.
+  const movieIDs = (await readFilePromise(&#39;../data/ghibli_movies.txt&#39;)).toString().split(&#39;\n&#39;);
+
+  // Her bir dizi elemanı için async olarak istek gönderelim.
+  for(let movieID of movieIDs){
+    // API&#39;ye yaptığımız istek
+    const resultStr = await request(`https://ghibliapi.herokuapp.com/films/${movieID}`);
+    // API&#39;den gelen string cevabı, javascript objesini çevirmek için JSON parse işlemi
+    const body = JSON.parse(resultStr);
+    // obje içerisindeki title ve description değerlerinin, aynı isimle değişkene atanması.
+    const { title, description } = body;
+
+    // Artık sonucu ekrana yazdırabiliriz.
+    console.log(`Film Adı: ${title}`);
+    console.log(`Filmin açıklaması: ${description}`);
+  }
+}
+
+// main fonksiyonunu çalıştır, ve dönen promise değerinde sonuç ve hata olması durumunda, konsola çıktı ver.
+main().then(console.log, console.log);
+// main fonksiyonunun bloklamadığını kanıtlamak için, ekrana yazı yazalım.
+console.log(&#39;Main fonksiyonu çağrıldı!&#39;);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Bu kodu çalıştırdığımızda, ağ işleminin async olmasına rağmen, beklediğimizden yavaş çalıştığını göreceğiz. Hani async sayesinde birden fazla ağ isteğini aynı anda yapabilecektik? İlk geleni işleyecektik? Buradaki sıkıntı async/await&amp;rsquo;in, promise&amp;rsquo;e dönüştürülürken, takip etmesi gereken adımlar. Şuanda bu yapı ile özet olarak şu şekilde bir yapıya sahip oluyoruz:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;let promise = Promise.resolve();
+for(let movieID of movieIDs){
+    promise = promise.then(() =&amp;gt; request(...movieID)).then((result) =&amp;gt; ...));
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;yani tek bir Promise zinciri oluşturuluyor. Bu yüzden network isteklerimizden biri bitmeden, bir sonraki başlamıyor. Burada uygulamanın yavaş çalışmasına rağmen, not düşmek istediğim bir konu var. Tüm ağ isteklerini, sırayla başlatmak yerine, hepsini aynı anda başlatabiliriz. Ama bu bizim Node.js uygulamamızı blokladığımız zamanı değiştirmeyecek. Sadece bu işlemin daha hızlı sonlanmasını/toplamda daha az zaman almasını sağlayacak. Burada ne demek istiyorum?&lt;/p&gt;
+
+&lt;p&gt;Diyelim ki, her gönderdiğimiz istek 300 milisaniye alıyor, ve gelen cevabın işlenip ekrana yazdırılması ise 10 ms sürüyor. 300 milisaniyelik ağ isteği async olduğu için, nodejs işlemimiz bu ağ isteği gönderildikten sonra, çalışmasına devam edebilir, başka bir yerde, CPU harcayan bir kodunuz varsa(şuan bizim scriptimizde yok) onu çalıştırabilir. Ama ağ isteğinden cevap geldikten ve sıra işleme/yazdırma kodumuza geldiğinde 10 ms boyunca CPU&amp;rsquo;yu bu fonksiyonumuz bloklayacak. Daha sonra 300 milisaniye süren, yeni bir ağ isteği başlatılacak, ve yine CPU kullanmak isteyen farklı bir kod parçacağı varsa o çağrılabilecek. Yani biz aslında bu kod ile, her film id&amp;rsquo;si için sadece 10 milisaniye bloklamış oluyoruz. Ve toplam CPU bloklama süremiz, &lt;code&gt;10 * film id sayısı&lt;/code&gt; milisaniye oluyor. Fakat algoritmamız: &lt;code&gt;ağ isteği gönder, cevabın gelmesini bekle, işle ve yazdır, ağ isteği gönder...&lt;/code&gt; şeklinde olduğu için, toplam işlem süremiz:  &lt;code&gt;(300 + 10) * film id sayısı&lt;/code&gt; milisaniye oluyor.&lt;/p&gt;
+
+&lt;p&gt;Bu durumu, algoritmamımızı: &lt;code&gt;bir filmid için; ağ isteği başlatıp, sonucu işleyen ve yazdıran bir promise zinciri oluştur, tüm film id için bu promise zincirlerini aynı anda başlat&lt;/code&gt; şeklinde değiştirirsek, bloklama süremiz yine değişmeyecek. Her işlemi işlemesi ve yazdırması 10 milisaniye süreceği için, gene &lt;code&gt;10 * film id sayısı&lt;/code&gt; milisaniye CPU bloklamış olacağız. Fakat ağ istekleri aynı anda başlatıldığı için, hepsi farklı sürede bitecek, ve en uzun süren isteğin 500 ms olduğunu varsayarsak, &lt;code&gt;500 + (10 * film id sayısı)&lt;/code&gt; milisaniye sonra, programımız sonlanmış olacak. Bu da script&amp;rsquo;in çalışma süresinde çok büyük bir düşüşe sebep olmuş olacak. Hatta kendi bilgisayarımdan ve internet bağlantımdan örnek vermem gerekirse; şuanki kod 25 saniyede çalışırken, optimize edilmiş şekilde yazdığım kod, 1.5 saniye sürüyor. 20 tane film id&amp;rsquo;si olduğunu varsayarsak, demek ki tek bir isteğin sonuçlanması ortalama 1.25 saniye sürüyor, ve tüm ağ isteklerini aynı anda başlattığımda, en uzun süren işlem 1.5 saniye tutuyor. Burada unutmamamız gereken, bloklama süresinin iki örnek içinde aynı olduğu. Yani eğer ağ istekleri 10 milisaniye tutsaydı, ve CPU işlemleri 1.5 saniye tutsaydı, iki örnekte benzer sürede bitecekti.&lt;/p&gt;
+
+&lt;p&gt;Bu işlemin, daha hızlı biten versiyonunu yazabilmek için async/await fonksiyonları ile Promise bilgilerimizi birbiri ile birleştirip, ortaya bir karışım çıkarmamız gerkiyor. Bundan önce, uygulamamızı fonksiyonlara ayrıştırıp, kodumuzu daha düzenli hale getirelim. Ve son olarak, promise ile daha performanslı olarak yazmaya çalışalım.&lt;/p&gt;
+
+&lt;h3 id=&#34;fonksiyonlara-ayrıştırmak&#34;&gt;Fonksiyonlara ayrıştırmak&lt;/h3&gt;
+
+&lt;p&gt;Sync veya Async nasıl kodlarsak kodlayalım, uygulamamızın bazı kısımları tamamen saf, sync olarak çalışacak mantıklar içermektedir. Örnek vermek gerekirse, dosya okuma işlememiz sync/async olabilir ama, sonuç olarak elimizde olan değer string olduğu için, dosyayı dizi listesine çevirme işlemimiz hep aynı sync kod ile yapılıyor.&lt;/p&gt;
+
+&lt;p&gt;Aynı şekilde network isteğimiz sync/async olabilir ama gelen string cevabı hep JSON&amp;rsquo;a parselayıp, içindeki title ve description bilgisini aynı şekilde alıyoruz. Ve ekrana yazma fonksiyonumuzda aynı şekilde hep aynı kalıyor.&lt;/p&gt;
+
+&lt;p&gt;Bu fonksiyonları ayırıp, bir önceki async/await kodumuzu tekrar yazdığımızda böyle bir şey elde ediyoruz:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;// Dosya okumak için node.js kütüphanemizi alalım.
+const fs = require(&#39;fs&#39;);
+// node.js error-first callbackleri Promise&#39;e çevirmemize yardımcı olan fonksiyon
+const { promisify } = require(&#39;util&#39;);
+// readFile error first async fonksiyonunu, promise döndürecek şekilde çeviriyoruz.
+const readFilePromise = promisify(fs.readFile);
+// promise döndürecek şekilde async istek yapmamızı sağlayacak olan kütüphane.
+const request = require(&#39;request-promise-native&#39;);
+
+function convertFileBufferToIDArray(buffer){
+  return buffer.toString().split(&#39;\n&#39;);
+}
+
+// verilen string&#39;i json parse yaparak, film modeline çevirme işlemi.
+function parseResponseToTitleAndDescription(resultStr){
+  const body = JSON.parse(resultStr);
+  return { title, description } = body;
+}
+
+// verilen başlık ve açıklamayı, konsola yazdırma
+function outputMovieToConsole({ title, description }){
+  console.log(`Film Adı: ${title}`);
+  console.log(`Filmin açıklaması: ${description}`);
+}
+
+// string olarak gelen cevabı film modeline işle ve ekrana bastır.
+function parseAndOutput(resultStr){
+  const movie = parseResponseToTitleAndDescription(resultStr);
+  return outputMovieToConsole(movie);
+}
+
+// sync benzeri kod yazabilmek için, async (promise döndüren) bir fonksiyon yazalım.
+async function main(){
+  // Dosya okuyan async kodu başlatalım, sonuctaki her bir satırı, dizi elemanı olarak alalım.
+  const buffer = await readFilePromise(&#39;../data/ghibli_movies.txt&#39;);
+  const movieIDs = convertFileBufferToIDArray(buffer);
+
+  // Her bir dizi elemanı için async olarak istek gönderelim.
+  for(let movieID of movieIDs){
+    // API&#39;ye yaptığımız istek
+    const resultStr = await request(`https://ghibliapi.herokuapp.com/films/${movieID}`);
+    parseAndOutput(resultStr);
+  }
+}
+
+// main fonksiyonunu çalıştır, ve dönen promise değerinde sonuç ve hata olması durumunda, konsola çıktı ver.
+main().then(console.log, console.log);
+// main fonksiyonunun bloklamadığını kanıtlamak için, ekrana yazı yazalım.
+console.log(&#39;Main fonksiyonu çağrıldı!&#39;);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Uygulamamızın sabit mantığını fonksiyonlara taşıyarak, async içerisindeki kodu oldukca azalttık. Artık sync veya farklı bir şekilde kod yazsak bile, async kısma bulaşmayan kodumuz aynı çalışacak.&lt;/p&gt;
+
+&lt;h3 id=&#34;promise-kullanarak-çoklu-işlemde-performansı-arttırmak&#34;&gt;Promise kullanarak çoklu işlemde performansı arttırmak&lt;/h3&gt;
+
+&lt;p&gt;Bir Promise zinciri oluşturmak yerine, Promise oluşturma işlemini async await&amp;rsquo;e bırakmak yerine, kendimiz belirleyerek, daha performanslı bir kod elde edebiliriz.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;// sync benzeri kod yazabilmek için, async (promise döndüren) bir fonksiyon yazalım.
+async function main(){
+  // Dosya okuyan async kodu başlatalım, sonuctaki her bir satırı, dizi elemanı olarak alalım.
+  const buffer = await readFilePromise(&#39;../data/ghibli_movies.txt&#39;);
+  const movieIDs = convertFileBufferToIDArray(buffer);
+
+  // Promise all kullanarak, aynı anda birden fazla async işlem başlatıp, hepsinin bitmesini bekleyebiliriz.
+  // await ile bu işlemler bitmeden main fonksiyonunu sonlandırmak istemediğimiz söylüyoruz.
+  await Promise.all(
+      // her bir film id için,
+      movieIDs.map((movieID) =&amp;gt; 
+        // async bir işlem başlat
+        request(`https://ghibliapi.herokuapp.com/films/${movieID}`)
+          // bu işlem bittikten sonra, sonucu işle ve ekrana yazdır.
+          .then(parseAndOutput)
+      )
+  )
+
+  console.log(&#39;Main fonksiyonunun çalışması bitti.&#39;);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Main fonksiyonumuzu bu şekilde değiştirdikten sonra, film çekilme işleminin hızlandığını ve çıktıların sıralarının her çalıştırmada değiştiğini görüyoruz. Artık tüm network istekleri eş zamanlı olarak çalıştırılıyor ve ilk biten istek için işleme ve ekrana yazdırma işlemi yapılıyor.&lt;/p&gt;
+
+&lt;p&gt;Özet olarak; async/await&amp;rsquo;in okunulabilirlik açısından sağladığı faydaların, Promise kullanımı bilmeden, performansı kötü etkileyici bir faktör olabildiğini, ve Promise primitivelerini kullanarak uygulamamızı hızlandırabileceğimizi gördük.&lt;/p&gt;
+
+&lt;p&gt;Fakat şöyle bir sıkıntı var. Bu tarz bir yapıda, eş zamanlı olarak kaç işlem başlatabileceğimizin, işlemlerin iptal edilebilmesinin kontrolü bizde değil. Ne kadar Promise&amp;rsquo;ler ile çalışırken yardımcı kütüphaneler ile bu konularda biraz çözüm bulabilsekte, Promise&amp;rsquo;ler tek bir async veri ile çalışmak üzere geliştirildiği için bu konularda eksiklik çekiyoruz. Burada devreye; kurtarıcımız, RxJS giriyor.&lt;/p&gt;
+
+&lt;h3 id=&#34;rxjs-ile-async-birden-fazla-film-işlemenin-yeniden-yazılması&#34;&gt;RxJs ile async, birden fazla film işlemenin yeniden yazılması&lt;/h3&gt;
+
+&lt;p&gt;Promise&amp;rsquo;ler Async ve Tek veriler ile kullanıma uygun olduğu gibi, RxJS ise, async veri akışı ile çalışmak istediğimiz zamanda kullanılıyor. Promise&amp;rsquo;ler, error first callbackler için nasıl güzel bir alternatif ise, RxJs&amp;rsquo;de Node.JS streamleri için o kadar güzel bir alternatif. Promise&amp;rsquo;ler gelecekte başarılı veya başarısız olabilecek tekil verileri ifade ederkeen, RxJs oberservable pattern kullanarak, zaman bağlı olarak bir veri akışını ifade ediyor. RxJs&amp;rsquo;de Stream üzerindeki verileri tek tek işlemek için bir fonksiyon, hata olması durumunda başka bir fonksiyon ve Stream&amp;rsquo;in sonuçlanmasında farklı bir fonksiyon tanımlayabiliyorsunuz.&lt;/p&gt;
+
+&lt;p&gt;RxJs Streamleri, Promise&amp;rsquo;ler gibi zincirlenme özelliklerine sahip, ve aynı zamanda kendi methodları içerisinde Promise&amp;rsquo;leride destekliyor. RxJs&amp;rsquo;in bir güzel özelliği ise, zamana bağlı işlemler için &lt;a href=&#34;http://reactivex.io/documentation/operators.html&#34;&gt;operator&lt;/a&gt; adını verdiği methodlar içermesi. Bu methodlar ile el ile implemente etmesi zor olan bir çok veri akışı işleme özelliğini bedavaya alıyorsunuz.&lt;/p&gt;
+
+&lt;p&gt;Az önceki kodumuza, eş zamanlı olarak maksimum 5 istek çağırmayı ve eğer toplam işlem süresi 2 saniyeyi geçerse tüm istekleri durdurmayı ekliyelim:&lt;/p&gt;
+
+&lt;p&gt;İlk önce rxjs&amp;rsquo;i projemize ekliyoruz.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;// rxjs kütüphanesini ekliyelim
+const Rx = require(&#39;rxjs/Rx&#39;);
+// kullanacağımız operatörleri alalım
+const { mergeMap, takeUntil } = require(&#39;rxjs/operators&#39;);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Daha sonrada projemizin sadece Main fonksiyon kısmını değiştiriyoruz:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;const timeoutPromise = new Promise((resolve, reject) =&amp;gt; setTimeout(resolve, 2000));
+// sync benzeri kod yazabilmek için, async (promise döndüren) bir fonksiyon yazalım.
+async function main(){
+  // Dosya okuyan async kodu başlatalım, sonuctaki her bir satırı, dizi elemanı olarak alalım.
+  const buffer = await readFilePromise(&#39;../data/ghibli_movies.txt&#39;);
+  const movieIDs$ = Rx.Observable.from(convertFileBufferToIDArray(buffer));
+
+  // movieIDs streamini işlemek için bir hat oluştur, promise&#39;e döndür ve bitmesini bekle.
+  await movieIDs$.pipe(
+      // her akıştan gelen veri için, verilen fonksiyondaki işlemi yap.
+      mergeMap((movieID) =&amp;gt;
+        // movieID için istek gönder, sonucu işle.
+        request(`https://ghibliapi.herokuapp.com/films/${movieID}`).then(parseAndOutput),
+        undefined,
+        // aynı anda en fazla 5 promise bekliyor durumda olsun.
+        5
+      ),
+      // timeoutPromise bitene kadar çalış!
+      takeUntil(timeoutPromise)
+  ).toPromise();
+
+  console.log(&#39;Main fonksiyonunun çalışması bitti.&#39;);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;bunun sonucunda elde ettiğimiz scriptin, 2 saniyeden fazla çalışması durumunda kendini sonlandırdığını, ve anlık olarak en fazla 5 istek gönderdiğini görebiliriz. Umarım RxJs&amp;rsquo;in operatörleri sayesinde kafanızdaki fikirleri, sonlu/sonsuz bir veri akışı üzerinde gerçekleştirmenin ne kadar kolay olduğunu anlayabilmişsinizdir.&lt;/p&gt;
+
+&lt;p&gt;Bu kullanım, JS dünyasında Thread olmadığı için, diğer dillere göre daha bir kolay ve eğlencelidir.&lt;/p&gt;
+
+&lt;p&gt;Son oluşturduğumuz script&amp;rsquo;de küçük bir hata&amp;rsquo;da bulunmaktadır! Yaptığımız istekleri Promise olarak yaptığımız için, stream timeout sebebi ile sonlanması, Promise&amp;rsquo;ler cancel edilebilir olmadığı için, istekleri durduramamaktadır. Bunuda &lt;a href=&#34;https://github.com/Reactive-Extensions/RxJS-DOM/blob/master/doc/operators/ajax.md&#34;&gt;RxJs.DOM.Ajax&lt;/a&gt; kullanarak çözebiliriz.&lt;/p&gt;
+
+&lt;h2 id=&#34;çıkarımlar&#34;&gt;Çıkarımlar&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Bilgisayar donanımımızı ve kaynaklarımızı en optimize şekilde kullanmak için async işlem yapmaya ihtiyacımız vardır.&lt;/li&gt;
+&lt;li&gt;Node.JS&amp;rsquo;in tek çekirdekli yapısı, dili parallelikten yoksun bırakırken, async olarak çalışmayı kolaylaştırmaktadır.&lt;/li&gt;
+&lt;li&gt;Node.JS scriptleri birden fazla işlem olarak çalıştırılarak paralellik elde edilebilir.&lt;/li&gt;
+&lt;li&gt;Sync/Async durumlara bağlı olmayan işlemlerinizi ayrıştırarak, ortak kullanılabilen fonksiyonlar oluşturabilirsiniz.&lt;/li&gt;
+&lt;li&gt;Promise gibi yapılara dil seviyesinde uyumluluk sağlanarak, daha okunulabilir kod yazılabilir. Örn. async/await.&lt;/li&gt;
+&lt;li&gt;Async tekli veriler için Promise kullanabilirsiniz. Async/Await syntaxı ile Promiseler ile, Sync kod&amp;rsquo;a benzer bir yapıya sahip olabilirsiniz, ama performans için her zaman iyi olmayabilir.&lt;/li&gt;
+&lt;li&gt;Async/Await kullanırken, performans veya okunulabilirlik için Promise fonksiyonları kullanabilirsiniz.&lt;/li&gt;
+&lt;li&gt;Sonlu veya sonsuz, async olarak işlenebilecek veri akışları için, Node.JS Stream&amp;rsquo;lerine alternatif olarak RxJS kullanabilirsiniz.&lt;/li&gt;
+&lt;li&gt;RxJS operatörleri, zamana bağlı veri akışları ile çalışmayı kolaylaştırmaktadır. Ve Promiseler ile uyumlu bir şekilde çalışabilir.&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

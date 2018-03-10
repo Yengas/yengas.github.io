@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+	
+	<sitemap>
+	   	<loc>https://yengas.github.io/en/sitemap.xml</loc>
+		
+	   	<lastmod>2017-08-03T16:10:00+03:00</lastmod>
+		
+	</sitemap>
+	
+	<sitemap>
+	   	<loc>https://yengas.github.io/tr/sitemap.xml</loc>
+		
+	   	<lastmod>2018-03-10T03:28:00+03:00</lastmod>
+		
+	</sitemap>
+	
+</sitemapindex>

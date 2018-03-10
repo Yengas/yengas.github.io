@@ -1,0 +1,438 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Yengas</title>
+    <link>https://yengas.github.io/index.xml</link>
+    <description>Recent content on Yengas</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 03 Aug 2017 16:10:00 +0300</lastBuildDate>
+    <atom:link href="https://yengas.github.io/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>KairosDB inner workings; how does it store data in Cassandra?</title>
+      <link>https://yengas.github.io/kairosdb-inner-workings/</link>
+      <pubDate>Thu, 03 Aug 2017 16:10:00 +0300</pubDate>
+      
+      <guid>https://yengas.github.io/kairosdb-inner-workings/</guid>
+      <description>
+
+&lt;p&gt;KairosDB is a timeseries database built on Cassandra. Even though it is coded in a way to support different database backends, it is known mostly by its usage of Cassandra as a scaleable and performant time series data storage. With KairosDB, you can store timeseries metric data in different types and then query them with aggregations over time units. In this article, we will look into the details of KairosDB and its two different Cassandra schema to understand how the insert, delete and read operations we do, work under the cover. Cassandra is a database that you need to model your data, regarding to your queries. That is why its important to know how your queries are made to the Cassandra according to your KairosDB data model!&lt;/p&gt;
+
+&lt;p&gt;KairosDB has just released a new version that uses CQL and an improved Cassandra Schema this month. This version &lt;a href=&#34;https://groups.google.com/d/msg/kairosdb-group/V8ViA6RXNZo/7svKXoKcAQAJ&#34;&gt;reportedly&lt;/a&gt; has some performance improvement over the old one. However to be compatible with the old schema, this new version still includes the schema of the old one. Queries are done on the both new and old tables to stay compatible.&lt;/p&gt;
+
+&lt;p&gt;The first thing you need to know before inspecting the schemas, is that most of the data in the old schema has a &lt;code&gt;blob&lt;/code&gt; type. Meaning if you were to query the Cassandra database directly, the returned data would be not human-readable. To get around this when inspecting the database with a GUI or by hand, you can run this Python code in an interpreter to see what the data is: &lt;code&gt;bytearray.fromhex(&#39;7461675f76616c756573&#39;).decode(&#39;utf8&#39;)&lt;/code&gt;. The reason why the data is stored as blobs comes down to custom metric data types and the schema design. We will see this later.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s start with dissecting the old Cassandra Schema and see how it works for our read/insert/delete operations.&lt;/p&gt;
+
+&lt;h2 id=&#34;old-cassandra-schema&#34;&gt;Old Cassandra Schema&lt;/h2&gt;
+
+&lt;p&gt;This Cassandra Schema is used prior to v1.2.0 for the versions of KairosDB that uses Thrift instead of CQL. Check &lt;a href=&#34;https://gist.github.com/Yengas/541808c4ea65d957f052f179f52e6a07&#34;&gt;this gist&lt;/a&gt; to see the full schema as a gist file.&lt;/p&gt;
+
+&lt;h3 id=&#34;tables&#34;&gt;Tables&lt;/h3&gt;
+
+&lt;p&gt;This Schema has a single keyspace called &lt;code&gt;kairosdb&lt;/code&gt; and 3 tables called &lt;code&gt;string_index&lt;/code&gt;, &lt;code&gt;row_key_index&lt;/code&gt; and &lt;code&gt;data_points&lt;/code&gt;. Each of these tables are explained in detail below.&lt;/p&gt;
+
+&lt;p&gt;Metric data for a specific metric and tags are hold in buckets of 3 weeks. This means a new row is created every three weeks to hold metric data for that period of time. The 3 weeks is  &lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/271660f00c009e39e16c1bff536096ec7ed83409/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L92&#34;&gt;hardcoded&lt;/a&gt; into KairosDB and is a design choice. Finding out which buckets to query for a period of time, or which bucket a specific data point belongs to is done with the help of &lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/271660f00c009e39e16c1bff536096ec7ed83409/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L684&#34;&gt;a simple arithmetic calculation&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h4 id=&#34;string-index&#34;&gt;string_index&lt;/h4&gt;
+
+&lt;p&gt;This table has &lt;a href=&#34;https://gist.github.com/Yengas/541808c4ea65d957f052f179f52e6a07#file-cassandra-old-cql-L75&#34;&gt;3 fields&lt;/a&gt; &lt;code&gt;key = blob&lt;/code&gt;, &lt;code&gt;column = text&lt;/code&gt; and &lt;code&gt;value = blob&lt;/code&gt; however only the first two columns are used. KairosDB stores every string it sees on inserts into this table to speed up queries. There are 3 possible values for the &lt;code&gt;key&lt;/code&gt; field, namely &lt;strong&gt;metric_names&lt;/strong&gt;, &lt;strong&gt;tag_names&lt;/strong&gt; and &lt;strong&gt;tag_values&lt;/strong&gt;(stored as UTF-8 blobs). The other field which is used is the &lt;code&gt;column&lt;/code&gt; field, which is used to store seen metric names, tag names and tag values. &lt;del&gt;This table is queried to make sure searching the other tables is not unnecessary for a specific metric/tag.&lt;/del&gt; This table is queried only when &lt;a href=&#34;https://groups.google.com/forum/?hl=en#!topic/kairosdb-group/MlwSRmZjhdU&#34;&gt;populating the KairosDB UI&lt;/a&gt;&amp;rsquo;s metric name dropdown menu. &lt;code&gt;tag_names&lt;/code&gt; and &lt;code&gt;tag_values&lt;/code&gt; are not used and they aren&amp;rsquo;t populated in the new version anymore.&lt;/p&gt;
+
+&lt;h4 id=&#34;data-points&#34;&gt;data_points&lt;/h4&gt;
+
+&lt;p&gt;This table has &lt;a href=&#34;https://gist.github.com/Yengas/541808c4ea65d957f052f179f52e6a07#file-cassandra-old-cql-L9&#34;&gt;3 fields&lt;/a&gt; which are used to hold a metric data for a specific metric name and tags.&lt;/p&gt;
+
+&lt;p&gt;The fields for tables are &lt;code&gt;key = blob&lt;/code&gt;, &lt;code&gt;column1 = blob&lt;/code&gt; and &lt;code&gt;value = blob&lt;/code&gt;. The &lt;code&gt;key&lt;/code&gt; field is the concatenation of metric name, bucket start timestamp, the data type and the tags. &lt;code&gt;column1&lt;/code&gt; is the offset of this data&amp;rsquo;s time, relative to the bucket start time, and &lt;code&gt;value&lt;/code&gt; is the serialized binary data for the value(this is how KairosDB can have custom data types) for your metric data. How this columns are utilized are explained below in Workflow section.&lt;/p&gt;
+
+&lt;p&gt;The data in this rows are ordered by their offset time in ASC order, so you can have sequential access to your timeseries data when querying. Also another thing to keep in mind is, since the &lt;code&gt;key&lt;/code&gt; field is used for partioning this data in your Cassandra cluster, each metric data for a specific metric/tags/bucket will be in the same Cassandra node.&lt;/p&gt;
+
+&lt;h4 id=&#34;row-key-index&#34;&gt;row_key_index&lt;/h4&gt;
+
+&lt;p&gt;This table is used to keep track of which buckets are available in the &lt;code&gt;data_points&lt;/code&gt; table for a specific metric/tags. Lets say you have a time range and you want to do aggregates over a metric with a tag. You need a way of finding matching buckets of data(in &lt;code&gt;data_points&lt;/code&gt;) for this query first. This tables helps you with this.&lt;/p&gt;
+
+&lt;p&gt;It has &lt;a href=&#34;https://gist.github.com/Yengas/541808c4ea65d957f052f179f52e6a07#file-cassandra-old-cql-L42&#34;&gt;3 fields&lt;/a&gt; &lt;code&gt;key = blob&lt;/code&gt;, &lt;code&gt;column1 = blob&lt;/code&gt;, &lt;code&gt;value = blob&lt;/code&gt;. The &lt;code&gt;key&lt;/code&gt; field is the metric name in utf-8 bytes. And the &lt;code&gt;column1&lt;/code&gt; field is the same with the &lt;code&gt;data_points&lt;/code&gt; table&amp;rsquo;s &lt;code&gt;key&lt;/code&gt; field. Meaning metric name + bucket start time + data type + tags concatenated together. The &lt;code&gt;value&lt;/code&gt; field is not used. This table essentially is a way of saying(in plain English); for this metric name, we have these buckets of data with these tags.&lt;/p&gt;
+
+&lt;p&gt;You can later use this information to make your queries. This is explained in detail below in Workflow section.&lt;/p&gt;
+
+&lt;p&gt;This table&amp;rsquo;s partition key is the &lt;code&gt;key&lt;/code&gt; field which holds the metric name. Because of this, all of &lt;code&gt;row_key_index&lt;/code&gt; entries for a single metric get stored in the same cassandra node. This is improved in the new schema.&lt;/p&gt;
+
+&lt;h3 id=&#34;workflow&#34;&gt;Workflow&lt;/h3&gt;
+
+&lt;p&gt;Below we try to explain how each insert/read and delete operation is done with this schema so you can better understand the inner workings of KairosDB.&lt;/p&gt;
+
+&lt;p&gt;As an example in this workflow, we will assume that we&amp;rsquo;re holding temperature data for different cities. Lets model it so the metric name is &lt;code&gt;Temperature&lt;/code&gt; and the city information is a tag.&lt;/p&gt;
+
+&lt;h4 id=&#34;insert&#34;&gt;Insert&lt;/h4&gt;
+
+&lt;p&gt;Let&amp;rsquo;s say you have a metric data with &lt;code&gt;Temperature&lt;/code&gt; metric name, and &lt;code&gt;city=Antalya&lt;/code&gt; tag. For inserting a single metric to this set, we will use &lt;code&gt;33&lt;/code&gt; for the value and &lt;code&gt;1501672887988&lt;/code&gt; for the timestamp.&lt;/p&gt;
+
+&lt;p&gt;We first calculate(&lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/9469daa937056d84de121ff112a93947e44f960e/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L287&#34;&gt;CassandraDatastore.java Line 287&lt;/a&gt;) which bucket this data belongs to. It&amp;rsquo;s done using the formula &lt;code&gt;timestamp - (timestamp % row_width)&lt;/code&gt; where &lt;code&gt;row_width&lt;/code&gt; is the hardcoded value(&lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/develop/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L92&#34;&gt;Line 92&lt;/a&gt;) in KairosDB. This then translates to: &lt;code&gt;1501672887988 - (1501672887988 % 1814400000) = 1500508800000&lt;/code&gt;. In unix time, for a data dated &lt;code&gt;08/02/2017 @ 11:21am (UTC)&lt;/code&gt; the bucket start time corresponds to &lt;code&gt;07/20/2017 @ 12:00am (UTC)&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;We then create(&lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/9469daa937056d84de121ff112a93947e44f960e/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L289&#34;&gt;Line 289&lt;/a&gt;) a &lt;code&gt;row_key&lt;/code&gt; with this information. This &lt;code&gt;row_key&lt;/code&gt; is the concatenation of Metric Name(&lt;code&gt;Temperature&lt;/code&gt;), the bucket start time we calculated(&lt;code&gt;1500508800000&lt;/code&gt;), the data type(&lt;code&gt;kairos_long&lt;/code&gt;) and our tags(&lt;code&gt;city=Antalya&lt;/code&gt;).&lt;/p&gt;
+
+&lt;p&gt;Then we move on to making sure(&lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/9469daa937056d84de121ff112a93947e44f960e/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L298&#34;&gt;Line 298&lt;/a&gt;) we have a &lt;code&gt;row_key_index&lt;/code&gt; entry for the Metric Name(&lt;code&gt;Temperature&lt;/code&gt;) and the &lt;code&gt;row_key&lt;/code&gt; we calculated. And then we put the data in to the &lt;code&gt;data_points&lt;/code&gt; table! We do this by calculating the offset relative to the bucket start time &lt;code&gt;data_time - row_time&lt;/code&gt; in our case: &lt;code&gt;1501672887988 - 1500508800000 = 1164087988&lt;/code&gt;. This all in all translates to an insert to &lt;code&gt;data_points&lt;/code&gt; table with &lt;code&gt;key = row_key&lt;/code&gt;, &lt;code&gt;column1 = offset we calculated&lt;/code&gt; and the &lt;code&gt;value = our metric value = 33&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;After the data is written, we write metric names, tag names to the &lt;code&gt;string_index&lt;/code&gt; table.&lt;/p&gt;
+
+&lt;h4 id=&#34;read&#34;&gt;Read&lt;/h4&gt;
+
+&lt;p&gt;After getting familiar with insert, we don&amp;rsquo;t need to go into details here. It&amp;rsquo;s apparent that, for a time range and metric/tags query, before querying the &lt;code&gt;data_points&lt;/code&gt; table, we need to take a look(&lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/9469daa937056d84de121ff112a93947e44f960e/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L425&#34;&gt;Line 425&lt;/a&gt;) into &lt;code&gt;row_key_index&lt;/code&gt; table. To do this we create a query into the &lt;code&gt;row_key_index&lt;/code&gt; table with the start and end time of our query(&lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/9469daa937056d84de121ff112a93947e44f960e/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L582&#34;&gt;Line 582&lt;/a&gt;). This results in a query with Metric Name(e.g. &lt;code&gt;Temperature&lt;/code&gt;) and time range to the &lt;code&gt;row_key_index&lt;/code&gt; table. For each returned result, we match them in-memory with our query(&lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/9469daa937056d84de121ff112a93947e44f960e/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L712&#34;&gt;Line 712&lt;/a&gt; this requires parsing the binary &lt;code&gt;row_key&lt;/code&gt; values aswell) and then we make queries(&lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/9469daa937056d84de121ff112a93947e44f960e/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L457&#34;&gt;Line 457&lt;/a&gt;) to &lt;code&gt;data_points&lt;/code&gt; table for each matched bucket.&lt;/p&gt;
+
+&lt;p&gt;This is why its &lt;a href=&#34;https://github.com/kairosdb/kairosdb/wiki/Query-Performance&#34;&gt;not recommended&lt;/a&gt; to have a very populated &lt;code&gt;row_key_index&lt;/code&gt; table with the old schema. Because that may result in too many in-memory comparisons and too many different queries to be made to &lt;code&gt;data_points&lt;/code&gt; table.&lt;/p&gt;
+
+&lt;h4 id=&#34;delete&#34;&gt;Delete&lt;/h4&gt;
+
+&lt;p&gt;Deletes goes pretty much same with the read. However instead of doing read queries to the &lt;code&gt;data_points&lt;/code&gt; table, we instead make delete queries. A good part to notice here(&lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/9469daa937056d84de121ff112a93947e44f960e/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L522&#34;&gt;Line 522&lt;/a&gt;) that, if you happen to delete a whole row of data(meaning the time range you gave includes the start and end time of the bucket), its very performant. However if you do a partial deletes and keep querying that row, you may have performance issues because of &lt;a href=&#34;https://opencredo.com/cassandra-tombstones-common-issues/&#34;&gt;Cassandra tombstones&lt;/a&gt;(may even result in your read queries to not respond!).&lt;/p&gt;
+
+&lt;h4 id=&#34;keep-in-mind&#34;&gt;Keep in mind!&lt;/h4&gt;
+
+&lt;p&gt;An important thing to keep in mind when doing reads/deletes is that; Lets say you have 3 metric names and 300.000 cities. To delete 1 week of data for these 3 metrics on Antalya, KairosDB needs to filter all of your &lt;code&gt;row_key_index&lt;/code&gt; table in-memory and that may translate to millions of comparisons. See calculating &lt;code&gt;row_key_index&lt;/code&gt; size in Optimization section!&lt;/p&gt;
+
+&lt;h2 id=&#34;new-cassandra-schema&#34;&gt;New Cassandra Schema&lt;/h2&gt;
+
+&lt;p&gt;The maintainer of the KairosDB database has been doing some work with CQL instead of using THRIFT. The beta version of KairosDB that uses CQL was released in &lt;a href=&#34;https://github.com/kairosdb/kairosdb/releases/tag/v1.2.0-beta2&#34;&gt;July 2017&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;This version has some new tables in the Schema, however its still compatible with the old version of KairosDB, meaning it queries both tables for backwards compatibility. There is a small difference that you need to keep in mind, the new version of the Cassandra schema creates &lt;code&gt;string_index&lt;/code&gt; table with the &lt;code&gt;column1&lt;/code&gt; fields as blob. This field was text with the old schema. However these schemas are created only if the table doesn&amp;rsquo;t already exists(&lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/Schema.java#L50&#34;&gt;Schema.java Line 50&lt;/a&gt;). So it shouldn&amp;rsquo;t cause any problem when upgrading KairosDB to the new version.&lt;/p&gt;
+
+&lt;p&gt;The &lt;code&gt;data_points&lt;/code&gt; and &lt;code&gt;string_index&lt;/code&gt; are actively used for the same purpose they were used with the old version.&lt;/p&gt;
+
+&lt;h3 id=&#34;new-tables&#34;&gt;New Tables&lt;/h3&gt;
+
+&lt;h4 id=&#34;row-key-time-index&#34;&gt;row_key_time_index&lt;/h4&gt;
+
+&lt;p&gt;This table has 3 fields &lt;code&gt;metric = text&lt;/code&gt;, &lt;code&gt;row_time = timestamp&lt;/code&gt; and an unused &lt;code&gt;value = text&lt;/code&gt;. Essentially it&amp;rsquo;s job is to hold what buckets we have for a specific metric. It&amp;rsquo;s queried with the time range and the metric name, and the result is used to query the row_keys_index table.&lt;/p&gt;
+
+&lt;h4 id=&#34;row-keys-index&#34;&gt;row_keys_index&lt;/h4&gt;
+
+&lt;p&gt;This table holds the &lt;code&gt;row_key&lt;/code&gt; we calculated in a CQL friendly way. It has 4 fields namely; &lt;code&gt;metric = text&lt;/code&gt;, &lt;code&gt;row_time = timestamp&lt;/code&gt;, &lt;code&gt;data_type = text&lt;/code&gt; and &lt;code&gt;tags = frozen&amp;lt;map&amp;lt;text, text&amp;gt;&amp;gt;&lt;/code&gt;. These are used to hold a &lt;code&gt;row_key&lt;/code&gt; in Cassandra table, so they can be queried with their metric, timestamp and data type to be parsed and compared in memory with the query.&lt;/p&gt;
+
+&lt;h3 id=&#34;workflow-1&#34;&gt;Workflow&lt;/h3&gt;
+
+&lt;h4 id=&#34;insert-1&#34;&gt;Insert&lt;/h4&gt;
+
+&lt;p&gt;Insert is pretty simple and almost the same as the old schema and addition is that the CQL commands are run batched. Bucket is calculated, then the &lt;code&gt;row_key&lt;/code&gt; and it&amp;rsquo;s made sure corresponding entries are created in &lt;code&gt;row_key_time&lt;/code&gt;(&lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/CQLBatch.java#L54&#34;&gt;Line 54&lt;/a&gt;) and &lt;code&gt;row_keys&lt;/code&gt;(&lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/CQLBatch.java#L65&#34;&gt;Line 65&lt;/a&gt;), after this the data is inserted into the &lt;code&gt;data_points&lt;/code&gt;(&lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/CQLBatch.java#L116&#34;&gt;Line 116&lt;/a&gt;) and only the metric names are inserted into the &lt;code&gt;string_index&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h4 id=&#34;read-1&#34;&gt;Read&lt;/h4&gt;
+
+&lt;p&gt;We still need a way to find which &lt;code&gt;data_points&lt;/code&gt; buckets we need to query. To do this, KairosDB needs to query both old schema&amp;rsquo;s &lt;code&gt;row_key_index&lt;/code&gt; table and the new &lt;code&gt;row_key_time_index&lt;/code&gt; and &lt;code&gt;row_keys&lt;/code&gt; table.&lt;/p&gt;
+
+&lt;p&gt;The old schema is queried like the old version of KairosDB but instead of using Thrift, CQL is used.&lt;/p&gt;
+
+&lt;p&gt;For the new schema; &lt;code&gt;row_key_time_index&lt;/code&gt; is queried with the metric name and the time range(&lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L780&#34;&gt;Line 780&lt;/a&gt;) to get the buckets available, then multiple queries are made to the &lt;code&gt;row_keys&lt;/code&gt; table(&lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L788&#34;&gt;Line 788&lt;/a&gt;) and the returning entries are filtered in memory(&lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L823&#34;&gt;Line 823&lt;/a&gt;) according to the query made.&lt;/p&gt;
+
+&lt;h4 id=&#34;delete-1&#34;&gt;Delete&lt;/h4&gt;
+
+&lt;p&gt;New version of cassandra &lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L595&#34;&gt;doesn&amp;rsquo;t seem to delete&lt;/a&gt; &lt;code&gt;row_key_time_index&lt;/code&gt; and &lt;code&gt;row_keys&lt;/code&gt; entries for the metric data. It just deletes the old schema&amp;rsquo;s &lt;code&gt;row_key_index&lt;/code&gt; entry, and the &lt;code&gt;data_points&lt;/code&gt; entries(&lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L595&#34;&gt;Line 595&lt;/a&gt; and &lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L614&#34;&gt;Line 614&lt;/a&gt;). There are no delete queries for the new tables in &lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/Schema.java&#34;&gt;Schema.java&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;optimization-what-to-keep-in-mind&#34;&gt;Optimization, what to keep in mind&lt;/h2&gt;
+
+&lt;h3 id=&#34;calculating-your-row-key-index-size&#34;&gt;Calculating your row_key_index size&lt;/h3&gt;
+
+&lt;p&gt;To do this calculation. Lets say you have 300.000 different cities, and you hold &lt;code&gt;Temperature&lt;/code&gt;, &lt;code&gt;Humidity&lt;/code&gt; and &lt;code&gt;Wind&lt;/code&gt; metrics for these cities. And you decided to model your data in KairosDB so the metric names correspond to the &lt;code&gt;Temperature&lt;/code&gt;, &lt;code&gt;Humidity&lt;/code&gt; and &lt;code&gt;Wind&lt;/code&gt;. And the cities are stored with the &lt;code&gt;city=XXX&lt;/code&gt; tag. You will have &lt;code&gt;N = 300.000 * 3 = 900.000&lt;/code&gt; entries in your &lt;code&gt;row_key_index&lt;/code&gt;. And you get &lt;code&gt;N&lt;/code&gt; more &lt;code&gt;row_key_index&lt;/code&gt; entries each 3 week because KairosDB divides your data into buckets! You can see how this could slow your queries with the Read and Delete, because of in-memory comparisons. The situation is different with the new schema.&lt;/p&gt;
+
+&lt;h3 id=&#34;gotchas-not-many-performance-improvements-slow-deletes-reads&#34;&gt;Gotchas, not many performance improvements&amp;hellip; Slow deletes, reads.&lt;/h3&gt;
+
+&lt;p&gt;KairosDB isn&amp;rsquo;t the most optimized database when it comes to executing your queries on Cassandra. One of the most apparent feature it lacks, is that when you make a query with same metric name, but different tags, it queries the &lt;code&gt;row_key_index&lt;/code&gt; table multiple times. And considering this metric name is populated, this may cause a lot of slow downs on your system. This can happen both with reads and deletes.&lt;/p&gt;
+
+&lt;p&gt;Lets keep going with our example where we had 3 different metrics &lt;code&gt;Temperature&lt;/code&gt;, &lt;code&gt;Humidity&lt;/code&gt; and &lt;code&gt;Wind&lt;/code&gt; and we had 1 tag named city, which holds the city name. If we were to run a delete query which deletes all of the metrics for 2 different cities &lt;code&gt;Antalya&lt;/code&gt; and &lt;code&gt;Istanbul&lt;/code&gt;, this will cause 2 scans on all of our &lt;code&gt;row_key_index&lt;/code&gt;. Lets think a scenario where we run this kind of query for deleting a big number of cities&amp;hellip; This could cause a serious slowdown with the current schema(s) if you were to make a naive query with multiple metrics. To make this query more performant and make it read the &lt;code&gt;row_key_index&lt;/code&gt; table once, try using group by as mentioned by Brian Hawkins on &lt;a href=&#34;https://groups.google.com/d/msg/kairosdb-group/MlwSRmZjhdU/WndUNMi1AwAJ&#34;&gt;this kairosdb group post&lt;/a&gt;. Example query:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{
+    &amp;quot;start_absolute&amp;quot;: ...,
+    &amp;quot;end_absolute&amp;quot;: ...,
+    &amp;quot;metrics&amp;quot;: [{ 
+        &amp;quot;name&amp;quot;: &amp;quot;Temperature&amp;quot;,
+        &amp;quot;tags&amp;quot;: { &amp;quot;city&amp;quot;: [&amp;quot;Antalya&amp;quot;, &amp;quot;Istanbul&amp;quot;] }, 
+        &amp;quot;group_by&amp;quot;: [
+            {
+              &amp;quot;name&amp;quot;: &amp;quot;tag&amp;quot;,
+              &amp;quot;tags&amp;quot;: [ &amp;quot;city&amp;quot; ]
+            }
+        ]
+    }]
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;don-t-have-too-many-tombstones&#34;&gt;Don&amp;rsquo;t have too many tombstones&lt;/h3&gt;
+
+&lt;p&gt;Cassandra doesn&amp;rsquo;t delete records when you execute a delete query. It just marks them as tombstones and deletes them in the next compaction. Until this compaction happens, every query you make to these sstables, will need to filter out tombstones records and this may cause problem such as your read queries not responding or getting slower. You should keep in mind KairosDB stores 3 weeks of metric data in a row for each specific metric/tag combinations. If you delete some data in the row you are actively using, you may get slow downs/halts/aborts. Please see this &lt;a href=&#34;https://stackoverflow.com/questions/21755286/what-exactly-happens-when-tombstone-limit-is-reached&#34;&gt;stackoverflow question&lt;/a&gt;, regarding this problem.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Using Docker and Docker-Compose to setup a local working environment, ready to be scaled.</title>
+      <link>https://yengas.github.io/docker-compose-node/</link>
+      <pubDate>Tue, 31 Jan 2017 03:30:00 +0300</pubDate>
+      
+      <guid>https://yengas.github.io/docker-compose-node/</guid>
+      <description>
+
+&lt;p&gt;Let&amp;rsquo;s talk about running your Node.js applications, in a way that makes it easier to migrate to continuous integration and deployment pipelines later on the road. There are too many things that you can do in DevOps layer that will make your code more readable and easier to maintain. For example:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;You can assume that every &lt;strong&gt;configuration&lt;/strong&gt; is retrieved through a single file, then make a spec in your Kubernetes cluster to dynamically create this file through &lt;a href=&#34;https://kubernetes.io/docs/user-guide/configmap/&#34;&gt;ConfigMaps&lt;/a&gt;, which would solve your problem of moving/managing configuration files on multiple servers. You can also mount these &lt;a href=&#34;https://kubernetes.io/docs/user-guide/configmap/&#34;&gt;ConfigMaps&lt;/a&gt; as environment variables.&lt;/li&gt;
+&lt;li&gt;You can make your &lt;strong&gt;service discovery&lt;/strong&gt; by making the hostnames/ports of the services you&amp;rsquo;re using variable. This will give you the flexibility of either using an intermediary DNS server(e.g. &lt;a href=&#34;https://kubernetes.io/docs/admin/dns/&#34;&gt;kube-dns&lt;/a&gt;), or entering static values(e.g. &lt;code&gt;localhost&lt;/code&gt; or docker service name).&lt;/li&gt;
+&lt;li&gt;You can &lt;strong&gt;log&lt;/strong&gt; everything to &lt;code&gt;stdout&lt;/code&gt; in your code. Then use a collector like &lt;a href=&#34;http://www.fluentd.org/&#34;&gt;fluentd&lt;/a&gt; to forward your logs to a centralized logging solution to analyze and report on.&lt;/li&gt;
+&lt;li&gt;You can leave out anything related to simple cpu/memory &lt;strong&gt;monitoring&lt;/strong&gt;. Then use something like &lt;a href=&#34;https://github.com/kubernetes/heapster&#34;&gt;heapster&lt;/a&gt; to retrieve these data through docker.&lt;/li&gt;
+&lt;li&gt;You can leave out any &lt;strong&gt;rate limiting&lt;/strong&gt; to be handled before any request reaches to your services by putting up a reverse proxy in front of your services.&lt;/li&gt;
+&lt;li&gt;You can forget about &lt;strong&gt;mapping domains/paths&lt;/strong&gt; to backend services and use dynamic reverse-proxy configurations(e.g. &lt;a href=&#34;https://github.com/kubernetes/contrib/tree/master/ingress/controllers&#34;&gt;Kubernetes ingress controller&lt;/a&gt;) to handle it in your operations layer.&lt;/li&gt;
+&lt;li&gt;You can assume that a specific folder is shared between multiple instances of your processes, then use &lt;a href=&#34;https://github.com/kubernetes/kubernetes/tree/master/examples/volumes/nfs&#34;&gt;NFS volume mounts&lt;/a&gt; to have a truly shared filesystem between multiple nodes in your cluster.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;These are all helpful&amp;hellip; but maybe hard for you to setup all at once, or you just may not have the resources. This doesn&amp;rsquo;t mean you should code your services like you don&amp;rsquo;t have these options. You can mostly have the juicy parts of these features just by using Docker and some clever structuring/configuration. Below i will explain how to achieve a working environment that will make it easy for you to push your services into Kubernetes.&lt;/p&gt;
+
+&lt;h2 id=&#34;configuration&#34;&gt;Configuration&lt;/h2&gt;
+
+&lt;p&gt;Have a single configuration file that retrieves your environment specific configurations through environment variables, and holds the other kind of information(configuration you would like to have in your source control) as hardcoded.&lt;/p&gt;
+
+&lt;p&gt;This will make it possible for you to plug-in different kinds of environment files on different environments. You can achieve this by using &lt;code&gt;env_file&lt;/code&gt; in &lt;code&gt;docker-compose&lt;/code&gt; or &lt;code&gt;ConfigMap&lt;/code&gt; in Kubernetes. You also have the chance to dynamically create this file in your docker entrypoint and override it with a configuration retrieved from a database or somewhere else.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Configurations that changes from host to host or environment to environment should be retrieved as environment variables or files.&lt;/li&gt;
+&lt;li&gt;Configurations that change the business logic related behaviour of the application should be stored within scm(git, svn).&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&#34;single-configuration-file&#34;&gt;Single Configuration File&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;// config.js
+module.exports = {
+  // Good old way of getting configurations.
+  database: { password: process.env.DATABASE_PORT || 3306 },
+  // Multi-level objects can be stored as .json files and then serialized into ENV variables.
+  session: JSON.parse(process.env.SESSION_OPTIONS || &#39;{}&#39;),
+  // Magic string should be in our scm
+  magic: { string: &#39;Hello, World!&#39; }
+};
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;After having a configuration file like this. You can create &lt;code&gt;.env.example&lt;/code&gt; to hold the default values, and use specific configurations for each environments (as: &lt;code&gt;.env.{ENVIRONMENT}&lt;/code&gt;). These files can be loaded with docker-compose to your container&amp;rsquo;s &lt;code&gt;process.env&lt;/code&gt;. You can also create Kubernetes spec to mount Environment Variables from &lt;code&gt;ConfigMaps&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h3 id=&#34;docker-envfile-example&#34;&gt;Docker Envfile (Example)&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-yaml&#34;&gt;# docker-compose.yaml
+version: &#39;2&#39;
+services:
+    application:
+      image: xxx:latest
+      env_file: ./.env.development
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;shared-files&#34;&gt;Shared Files&lt;/h2&gt;
+
+&lt;p&gt;You can use docker named volumes for folders you would like to share between multiple instances of your services, or to store persistent information between container re-creates.&lt;/p&gt;
+
+&lt;p&gt;There is also the ability to create named volumes backed by AWS storage or NFS. You&amp;rsquo;re almost as flexible as you would have been with Kubernetes and it&amp;rsquo;s much more easier.&lt;/p&gt;
+
+&lt;h3 id=&#34;named-volumes-example&#34;&gt;Named Volumes (Example)&lt;/h3&gt;
+
+&lt;p&gt;Example:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-yaml&#34;&gt;# docker-compose.yaml
+version: &#39;2&#39;
+volumes:
+  database-storage: {}
+services:
+    database:
+      image: mariadb:10.1
+      volumes:
+        - database-storage:/var/lib/mysql
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;service-discovery&#34;&gt;Service Discovery&lt;/h2&gt;
+
+&lt;p&gt;You should make all of your remote dependencies host names and ports configurable. Use the suggested single configuration file strategy to hold your host name and port information. You can use static ip addresses like &lt;code&gt;localhost&lt;/code&gt; or public ips in one environment configuration, and use custom hostnames like &lt;code&gt;database&lt;/code&gt; in another to let it resolve through a DNS.&lt;/p&gt;
+
+&lt;p&gt;Docker supports DNS resolving of containers that run in the same network. You can easily run 2 different services called &lt;code&gt;database&lt;/code&gt; and &lt;code&gt;application&lt;/code&gt; and both will see each other in their given name, thanks to the DNS service supplied by Docker. You can also add extra hosts with static ip resolutions using &lt;code&gt;extra_hosts&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h3 id=&#34;docker-networks-example&#34;&gt;Docker Networks (Example)&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-yaml&#34;&gt;# docker-compose.yaml
+version: &amp;quot;2&amp;quot;
+networks:
+  redisnetwork: { driver: bridge }
+services:
+  application:
+    image: xxx:latest
+    # Extra host is defined here.
+    # This service can resolve both database and google hostnames.
+    extra_hosts: &amp;amp;default_hosts
+      - &amp;quot;google:172.217.17.174&amp;quot;
+  database:
+    build: mariadb:10.1
+    # This service can resolve both application and google hostnames.
+    extra_hosts: *default_hosts
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Only problem with this setup is when you would like to spin up multiple instances of a given container. You can spin up a reverse proxy container to load balance the recv requests to itself and forward them to other services defined in the docker-compose file. With Kubernetes, you can use a &lt;code&gt;Service&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;auto-restarting&#34;&gt;Auto Restarting&lt;/h2&gt;
+
+&lt;p&gt;Most of the continuous integration pipelines are built to output a single docker image that could be run as if the whole project were a single binary. This means adding your source code into the image, installing all dependencies and making the main file of your project the entrypoint. However a Dockerfile designed for this process is not very useful when working locally. Since the source code is added to the image in the &lt;code&gt;docker build&lt;/code&gt; process, changes you make on your code after the build phase will not change how the containers created by the previously built images behaves.&lt;/p&gt;
+
+&lt;p&gt;This is why i have 2 different Dockerfiles, one for building &lt;code&gt;binary&lt;/code&gt; images and one for development. The trick with development Dockerfile is that we add our source code into the container, not into the image. This means mounting the source directory from the Host to the Docker container. Things you need to take into consideration here is as follows;&lt;/p&gt;
+
+&lt;h3 id=&#34;docker-container-volume-mounts&#34;&gt;Docker Container Volume Mounts&lt;/h3&gt;
+
+&lt;p&gt;Docker containers can mount directories from where the docker engine runs, not from the machine you run the &lt;code&gt;docker&lt;/code&gt; command from. Meaning if you&amp;rsquo;re using Virtualbox or a remote server as your Docker Host, this virtual/remote machine should have access to your source code. Since we&amp;rsquo;re talking about local development. You&amp;rsquo;re probably running docker-engine and docker cli in the same machine, or you have your docker-engine in a virtual box.&lt;/p&gt;
+
+&lt;p&gt;In case of a Virtualbox, make sure your source code&amp;rsquo;s root folder is shared with the guest os. This is automatically configured for Windows Toolbox. Toolbox mounts &lt;code&gt;C:\Users&lt;/code&gt; into &lt;code&gt;/c/users&lt;/code&gt; of the docker-engine guest os. However the docker-compose that comes with the Toolbox can&amp;rsquo;t mount from &lt;code&gt;/c/users&lt;/code&gt;. You will have a weird error about how the volume mount includes invalid characters, and you should use absolute paths. In this case you should set &lt;code&gt;COMPOSE_CONVERT_WINDOWS_PATHS&lt;/code&gt; environment variable to &lt;code&gt;1&lt;/code&gt; in the terminal you run docker-compose.&lt;/p&gt;
+
+&lt;p&gt;In other scenarios like running docker-compose under Hyper-V or native Linux, there shouldn&amp;rsquo;t be any problems.&lt;/p&gt;
+
+&lt;h3 id=&#34;dependency-installation&#34;&gt;Dependency Installation&lt;/h3&gt;
+
+&lt;p&gt;You should never mount your &lt;code&gt;node_modules&lt;/code&gt; into a container. There are packages which require libraries that are specifically built for your operating system. In these cases, mounting an incompatible library will cause your application to not work.&lt;/p&gt;
+
+&lt;p&gt;This is why you should run &lt;code&gt;npm install&lt;/code&gt; inside the image and only mount the source code needed to run your service. This may require you to &lt;code&gt;build-essentials&lt;/code&gt; into your image. If you&amp;rsquo;re using an image that doesn&amp;rsquo;t have it like &lt;code&gt;alpine-node&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h3 id=&#34;utilities&#34;&gt;Utilities&lt;/h3&gt;
+
+&lt;p&gt;You will need utilities to watch for code changes and restart your application. Easiest to setup utilities and most frequently used ones are &lt;code&gt;forever&lt;/code&gt; and &lt;code&gt;nodemon&lt;/code&gt;. However keep in mind that &lt;code&gt;nodemon&lt;/code&gt; needs to exit when your application crashes, so forever will pick up that your application has been terminated, and restart it. This can be done using the &lt;code&gt;--exitcrash&lt;/code&gt; flag of &lt;code&gt;nodemon&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;And another thing to keep in mind is that &lt;code&gt;nodemon&lt;/code&gt; uses &lt;code&gt;inotify&lt;/code&gt; to watch for file changes. This may not work in case you&amp;rsquo;re using Hyper-V or Virtualbox. You can fix this by using polling.&lt;/p&gt;
+
+&lt;h3 id=&#34;development-dockerfile-example&#34;&gt;Development Dockerfile (Example)&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-dockerfile&#34;&gt;# Dockerfile
+FROM alpine-node:6.9.1
+
+RUN mkdir /application
+
+RUN npm install -g nodemon
+RUN npm install -g forever
+
+WORKDIR /application
+
+ADD ./package.json package.json
+RUN npm install
+
+VOLUME /application/src
+
+EXPOSE 80
+
+CMD forever --spinSleepTime 10000 --minUptime 5000 -c &#39;nodemon --exitcrash -L --watch /application/src&#39; /application/src/index.js
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This will create an image that will have all the dependencies installed for a given nodejs service. You can then mount the source code from your host to a container which was created by this image, and you will have a autorestarting nodejs microservice that restarts everytime you make a change.&lt;/p&gt;
+
+&lt;p&gt;An accompanying docker-compose file should be like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-yaml&#34;&gt;version: &#39;2&#39;
+services:
+    application:
+      build: ./application
+      volumes:
+       - ./application/src:/application/src 
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;However you shouldn&amp;rsquo;t use forever while building a &lt;code&gt;binary&lt;/code&gt; image. The process of restarting your application once it crashes/fails should be handled in your operations layer aswell. Most of the container runtimes like &lt;code&gt;Docker Swarm&lt;/code&gt; and &lt;code&gt;Kubernetes&lt;/code&gt; have this option by default. Check &lt;a href=&#34;https://docs.docker.com/compose/compose-file/#/restartpolicy&#34;&gt;restart_policy&lt;/a&gt; that came out with docker-compose v3 and &lt;a href=&#34;https://kubernetes.io/docs/user-guide/deployments/&#34;&gt;Deployments&lt;/a&gt; in Kubernetes.&lt;/p&gt;
+
+&lt;h2 id=&#34;conclusion&#34;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;We talked about what we can gain using DevOps. Instead of manually scripting solutions into our business logic, we can use containers and container runtimes to make it easy to reason about general problems of microservices. We showed that we didn&amp;rsquo;t need any complex setups or configurations to start coding our services in a way that makes them more readable, and easier to migrate to a container runtimes.&lt;/p&gt;
+
+&lt;p&gt;With the advance of technologies such as Docker and Kubernetes, your services should only include code about your business logic. Not about your infrastructure.&lt;/p&gt;
+
+&lt;h3 id=&#34;a-local-working-environment-example&#34;&gt;A local working environment (Example)&lt;/h3&gt;
+
+&lt;p&gt;Below is an example of backend application using Mariadb database with prepopulated sql data.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-yaml&#34;&gt;# docker-compose.yaml
+version: &#39;2&#39;
+# Network for creating isolated container groups
+networks:
+  # Server group that contains database and application.
+  servernetwork: { driver: bridge }
+# Named volumes for tidy storage on docker host.
+volumes:
+  # Database storage volume.
+  database-storage: {}
+services:
+  database:
+    image: mariadb:10.1
+    ports:
+      # Expose the port to localhost so you can connect with a database client.
+      - &amp;quot;3306:3306&amp;quot;
+    volumes:
+      # Make the data persistent in a named volume.
+      - database-storage:/var/lib/mysql
+      # Add startup data for the Mariadb container.
+      - ./database/backup:/docker-entrypoint-initdb.d
+    networks:
+      # Add to the server network
+      - servernetwork
+    environment:
+      # make Mariadb run with empty pass
+      - MYSQL_ALLOW_EMPTY_PASSWORD=true
+  application:
+    build:
+      # Change the build context to the development file.
+      # Its always nice to have the &#39;binary` building dockerfile as the default.
+      context: ./application
+      dockerfile: Dockerfile-development
+    volumes:
+      # Link the host directory to container.
+      - ./application/src:/application/src
+    env_file:
+      # Get the configuration from the dotenv file.
+      - ./application/.env.development
+    ports:
+      # Expose the port.
+      - &amp;quot;80:80&amp;quot;
+    networks:
+      # Add the port.
+      - servernetwork
+    depends_on:
+      # make sure the database starts up with application.
+      # doesn&#39;t guarantee that the database will be ready before backend works.
+      - database
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;sample-project-with-a-pre-populated-database&#34;&gt;Sample Project with a pre-populated database.&lt;/h3&gt;
+
+&lt;p&gt;You can check &lt;a href=&#34;https://github.com/Yengas/nodejs-docker-bootstrap&#34;&gt;Yengas/nodejs-docker-bootstrap&lt;/a&gt; which is a starter application i&amp;rsquo;ve made by following the above recommendations. It also includes a samples section that shows how to deploy a Nodejs application made this way into Kubernetes.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>How I Made This Blog?</title>
+      <link>https://yengas.github.io/personal-website/</link>
+      <pubDate>Sun, 20 Nov 2016 16:30:00 +0300</pubDate>
+      
+      <guid>https://yengas.github.io/personal-website/</guid>
+      <description>&lt;p&gt;I haven&amp;rsquo;t been designing any GUI&amp;rsquo;s since i switched from Web development to other platforms. Most of the projects i&amp;rsquo;ve worked on for the last few years were either single page designs, or they worked in the background.&lt;/p&gt;
+
+&lt;p&gt;Even though i&amp;rsquo;m not very up-to-date with web technologies(except trying out &lt;code&gt;React&lt;/code&gt;&amp;amp;&lt;code&gt;Redux&lt;/code&gt; for a few weeks), i always wanted to experiment with Static Website Generators. After investigating a little bit, i decided to make this blog using &lt;code&gt;Hugo&lt;/code&gt; and &lt;code&gt;Github Pages&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;I created 2 projects called &lt;code&gt;personal-website&lt;/code&gt; and &lt;code&gt;yengas.github.io&lt;/code&gt;. &lt;code&gt;personal-website&lt;/code&gt; included my Hugo configurations, blog posts and static assets, and the &lt;code&gt;yengas.github.io&lt;/code&gt; was for hosting the output of my Hugo builds. I wanted to automate this process so i could post from anywhere(specially mobile) and my blog would automatically update.&lt;/p&gt;
+
+&lt;p&gt;At first, i thought about creating a &lt;code&gt;continous integration&lt;/code&gt; pipeline via &lt;code&gt;Jenkins&lt;/code&gt; on my &lt;code&gt;DigitalOcean&lt;/code&gt; hosted VPS. But after reading more about Hugo, i found out there was a third party service called &lt;a href=&#34;http://www.wercker.com/&#34;&gt;wercker&lt;/a&gt; that could make this process easier, and require no setup. The only downside is that it requires full access to your Github account. I don&amp;rsquo;t have any critical code on my Github account, so i decided to use wercker.&lt;/p&gt;
+
+&lt;p&gt;This way, i would have completely free and automated personal blog whose performance and security depends on Github Pages and my Github Account credentials.&lt;/p&gt;
+
+&lt;p&gt;I only had few struggles while i was trying to set this up. First of all, there isn&amp;rsquo;t an up-to-date wercker script that pushes a git project to master branch of a repository. So i had to create a bash script inside of my wercker config to publish my project to gh-pages.&lt;/p&gt;
+
+&lt;p&gt;Also, the theme(&lt;a href=&#34;https://github.com/tmaiaroto/hugo-redlounge&#34;&gt;hugo-redlounge&lt;/a&gt;) i decided to use didn&amp;rsquo;t have a multilingual support, so i had to learn more about Hugo and customize the template to my needs. I added internationalization, a list of languages, and a feature to switch the post language if there is a translation.&lt;/p&gt;
+
+&lt;p&gt;If you would like to setup a similiar website, you could check out this website&amp;rsquo;s &lt;a href=&#34;https://github.com/Yengas/personal-website&#34;&gt;source code&lt;/a&gt; on Github. You could also checkout my fork of &lt;a href=&#34;https://github.com/Yengas/hugo-redlounge&#34;&gt;hugo-redlounge&lt;/a&gt; theme, which has some fixes and the multilingual support i was talking about.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>About</title>
+      <link>https://yengas.github.io/about/</link>
+      <pubDate>Sat, 19 Nov 2016 00:00:00 +0300</pubDate>
+      
+      <guid>https://yengas.github.io/about/</guid>
+      <description>&lt;p&gt;Hello, I&amp;rsquo;m Yiğitcan! I have been programming since my late highschool years. I&amp;rsquo;m currently studying &lt;strong&gt;Computer Science&lt;/strong&gt; at &lt;strong&gt;Trakya University&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;I&amp;rsquo;ve played with various technologies and programming languages for the past 5 years. I&amp;rsquo;ve had the chance of working with Web, Mobile and Desktop platforms.&lt;/p&gt;
+
+&lt;p&gt;Even though it was hard to decide and dedicate myself on something; i chose to improve myself on &lt;code&gt;Microservice&lt;/code&gt; architecture and &lt;code&gt;Container&lt;/code&gt; technologies, using &lt;code&gt;Scala&lt;/code&gt; and &lt;code&gt;NodeJS&lt;/code&gt; as my main languages. I&amp;rsquo;m currently focusing on &lt;code&gt;DevOps&lt;/code&gt; and &lt;code&gt;Backend&lt;/code&gt; development.&lt;/p&gt;
+
+&lt;p&gt;You can follow my projects and codes on &lt;a href=&#34;https://github.com/Yengas&#34;&gt;Github&lt;/a&gt;, and read my opinions/tutorials about various programming topics on this blog!&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
