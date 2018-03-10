@@ -35,7 +35,7 @@ cd3d059c-09f4-4ff3-8d63-bc765a5184fa
 578ae244-7750-4d9f-867b-f3cd3d6fecf4
 5fdfb320-2a02-49a7-94ff-5ca418cae602
 ```
-Her satır, takip ettiğim bir bitcoin'i ifade ediyor. Güzel... Yeni satır karakteri '\n' ile, satırları birbirinden ayırmam yetecek. Ama ilk önce tüm listeyi işlemeye başlamadan önce, tek bir id için başlık ve açıklama alabileceğimden emin olmam lazım.
+Her satır, açıklamasını ve başlığını almak istediğim filmin id'sini ifade ediyor. Güzel... Yeni satır karakteri '\n' ile, satırları birbirinden ayırmam yetecek. Ama ilk önce tüm listeyi işlemeye başlamadan önce, tek bir id için başlık ve açıklama alabileceğimden emin olmam lazım.
 
 ## Tek bir film, sync olarak işlem yapmak.
 Algoritma basit. Bir değişkende, bilgilerini bulmak istediğim filmin id'sini tutacağım, API'ye bir istek göndereceğim, gelen cevabı JSON olarak işleyip, obje'ye dönüştüreceğim, ve obje'min içindeki başlık ve açıklama bilgisini ekrana yazdıracağım! Tamamen düz mantık.
