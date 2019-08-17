@@ -122,7 +122,6 @@ setTimeout(() =&amp;gt; [...new Array(10000)].map(() =&amp;gt; stockfishCustom.g
 &lt;p&gt;İşlemler arası iletişim ve iş dağıtımı konularını konuşurken, &lt;em&gt;UCI&lt;/em&gt; veya kütüphane ile ilgili çok düşünmek istemiyorum. O yüzden hemen kendime yardımcı bir fonksiyon yazıyorum. Yapmak istediğim; satranç tahtasının durumu (&lt;em&gt;FEN&lt;/em&gt; string), motor yetenek seviyesi (0-20 arasında bir sayı) ve arama derinliği (sayı) verildiği zaman, bana en iyi hamleyi dönen bir fonksiyon. Bu fonksiyonun genel yapısı şöyle olucak:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;module.exports = () =&amp;gt; {
-	// aslında bunu fonksiyon parametresi olarak almak daha mantıklı(DI), ama oraya hiç girmiyorum.
 	const stockfish = require(&#39;stockfish&#39;)();
 	
 	function getBestMove(fen, level, depth) {
@@ -187,11 +186,11 @@ module.exports = {
 &lt;p&gt;O zaman aynı işlem içinde uygulayabileceğim bir başka seçeneği deniyorum. Sadece bir tane Stockfish motorum olsun, ama her hamle hesaplama isteğini bir sıraya dizip, tek tek işleyeyim. Bunu bir array&amp;rsquo;e tüm istekleri pushlayıp, array&amp;rsquo;deki işleri işleyen bir fonksiyon ile yapabilirim. Ya da Promise chaining ile çok daha kolay ve temiz yapabilirim. Promise chaining ile ilerliyorum.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;const { getBestMove: realGetBestMove } = require(&#39;../customStockfish&#39;)();
-let work = Promise.resolve();
+let workChain = Promise.resolve();
 
 module.exports = {
 	async getBestMove(fen, level, depth) {
-		return work = work.then(() =&amp;gt; realGetBestMove(fen, level, depth).catch(console.error));
+		return workChain = workChain.then(() =&amp;gt; realGetBestMove(fen, level, depth).catch(console.error));
 	},
 };
 &lt;/code&gt;&lt;/pre&gt;
@@ -332,7 +331,7 @@ for (let i = 0; i &amp;lt; NUM_OF_WORKERS; i++) {
 
 &lt;h3 id=&#34;bağımsız-işlemler-ile-birden-fazla-stockfish-motoru&#34;&gt;Bağımsız İşlemler ile Birden Fazla Stockfish Motoru&lt;/h3&gt;
 
-&lt;p&gt;&lt;a href=&#34;https://nodejs.org/api/child_process.html&#34;&gt;child_process&lt;/a&gt; kullanarak, ana işlemim ile aynı sunucuda, bağımlı işlemler başlatabiliyorum. Ama Stockfish motorlarını benim işlemimden tamamen bağımsız yapmak istersem ne ne yapacağım? 100 kullanıcım varken 3 motor, 1000 kullanıcım varken 10 motor çalıştırmak istiyorsam? Stockfish motorlarının donanım gereksinimleri farklı ise ve onları özel makinelerde çalıştırmak istiyorsam? Bunları sağlamak için, araya ağ katmanı koymam lazım. Örneğin Stockfish motorunu bir REST API haline getirebilirim veya herhangi bir queue teknolojisini, bu amaç için kullanabilirim(örn. &lt;a href=&#34;https://www.rabbitmq.com&#34;&gt;RabbitMQ&lt;/a&gt;, &lt;a href=&#34;https://redis.io/topics/pubsub&#34;&gt;Redis&lt;/a&gt;).&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://nodejs.org/api/child_process.html&#34;&gt;child_process&lt;/a&gt; kullanarak, ana işlemim ile aynı sunucuda, bağımlı işlemler başlatabiliyorum. Ama Stockfish motorlarını benim işlemimden tamamen bağımsız yapmak istersem ne ne yapacağım? 100 kullanıcım varken 3 motor, 1000 kullanıcım varken 10 motor çalıştırmak istiyorsam? Stockfish motorlarının donanım gereksinimleri farklı ise ve onları özel makinelerde çalıştırmak istiyorsam? Bunları sağlamak için, araya ağ katmanı koymam lazım. Örneğin Stockfish motorunu bir REST API haline getirebilirim veya herhangi bir queue teknolojisini, bu amaç için kullanabilirim(örn. &lt;a href=&#34;https://www.rabbitmq.com&#34;&gt;RabbitMQ&lt;/a&gt;, &lt;a href=&#34;https://redis.io/topics/pubsub&#34;&gt;Redis&lt;/a&gt;). Bunlar seçeneklerimden sadece birkaçı.&lt;/p&gt;
 
 &lt;h4 id=&#34;rest-api-ile&#34;&gt;REST API ile&lt;/h4&gt;
 
@@ -343,12 +342,12 @@ for (let i = 0; i &amp;lt; NUM_OF_WORKERS; i++) {
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;const fastify = require(&#39;fastify&#39;)();
 const { getBestMove } = require(&#39;../stockfish&#39;)();
 
-let work = Promise.resolve();
+let workChain = Promise.resolve();
 
 fastify.get(&#39;/chess&#39;, (request) =&amp;gt; {
 	const { fen, level, depth } = request.query;
 
-	return work = work.then(() =&amp;gt; getBestMove(fen, level, depth));
+	return workChain = workChain.then(() =&amp;gt; getBestMove(fen, level, depth));
 });
 
 fastify.listen(process.argv[2]);
@@ -575,7 +574,6 @@ setTimeout(() =&amp;gt; [...new Array(10000)].map(() =&amp;gt; stockfishCustom.g
 &lt;p&gt;İşlemler arası iletişim ve iş dağıtımı konularını konuşurken, &lt;em&gt;UCI&lt;/em&gt; veya kütüphane ile ilgili çok düşünmek istemiyorum. O yüzden hemen kendime yardımcı bir fonksiyon yazıyorum. Yapmak istediğim; satranç tahtasının durumu (&lt;em&gt;FEN&lt;/em&gt; string), motor yetenek seviyesi (0-20 arasında bir sayı) ve arama derinliği (sayı) verildiği zaman, bana en iyi hamleyi dönen bir fonksiyon. Bu fonksiyonun genel yapısı şöyle olucak:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;module.exports = () =&amp;gt; {
-	// aslında bunu fonksiyon parametresi olarak almak daha mantıklı(DI), ama oraya hiç girmiyorum.
 	const stockfish = require(&#39;stockfish&#39;)();
 	
 	function getBestMove(fen, level, depth) {
@@ -640,11 +638,11 @@ module.exports = {
 &lt;p&gt;O zaman aynı işlem içinde uygulayabileceğim bir başka seçeneği deniyorum. Sadece bir tane Stockfish motorum olsun, ama her hamle hesaplama isteğini bir sıraya dizip, tek tek işleyeyim. Bunu bir array&amp;rsquo;e tüm istekleri pushlayıp, array&amp;rsquo;deki işleri işleyen bir fonksiyon ile yapabilirim. Ya da Promise chaining ile çok daha kolay ve temiz yapabilirim. Promise chaining ile ilerliyorum.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;const { getBestMove: realGetBestMove } = require(&#39;../customStockfish&#39;)();
-let work = Promise.resolve();
+let workChain = Promise.resolve();
 
 module.exports = {
 	async getBestMove(fen, level, depth) {
-		return work = work.then(() =&amp;gt; realGetBestMove(fen, level, depth).catch(console.error));
+		return workChain = workChain.then(() =&amp;gt; realGetBestMove(fen, level, depth).catch(console.error));
 	},
 };
 &lt;/code&gt;&lt;/pre&gt;
@@ -785,7 +783,7 @@ for (let i = 0; i &amp;lt; NUM_OF_WORKERS; i++) {
 
 &lt;h3 id=&#34;bağımsız-işlemler-ile-birden-fazla-stockfish-motoru&#34;&gt;Bağımsız İşlemler ile Birden Fazla Stockfish Motoru&lt;/h3&gt;
 
-&lt;p&gt;&lt;a href=&#34;https://nodejs.org/api/child_process.html&#34;&gt;child_process&lt;/a&gt; kullanarak, ana işlemim ile aynı sunucuda, bağımlı işlemler başlatabiliyorum. Ama Stockfish motorlarını benim işlemimden tamamen bağımsız yapmak istersem ne ne yapacağım? 100 kullanıcım varken 3 motor, 1000 kullanıcım varken 10 motor çalıştırmak istiyorsam? Stockfish motorlarının donanım gereksinimleri farklı ise ve onları özel makinelerde çalıştırmak istiyorsam? Bunları sağlamak için, araya ağ katmanı koymam lazım. Örneğin Stockfish motorunu bir REST API haline getirebilirim veya herhangi bir queue teknolojisini, bu amaç için kullanabilirim(örn. &lt;a href=&#34;https://www.rabbitmq.com&#34;&gt;RabbitMQ&lt;/a&gt;, &lt;a href=&#34;https://redis.io/topics/pubsub&#34;&gt;Redis&lt;/a&gt;).&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://nodejs.org/api/child_process.html&#34;&gt;child_process&lt;/a&gt; kullanarak, ana işlemim ile aynı sunucuda, bağımlı işlemler başlatabiliyorum. Ama Stockfish motorlarını benim işlemimden tamamen bağımsız yapmak istersem ne ne yapacağım? 100 kullanıcım varken 3 motor, 1000 kullanıcım varken 10 motor çalıştırmak istiyorsam? Stockfish motorlarının donanım gereksinimleri farklı ise ve onları özel makinelerde çalıştırmak istiyorsam? Bunları sağlamak için, araya ağ katmanı koymam lazım. Örneğin Stockfish motorunu bir REST API haline getirebilirim veya herhangi bir queue teknolojisini, bu amaç için kullanabilirim(örn. &lt;a href=&#34;https://www.rabbitmq.com&#34;&gt;RabbitMQ&lt;/a&gt;, &lt;a href=&#34;https://redis.io/topics/pubsub&#34;&gt;Redis&lt;/a&gt;). Bunlar seçeneklerimden sadece birkaçı.&lt;/p&gt;
 
 &lt;h4 id=&#34;rest-api-ile&#34;&gt;REST API ile&lt;/h4&gt;
 
@@ -796,12 +794,12 @@ for (let i = 0; i &amp;lt; NUM_OF_WORKERS; i++) {
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;const fastify = require(&#39;fastify&#39;)();
 const { getBestMove } = require(&#39;../stockfish&#39;)();
 
-let work = Promise.resolve();
+let workChain = Promise.resolve();
 
 fastify.get(&#39;/chess&#39;, (request) =&amp;gt; {
 	const { fen, level, depth } = request.query;
 
-	return work = work.then(() =&amp;gt; getBestMove(fen, level, depth));
+	return workChain = workChain.then(() =&amp;gt; getBestMove(fen, level, depth));
 });
 
 fastify.listen(process.argv[2]);

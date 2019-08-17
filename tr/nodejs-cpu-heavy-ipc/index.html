@@ -72,7 +72,7 @@
 	
 
     <h1 class="brand-title">Yengas</h1>
-    <h2 class="brand-tagline">Definitely not a romantic.</h2>
+    <h2 class="brand-tagline">Making things work.</h2>
 
     <nav class="nav">
       <ul class="nav-list" >
@@ -321,7 +321,6 @@ setTimeout(() =&gt; [...new Array(10000)].map(() =&gt; stockfishCustom.getBestMo
 <p>İşlemler arası iletişim ve iş dağıtımı konularını konuşurken, <em>UCI</em> veya kütüphane ile ilgili çok düşünmek istemiyorum. O yüzden hemen kendime yardımcı bir fonksiyon yazıyorum. Yapmak istediğim; satranç tahtasının durumu (<em>FEN</em> string), motor yetenek seviyesi (0-20 arasında bir sayı) ve arama derinliği (sayı) verildiği zaman, bana en iyi hamleyi dönen bir fonksiyon. Bu fonksiyonun genel yapısı şöyle olucak:</p>
 
 <pre><code class="language-js">module.exports = () =&gt; {
-	// aslında bunu fonksiyon parametresi olarak almak daha mantıklı(DI), ama oraya hiç girmiyorum.
 	const stockfish = require('stockfish')();
 	
 	function getBestMove(fen, level, depth) {
@@ -386,11 +385,11 @@ module.exports = {
 <p>O zaman aynı işlem içinde uygulayabileceğim bir başka seçeneği deniyorum. Sadece bir tane Stockfish motorum olsun, ama her hamle hesaplama isteğini bir sıraya dizip, tek tek işleyeyim. Bunu bir array&rsquo;e tüm istekleri pushlayıp, array&rsquo;deki işleri işleyen bir fonksiyon ile yapabilirim. Ya da Promise chaining ile çok daha kolay ve temiz yapabilirim. Promise chaining ile ilerliyorum.</p>
 
 <pre><code class="language-js">const { getBestMove: realGetBestMove } = require('../customStockfish')();
-let work = Promise.resolve();
+let workChain = Promise.resolve();
 
 module.exports = {
 	async getBestMove(fen, level, depth) {
-		return work = work.then(() =&gt; realGetBestMove(fen, level, depth).catch(console.error));
+		return workChain = workChain.then(() =&gt; realGetBestMove(fen, level, depth).catch(console.error));
 	},
 };
 </code></pre>
@@ -531,7 +530,7 @@ for (let i = 0; i &lt; NUM_OF_WORKERS; i++) {
 
 <h3 id="bağımsız-işlemler-ile-birden-fazla-stockfish-motoru">Bağımsız İşlemler ile Birden Fazla Stockfish Motoru</h3>
 
-<p><a href="https://nodejs.org/api/child_process.html">child_process</a> kullanarak, ana işlemim ile aynı sunucuda, bağımlı işlemler başlatabiliyorum. Ama Stockfish motorlarını benim işlemimden tamamen bağımsız yapmak istersem ne ne yapacağım? 100 kullanıcım varken 3 motor, 1000 kullanıcım varken 10 motor çalıştırmak istiyorsam? Stockfish motorlarının donanım gereksinimleri farklı ise ve onları özel makinelerde çalıştırmak istiyorsam? Bunları sağlamak için, araya ağ katmanı koymam lazım. Örneğin Stockfish motorunu bir REST API haline getirebilirim veya herhangi bir queue teknolojisini, bu amaç için kullanabilirim(örn. <a href="https://www.rabbitmq.com">RabbitMQ</a>, <a href="https://redis.io/topics/pubsub">Redis</a>).</p>
+<p><a href="https://nodejs.org/api/child_process.html">child_process</a> kullanarak, ana işlemim ile aynı sunucuda, bağımlı işlemler başlatabiliyorum. Ama Stockfish motorlarını benim işlemimden tamamen bağımsız yapmak istersem ne ne yapacağım? 100 kullanıcım varken 3 motor, 1000 kullanıcım varken 10 motor çalıştırmak istiyorsam? Stockfish motorlarının donanım gereksinimleri farklı ise ve onları özel makinelerde çalıştırmak istiyorsam? Bunları sağlamak için, araya ağ katmanı koymam lazım. Örneğin Stockfish motorunu bir REST API haline getirebilirim veya herhangi bir queue teknolojisini, bu amaç için kullanabilirim(örn. <a href="https://www.rabbitmq.com">RabbitMQ</a>, <a href="https://redis.io/topics/pubsub">Redis</a>). Bunlar seçeneklerimden sadece birkaçı.</p>
 
 <h4 id="rest-api-ile">REST API ile</h4>
 
@@ -542,12 +541,12 @@ for (let i = 0; i &lt; NUM_OF_WORKERS; i++) {
 <pre><code class="language-js">const fastify = require('fastify')();
 const { getBestMove } = require('../stockfish')();
 
-let work = Promise.resolve();
+let workChain = Promise.resolve();
 
 fastify.get('/chess', (request) =&gt; {
 	const { fen, level, depth } = request.query;
 
-	return work = work.then(() =&gt; getBestMove(fen, level, depth));
+	return workChain = workChain.then(() =&gt; getBestMove(fen, level, depth));
 });
 
 fastify.listen(process.argv[2]);
