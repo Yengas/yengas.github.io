@@ -17,53 +17,53 @@
       <guid>https://yengas.github.io/tr/nodejs-cpu-heavy-ipc/</guid>
       <description>
 
-&lt;p&gt;Bu makalenin konusu, Facebook gruplarından birinde karşılaştığım güzel bir sorudan geliyor. Soru hem temel konularda bilgi sahibi olmayı, hem de kullanılacak aracı iyi tanımayı gerektiriyor. Bu konuda fikirlerimi kısa bir cevap olarak yazarsam, haksızlık ederim diye düşündüm. Ve aynı zamanda bir şeyler öğrenmek ve kod maymunluğu yapmak için eğlenceli bir konu bulmuş oldum. Ortaya bu makale ve github üzerinde yayınladığım &lt;a href=&#34;https://github.com/Yengas/stockfish-cluster-example&#34;&gt;örnek kodlar&lt;/a&gt; ortaya çıktı. Soruya bakarak, esas konumuzu yavaş yavaş işleyelim.&lt;/p&gt;
+&lt;p&gt;Bu makalenin konusu, Facebook gruplarından birinde karşılaştığım güzel bir sorudan geliyor. Soru hem temel konularda bilgi sahibi olmayı, hem de kullanılacak aracı iyi tanımayı gerektiriyor. Bu konuda fikirlerimi kısa bir cevap olarak yazarsam, haksızlık ederim diye düşündüm. Aynı zamanda bir şeyler öğrenmek ve kod maymunluğu yapmak için eğlenceli bir konu bulmuş oldum. Ortaya bu makale ve github üzerinde yayınladığım &lt;a href=&#34;https://github.com/Yengas/stockfish-cluster-example&#34;&gt;örnek kodlar&lt;/a&gt; çıktı. Soruya bakarak, esas konumuzu yavaş yavaş işleyelim.&lt;/p&gt;
 
 &lt;h2 id=&#34;bir-satranç-oyunu&#34;&gt;Bir Satranç Oyunu&lt;/h2&gt;
 
 &lt;p&gt;&lt;center&gt;&lt;img src=&#34;https://yengas.github.io/img/articles/selim-question.png&#34; alt=&#34;drawing&#34; style=&#34;width:70%; max-width: 600px; @media (min-width: 768px) { width: 50%; }&#34;/&gt;&lt;/center&gt;&lt;/p&gt;
 
-&lt;p&gt;Anlaşıldığı üzere, arkadaş bir satranç oyunu yapıyor ve kullanıcıyı bilgisayara karşı yarıştırmak istiyor. Stockfish motorunu(hamle önerisi yapan bir program), uygulamalarını yayınladığı ortama kurmuş, ve şimdi bunu Node.js socket sunucusu ile entegre ederken, kafasında soru işaretleri var. Bu soruya bakınca aklımda ilişkili sorular uçmaya başlıyor:&lt;/p&gt;
+&lt;p&gt;Anlaşıldığı üzere, arkadaş bir satranç oyunu yapıyor ve kullanıcıyı bilgisayara karşı yarıştırmak istiyor. Stockfish motorunu(hamle önerisi yapan bir program), uygulamalarını yayınladığı ortama kurmuş ve şimdi bunu Node.js socket sunucusu ile entegre ederken kafasında soru işaretleri var. Bu soruya bakınca aklımda ilişkili sorular uçuşmaya başlıyor:&lt;/p&gt;
 
 &lt;ol&gt;
-&lt;li&gt;Bu motoru istemci tarafında çalıştırabiliyor muyuz? Sunucu&amp;rsquo;da uğraşmamak, bizi fazlaca mühendislikten kurtarabilir.&lt;/li&gt;
-&lt;li&gt;Stockfish motorunu kendi kontrolümüzde, Node.js işlemi içerisinde çalıştırabiliyor muyuz?&lt;/li&gt;
-&lt;li&gt;Oldu da Node.js içerisinde çalıştırdık. Bunun bize CPU/Memory maliyeti ne olacak?&lt;/li&gt;
-&lt;li&gt;Bu motor herhangi bir state tutuyor mu? Örn. bir kullanıcı oyuna başladı, başlangıç itibari ile tüm hamleleri sırası ile mi motora veriyoruz? Yoksa her istekte tüm tahta durumunu mu veriyoruz?&lt;/li&gt;
-&lt;li&gt;Ne kadar kullanıcımız olacak?&lt;/li&gt;
+&lt;li&gt;Bu motoru istemci tarafında çalıştırabilir miyim? Sunucu&amp;rsquo;da uğraşmamak, beni fazlaca mühendislikten kurtarır.&lt;/li&gt;
+&lt;li&gt;Stockfish motorunu kendi kontrolümde, Node.js işlemim içerisinde çalıştırabilir miyim?&lt;/li&gt;
+&lt;li&gt;Oldu da Node.js içerisinde çalıştırdım. Bunun bana CPU/Memory maliyeti ne olacak?&lt;/li&gt;
+&lt;li&gt;Bu motor herhangi bir state tutuyor mu? Örn. bir kullanıcı oyuna başladı, başlangıç itibari ile tüm hamleleri sırası ile mi motora vermem lazım? Yoksa her istekte tüm tahta durumunu mu vermeliyim?&lt;/li&gt;
+&lt;li&gt;Ne kadar kullanıcım olacak? Anlık aktif satranç oyunu sayısı kaç olabilir?&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;p&gt;Araştırmaya koyulmam lazım. Her sorunun cevabı dizayn ettiğimiz sistemi değiştirebilir. Ama ilk önce bir duraksayıp, bu sorunun neden makale yazmaya değer olduğunu konuşalım.&lt;/p&gt;
+&lt;p&gt;Araştırmaya koyulmam lazım. Her sorunun cevabı dizayn ettiğim sistemi değiştirebilir. Ama ilk önce bir duraksayıp, bu sorunun neden makale yazmaya değer olduğunu anlatayım.&lt;/p&gt;
 
 &lt;h3 id=&#34;başka-birinin-kodu&#34;&gt;Başka Birinin Kodu&lt;/h3&gt;
 
-&lt;p&gt;Projelerimizde ihtiyacımız olan özellikleri karşılamak için başkalarının kodunu hep kullanıyoruz. Resim küçültüp, büyütmek için olabilir. PDF bir dosya çıktı almak için olabilir. QRCode oluşturmak için olabilir. Bu tarz ihtiyaçlarımızı NPM çoğu zaman karşılıyor. Ama bazı ihtiyaçlarımızı karşılayacak kodlar, kütüphane olarak bulunmayabilir. Böyle durumlarda artık kendi projemizin dışına adım atmamız gerekiyor.&lt;/p&gt;
+&lt;p&gt;Projelerimizde ihtiyacımız olan özellikleri edinmek için başkalarının kodunu hep kullanıyoruz. Resim küçültüp, büyütmek için olabilir. PDF bir dosya çıktısı almak için olabilir. QRCode oluşturmak için olabilir. Bu tarz ihtiyaçlarımızı NPM çoğu zaman karşılıyor. Ama bazı ihtiyaçlarımızı karşılayacak kodlar, kütüphane olarak bulunmayabilir. Böyle durumlarda artık kendi projemizin dışına adım atmamız ve farklı yazılımlar/işlemler ile konuşmamız gerekiyor.&lt;/p&gt;
 
-&lt;p&gt;Burada işin içine işlemler arası iletişim (&lt;a href=&#34;https://stackoverflow.com/questions/40005935/which-kind-of-inter-process-communication-ipc-mechanism-should-i-use-at-which&#34;&gt;IPC&lt;/a&gt;) dediğimiz kavram devreye giriyor. Eğer uygulamanın bir konsol arayüzü varsa, ilk akla gelende &amp;ldquo;komut çalıştırmak&amp;rdquo; oluyor. Evet bunu yapmak oldukca kolay, &lt;a href=&#34;https://nodejs.org/api/child_process.html&#34;&gt;child_process&lt;/a&gt; kullanılarak, istediğiniz programı başlatabilirsiniz. Başlayan programın stdin ve stdout &amp;ldquo;dosyalarını&amp;rdquo; kendi Node.js işleminize bağlayarak da, istediğiniz gibi iletişim kurabilirsiniz.&lt;/p&gt;
+&lt;p&gt;Bu olaya işlemler arası iletişim (&lt;a href=&#34;https://stackoverflow.com/questions/40005935/which-kind-of-inter-process-communication-ipc-mechanism-should-i-use-at-which&#34;&gt;IPC&lt;/a&gt;) diyoruz. Eğer uygulamanın bir konsol arayüzü varsa, bu uygulama ile iletişim kurmak için ilk akla gelen şey; &amp;ldquo;komut çalıştırmak&amp;rdquo; oluyor. Evet bunu yapmak oldukca kolay, &lt;a href=&#34;https://nodejs.org/api/child_process.html&#34;&gt;child_process&lt;/a&gt; kullanılarak, istediğimiz programı, istediğimiz argümanlar ile başlatabiliriz. Başlayan programın stdin ve stdout &amp;ldquo;dosyalarını&amp;rdquo; kendi Node.js işlemimize bağlayarak da, istediğimiz gibi iletişim kurabiliriz.&lt;/p&gt;
 
 &lt;p&gt;Bu yöntemle birlikte düşünülmesi gereken şeyler artıyor. Bizim kodumuzun çalıştığı her yerde, bu uygulamanın kurulu olması gerekiyor. Hem de aynı versiyon ve konfigürasyon ile. Kullanmak istediğimiz tüm özelliklerin komut satırı üzerinden sağlanıyor olması gerekiyor. Eğer kendi kodumun içine bu fonksiyonaliteyi gömebiliyorsam, bunlarla uğraşmak istemem.&lt;/p&gt;
 
-&lt;p&gt;Neyse ki Stockfish durumunda, NPM üzerinde bir kütüphane &lt;a href=&#34;https://www.npmjs.com/package/stockfish&#34;&gt;bulunuyor&lt;/a&gt;. Ama bu seferde başka sorunlar ortaya çıkıyor. Bu kütüphanenin nasıl çalıştığını anlamam lazım. Satranç hamlesi önermek CPU ucuz bir işlem olmamalı. Ben bu kütüphaneden bir fonksiyon çağırdığımda, CPU kullanımından dolayı sunucum kitlenecek mi? Sonuçta Node.js tek thread ve tek CPU demek. Bu kütüphanedeki bir fonksiyon 1 saniye bizi kitlerse, o 1 saniye hiç bir kullanıcı hizmet alamıyacak demek.&lt;/p&gt;
+&lt;p&gt;Neyse ki Stockfish durumunda, NPM üzerinde bir kütüphane &lt;a href=&#34;https://www.npmjs.com/package/stockfish&#34;&gt;bulunuyor&lt;/a&gt;. Ama bu seferde başka sorunlar ortaya çıkıyor. Bu kütüphanenin nasıl çalıştığını anlamam lazım. Satranç hamlesi önermek CPU ucuz bir işlem olmamalı. Ben bu kütüphaneden bir fonksiyon çağırdığımda, CPU kullanımından dolayı sunucum kitlenecek mi? Sonuçta Node.js tek thread ve tek CPU demek. Bu kütüphanedeki bir fonksiyon 1 saniye beni kitlerse, o 1 saniye hiç bir kullanıcım hizmet alamayacak demek. Böyle bir duruma engel olmak için de kendi projem içindeki fonksiyonaliteleri birden fazla işlem olarak çalıştırmam ve IPC yapmam gerekebilir.&lt;/p&gt;
 
-&lt;p&gt;Araştırma yapmam lazım.&lt;/p&gt;
+&lt;p&gt;Soruların hepsi çok güzel. Araştırma yapmam lazım.&lt;/p&gt;
 
 &lt;h2 id=&#34;stockfish-ve-satranç-hamle-önerisi&#34;&gt;Stockfish ve Satranç Hamle Önerisi&lt;/h2&gt;
 
-&lt;p&gt;Üç taş oyunu gibi oyunları bilgisayara oynatmaya çalıştığımızda, bilgisayarın tüm ihtimalleri değerlendirmesi çok kısa sürüyor. Kazanan strateji de önceden belirli oluyor. Ama satranç gibi çok fazla ihtimal içeren kompleks oyunlarda, tüm ihtimalleri değerlendirmek imkansız. Bu yüzden Stockfish gibi satranç motorları, tahtanın şu anki durumu üzerinden, potansiyel hamlelerin ne kadar mantıklı olduğunu(hangi hamlelerin kaybetme ihtimalini azaltacağını) hesaplamak için geleceğe dönük bir arama yapıyorlar. Problemin doğası gereği, bu ucuz bir işlem değil. CPU&amp;rsquo;nun ısınmasına sebep olabilir. Stockfish&amp;rsquo;i kendi Node process&amp;rsquo;imiz içerisinde çalıştırmak istiyoruz. O yüzden bunu aklımıza tutalım.&lt;/p&gt;
+&lt;p&gt;Üç taş oyunu gibi oyunları bilgisayara oynatmaya çalıştığımızda, bilgisayarın tüm ihtimalleri değerlendirmesi çok kısa sürer. Kazanan strateji de önceden belirlidir. Ama satranç gibi çok fazla ihtimal içeren kompleks oyunlarda, tüm ihtimalleri değerlendirmek imkansız. Bu yüzden Stockfish gibi satranç motorları, tahtanın şu anki durumu üzerinden, potansiyel hamlelerin ne kadar mantıklı olduğunu(hangi hamlelerin kaybetme ihtimalini azaltacağını) hesaplamak için geleceğe dönük bir arama yapar. Problemin doğası gereği, bu ucuz bir işlem değil ve CPU&amp;rsquo;nun ısınmasına sebep olabilir. Stockfish&amp;rsquo;i kendi Node process&amp;rsquo;im içerisinde çalıştırmak istiyorum. O yüzden bunu aklımda tutmam lazım.&lt;/p&gt;
 
-&lt;p&gt;Ama ilk önce bu motor ile nasıl konuşacağımıza, hamle önermek için bizden ne isteyeceğine bakalım. İnternette kısa bir araştırma sonucunda, &lt;a href=&#34;https://chess.stackexchange.com/a/12581&#34;&gt;aradığımı&lt;/a&gt; buldum. &lt;a href=&#34;http://wbec-ridderkerk.nl/html/UCIProtocol.html&#34;&gt;Universal Chess Interface&lt;/a&gt; (UCI) adı verilen bir protokol sayesinde, Stockfish&amp;rsquo;e tahtamızın şu anki durumunu veriyoruz, ve istediğimiz sayıda hamle önerisi alabiliyoruz. En basit örnek şuna indirgenebilir:&lt;/p&gt;
+&lt;p&gt;Ama ilk önce bu motor ile nasıl konuşacağıma, hamle önermek için benden ne isteyeceğine bakıyorum. İnternette kısa bir araştırma sonucunda, &lt;a href=&#34;https://chess.stackexchange.com/a/12581&#34;&gt;aradığımı&lt;/a&gt; buldum. &lt;a href=&#34;http://wbec-ridderkerk.nl/html/UCIProtocol.html&#34;&gt;Universal Chess Interface&lt;/a&gt; (UCI) adı verilen bir protokol sayesinde, Stockfish&amp;rsquo;e tahtamın şu anki durumunu veriyorum ve istediğim sayıda hamle önerisi alabiliyorum. En basit örnek şuna indirgenebilir:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;position fen r3kb1r/p2npppp/2p2n2/3N4/8/5N2/PPPP1PPP/R1B2RK1 b kq - 0 10
 go
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Kriptik görünen &lt;code&gt;r3kb1r/p2npppp/2p2n2/3N4/8/5N2/PPPP1PPP/R1B2RK1 b kq - 0 10&lt;/code&gt; kısmının &lt;a href=&#34;http://kirill-kryukov.com/chess/doc/fen.html&#34;&gt;açıklaması&lt;/a&gt; aslında oldukca &lt;a href=&#34;http://www.chessgames.com/fenhelp.html&#34;&gt;basit&lt;/a&gt;. &lt;em&gt;FEN&lt;/em&gt; adı verilen bu notasyon, tahtanın konumunu, sıranın hangi oyuncuda olduğu, kaçıncı hamle olduğunu gibi bilgileri barındırıyor. Önemli sorularımızdan biri cevaplandı. Her hamle önerisinde, tahtanın tüm pozisyonunu Stockfish&amp;rsquo;e verebiliyoruz ve &lt;a href=&#34;https://chess.stackexchange.com/a/12670&#34;&gt;önerilen&lt;/a&gt; bu. Bu demek oluyor ki, 1 tane motor çalıştırıp, eş zamanlı birden fazla kullanıcıya hizmet verebiliriz.&lt;/p&gt;
+&lt;p&gt;Kriptik görünen &lt;code&gt;r3kb1r/p2npppp/2p2n2/3N4/8/5N2/PPPP1PPP/R1B2RK1 b kq - 0 10&lt;/code&gt; kısmının &lt;a href=&#34;http://kirill-kryukov.com/chess/doc/fen.html&#34;&gt;açıklaması&lt;/a&gt; aslında oldukca &lt;a href=&#34;http://www.chessgames.com/fenhelp.html&#34;&gt;basit&lt;/a&gt;. &lt;em&gt;FEN&lt;/em&gt; adı verilen bu notasyon, tahtanın konumunu, sıranın hangi oyuncuda olduğu, kaçıncı hamle olduğunu gibi bilgileri barındırıyor. Önemli sorularımdan biri cevaplandı. Her hamle önerisinde, tahtanın tüm pozisyonunu Stockfish&amp;rsquo;e verebiliyorum ve &lt;a href=&#34;https://chess.stackexchange.com/a/12670&#34;&gt;önerilen&lt;/a&gt; bu. Bu demek oluyor ki, 1 tane motor çalıştırıp, eş zamanlı birden fazla kullanıcıya hizmet verebilirim. Motor herhangi bir state tutmuyor ve arka arkaya iki farklı oyunun FEN notasyonu verildiği zaman şaşırmıyor.&lt;/p&gt;
 
-&lt;p&gt;Aynı zamanda araştırmalarımda Stockfish&amp;rsquo;in multi-thread çalışabildiğini, düşünme zamanını kısıtlayabildiğimizi, arama derinliğini limitleyebildiğimizi, önerilen hamle sayısını ayarlayabildiğimi, yetenek seviyesi diye bir ayarı olduğunu gibi önemli bilgileri de ediniyorum. Şimdi kod kısmına geçelim.&lt;/p&gt;
+&lt;p&gt;Aynı zamanda araştırmalarımda Stockfish&amp;rsquo;in multi-thread çalışabildiği, düşünme zamanının kısıtlanabildiği, arama derinliğinin limitlenebildiği, önerilen hamle sayısının ayarlanabildiği, yetenek seviyesi ayarı bulunduğu gibi önemli bilgileri de edindim. Şimdi kod kısmına geçebilirim.&lt;/p&gt;
 
 &lt;h2 id=&#34;node-js-stockfish-kütüphanesi&#34;&gt;Node.js Stockfish Kütüphanesi&lt;/h2&gt;
 
-&lt;p&gt;Öğrendiklerimizi kullanarak, Stockfish Node.js &lt;a href=&#34;https://www.npmjs.com/package/stockfish&#34;&gt;kütüphanesi&lt;/a&gt; ile hemen bir örnek yapalım.&lt;/p&gt;
+&lt;p&gt;Öğrendiklerimi kullanarak, Stockfish Node.js &lt;a href=&#34;https://www.npmjs.com/package/stockfish&#34;&gt;kütüphanesi&lt;/a&gt; ile hemen bir örnek yapıyorum.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;const stockfish = require(&#39;stockfish&#39;)();
 
@@ -71,7 +71,7 @@ stockfish.onmessage = console.log;
 stockfish.postMessage(&#39;uci&#39;);
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;bu kodun çıktısı bize Stockfish motorumuzun opsiyonları ile ilgili bilgi veriyor. Örneğin:&lt;/p&gt;
+&lt;p&gt;bu kodun çıktısı bana Stockfish motorunun opsiyonları ile ilgili bilgi veriyor. Örneğin:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;...
 option name Threads type spin default 1 min 1 max 1
@@ -84,13 +84,13 @@ option name Minimum Thinking Time type spin default 20 min 0 max 5000
 
 &lt;p&gt;Burada ilgimi çeken şeylerden biri, &lt;em&gt;Threads&lt;/em&gt; opsiyonun olması, ama min ve max değerlerinin 1 olması. Muhtemelen Node.js ile alakalı bir şey. Kütüphanenin nasıl çalıştığını daha iyi anlamam lazım. Kütüphanenin açıklamasının başında &lt;code&gt;Stockfish.js is a pure JavaScript implementation of Stockfish&lt;/code&gt; yazıyor. Şimdi &lt;em&gt;pure Javascript&lt;/em&gt; denince kafam karıştı. Orjinali C++ olan bir motoru, sıfırdan Javascript ile mi yazmışlar? Öyle ise korkunç. Çünkü kim bilir ne eksikleri var? Ne kadar eski? Yüzlerce kişinin emeği olan C++ projesini, JS ile yeniden kaç kişi yazdı?&lt;/p&gt;
 
-&lt;p&gt;Umutsuzluğa kapılmadan önce, projenin kaynak koduna bakıyorum. Neyse ki proje ağırlıklı C++ olarak görünüyor. &lt;a href=&#34;https://github.com/emscripten-core/emscripten&#34;&gt;emscripten&lt;/a&gt; ve WebAssembly kullanılarak, Javascript kütüphanesi haline getirilmiş. WebAssembly olduğu için &lt;em&gt;pure Javascript&lt;/em&gt; dendiğini düşünüyorum. Sonuçta C++ kod ile FFI kullanılarak iletişim kurulmuyor. Compile olan kod gerçekten Node.js&amp;rsquo;in kullandığı Javascript motoru ile çalıştırılıyor. Aynı zamanda kütüphane hem Node.js hem de tarayıcıyı destekliyor. Bir önemli sorumuz daha cevaplandı. Bu kütüphane ile web tarayıcısı üzerinde istemci tarafında da analiz yapabiliriz(belki ileride React Native). Stockfish C++ olduğu için &lt;a href=&#34;https://github.com/akamai/stockfish-ios&#34;&gt;IOS&lt;/a&gt; ve &lt;a href=&#34;https://github.com/evijit/material-chess-android/tree/master/app/src/main/jni/stockfish&#34;&gt;Android&lt;/a&gt; üzerinde çalıştırmakta mümkün olabilir. Eğer Stockfish&amp;rsquo;i sunucu tarafında çalıştırırsak, kullanıcı sayısı arttıkca sunucu tarafındaki mühendislik ve kaynak gereksinimi artıcak. İstemci için aynı sorun yok. Belki arkadaşın ürünü için istemci daha mantıklı olabilir? Ben öyle olmadığını varsayıp, devam ediyorum :D&lt;/p&gt;
+&lt;p&gt;Umutsuzluğa kapılmadan önce, projenin kaynak koduna bakıyorum. Neyse ki proje ağırlıklı C++ olarak görünüyor. &lt;a href=&#34;https://github.com/emscripten-core/emscripten&#34;&gt;emscripten&lt;/a&gt; ve WebAssembly kullanılarak, Javascript kütüphanesi haline getirilmiş. WebAssembly olduğu için &lt;em&gt;pure Javascript&lt;/em&gt; dendiğini düşünüyorum. Sonuçta C++ kod ile FFI kullanılarak iletişim kurulmuyor. Compile olan kod gerçekten Node.js&amp;rsquo;in kullandığı Javascript motoru ile çalıştırılıyor. Aynı zamanda kütüphane hem Node.js hem de tarayıcıyı destekliyor. Bir önemli sorum daha cevaplandı. Bu kütüphane ile web tarayıcısı üzerinde istemci tarafında da analiz yapabilirim(belki ileride React Native). Stockfish C++ olduğu için &lt;a href=&#34;https://github.com/akamai/stockfish-ios&#34;&gt;IOS&lt;/a&gt; ve &lt;a href=&#34;https://github.com/evijit/material-chess-android/tree/master/app/src/main/jni/stockfish&#34;&gt;Android&lt;/a&gt; üzerinde çalıştırmakta mümkün olabilir. Eğer Stockfish&amp;rsquo;i sunucu tarafında çalıştırırsam, kullanıcı sayısı arttıkca sunucu tarafındaki mühendislik ve kaynak gereksinimi de artacak. İstemci için aynı sorun yok. Belki arkadaşın ürünü için istemci daha mantıklı olabilir? Ben öyle olmadığını varsayıp, devam ediyorum :D&lt;/p&gt;
 
 &lt;p&gt;Kütüphane ile ilgili araştırmamı sonlandırmadan önce bir kaç şey daha test etmek istiyorum.&lt;/p&gt;
 
 &lt;h3 id=&#34;bootstrap-maliyeti&#34;&gt;Bootstrap Maliyeti&lt;/h3&gt;
 
-&lt;p&gt;Bu kütüphanenin WebAssembly kullandığını öğrendik. Peki bu WebAssembly kütüphanesini &lt;em&gt;require&lt;/em&gt; etmek ne kadar maliyetli? Ve &lt;em&gt;dispose&lt;/em&gt; edebiliyor muyuz? Yani işimiz bittiğinde, kullandığı kaynağı teslim etmesini, ve bitmesini sağlayabiliyor muyuz? Hemen örnek bir kod ile deniyelim.&lt;/p&gt;
+&lt;p&gt;Bu kütüphanenin WebAssembly kullandığını öğrendim. Peki bu WebAssembly kütüphanesini &lt;em&gt;require&lt;/em&gt; etmek ne kadar maliyetli? Ve &lt;em&gt;dispose&lt;/em&gt; edebiliyor muyum? Yani işim bittiğinde, kullandığı kaynağı teslim etmesini ve yok olmasını sağlayabiliyor muyum? Hemen örnek bir kod ile deniyorum.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;const stockfishCreator = require(&#39;stockfish&#39;);
 const start = Date.now();
@@ -102,25 +102,25 @@ stockfish.onmessage = line =&amp;gt; {
 stockfish.postMessage(&#39;isready&#39;);
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;&lt;em&gt;UCI&lt;/em&gt; protokolüne göre, &lt;em&gt;isready&lt;/em&gt;&amp;lsquo;e &lt;em&gt;readyok&lt;/em&gt; ile cevap verilmesi lazım. Motor ayağa kalkar kalkmaz bu cevabı vermeli. Bu kodu çalıştırdığımda, ekranda gördüğüm çıktı 120 ms civarlarında. Bilgisayarım normal bir sunucudan daha hızlı. Bu başlangıç zamanı korkutucu. Aynı zamanda github üzerinde açık bir &lt;a href=&#34;https://github.com/nmrugg/stockfish.js/issues/14&#34;&gt;issue&lt;/a&gt; görüyorum. Birisi her Stockfish instance&amp;rsquo;ı oluşturduğunda 30 MB bir memory kullanımı olduğunu, ve bu memory&amp;rsquo;i free edemediğini söylemiş. Bu da korkutucu. Nihai kararı vermeden önce bir şeyi daha araştırmak istiyorum.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;UCI&lt;/em&gt; protokolüne göre, &lt;em&gt;isready&lt;/em&gt;&amp;lsquo;e &lt;em&gt;readyok&lt;/em&gt; ile cevap verilmesi lazım. Motor ayağa kalkar kalkmaz bu cevabı vermeli. Bu kodu çalıştırdığımda, ekranda gördüğüm çıktı 120 ms civarlarında. Bilgisayarım normal bir sunucudan daha hızlı. Bu başlangıç zamanı korkutucu. Aynı zamanda github üzerinde açık bir &lt;a href=&#34;https://github.com/nmrugg/stockfish.js/issues/14&#34;&gt;issue&lt;/a&gt; görüyorum. Birisi her Stockfish instance&amp;rsquo;ı oluşturduğunda 30 MB bir memory kullanımı olduğunu ve bu memory&amp;rsquo;i free edemediğini söylemiş. Bu da korkutucu. Nihai kararı vermeden önce bir şeyi daha araştırmak istiyorum.&lt;/p&gt;
 
 &lt;h3 id=&#34;cpu-blok-kontrolü&#34;&gt;CPU blok kontrolü&lt;/h3&gt;
 
-&lt;p&gt;Bu kütüphaneyi Node.js process&amp;rsquo;imize yüklediğimiz zaman, yaptığımız çağrılar, bizim kodumuz ile aynı çekirdekte mi çalışıyor? Eğer öyle ise çok tehlikeli. Çünkü Stockfish 1 saniyelik bir düşünme sürecine girerse, bizim Node processimiz kitlenicek demek. Bunu kontrol edicek kodu hemen yazalım.&lt;/p&gt;
+&lt;p&gt;Bu kütüphaneyi Node.js process&amp;rsquo;imize yüklediğim zaman, yaptığım çağrılar benim kodum ile aynı çekirdekte mi çalışıyor? Eğer öyle ise çok tehlikeli. Çünkü Stockfish 1 saniyelik bir düşünme sürecine girerse, Node process&amp;rsquo;im kitlenecek demek. Bunu kontrol edecek kodu hemen yazıyorum.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;// her 500 ms&#39;de bir ping yazdıralım
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;// her 500 ms&#39;de bir ping yazdır
 setInterval(() =&amp;gt; console.log(&#39;ping&#39;), 500);
-// 500 ms sonra, 1 kez stockfish fonksiyonu çağıralım
+// 500 ms sonra, 1 kez stockfish fonksiyonu çağır
 setTimeout(() =&amp;gt; stockfishCustom.getBestMove(&#39;...&#39;), 500);
-// 2 saniye sonra, 10.000 kez, stockfish fonksiyonu çağıralım
+// 2 saniye sonra, 10.000 kez, stockfish fonksiyonu çağır
 setTimeout(() =&amp;gt; [...new Array(10000)].map(() =&amp;gt; stockfishCustom.getBestMove(&#39;...&#39;)), 2000);
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Burada gözlemlediğimiz şu. Ekrana 500 ms sonra bir kez &lt;em&gt;ping&lt;/em&gt; yazılıyor, ve hemen ardından en iyi hamle yazılıyor. Bundan sonra 500 ms aralıklarla iki kez daha &lt;em&gt;ping&lt;/em&gt; yazılıyor ve anlık bir kitlenme yaşıyoruz. Korktuğum şey başımıza geldi, WebAssembly kodu, bizim kodumuzu bloklayabiliyor. Yani bu kütüphaneyi kendi process&amp;rsquo;imizden bağımsız çalıştırmak için takla atmamız gerekicek. Bu &lt;a href=&#34;https://nodejs.org/api/worker_threads.html&#34;&gt;worker_threads&lt;/a&gt; kullanarak olabilir, &lt;a href=&#34;https://nodejs.org/api/cluster.html&#34;&gt;cluster&lt;/a&gt; veya &lt;a href=&#34;https://nodejs.org/api/child_process.html&#34;&gt;child_process&lt;/a&gt; kullanarak olabilir. Veya deployment sırasında kodumuzdan bağımsız bu process&amp;rsquo;i ayağa kaldırıp, IPC yapabiliriz. Bunların hepsinin üzerinden geçicez. İlk önce kütüphane ile ilgili son bir konu.&lt;/p&gt;
+&lt;p&gt;Burada gözlemlediğim şu: Ekrana 500 ms sonra bir kez &lt;em&gt;ping&lt;/em&gt; yazılıyor ve hemen ardından en iyi hamle yazılıyor. Bundan sonra 500 ms aralıklarla iki kez daha &lt;em&gt;ping&lt;/em&gt; yazılıyor ve anlık bir kitlenme yaşıyorum. Korktuğum şey başıma geldi. WebAssembly kodu, benim kodumu bloklayabiliyor. Yani bu kütüphaneyi kendi process&amp;rsquo;imden bağımsız çalıştırmak için takla atmam gerekicek. Bu &lt;a href=&#34;https://nodejs.org/api/worker_threads.html&#34;&gt;worker_threads&lt;/a&gt; kullanarak olabilir, &lt;a href=&#34;https://nodejs.org/api/cluster.html&#34;&gt;cluster#fork&lt;/a&gt; kullanarak olabilir, &lt;a href=&#34;https://nodejs.org/api/child_process.html&#34;&gt;child_process#fork&lt;/a&gt; kullanarak olabilir veya deployment sırasında kodumdan bağımsız bi process&amp;rsquo;i ayağa kaldırıp IPC yaparak olabilir. Bunların hepsini deneyeceğim ancak kütüphane ile ilgili aklıma takılan son bir konu daha var.&lt;/p&gt;
 
 &lt;h3 id=&#34;yardımcı-fonksiyonlar&#34;&gt;Yardımcı Fonksiyonlar&lt;/h3&gt;
 
-&lt;p&gt;İşlemler arası iletişim ve iş dağıtımı konularını konuşurken, &lt;em&gt;UCI&lt;/em&gt; veya kütüphane ile ilgili çok düşünmek istemiyorum. O yüzden hemen kendimize yardımcı bir fonksiyon yazalım. Yapmak istediğimiz satranç tahtasının durumu (&lt;em&gt;FEN&lt;/em&gt; string), motor yetenek seviyesi (0-20 arasında bir sayı) ve arama derinliği (sayı) verildiği zaman, bize en iyi hamleyi dönen bir fonksiyon. Bu fonksiyonun genel yapısı şöyle olucak:&lt;/p&gt;
+&lt;p&gt;İşlemler arası iletişim ve iş dağıtımı konularını konuşurken, &lt;em&gt;UCI&lt;/em&gt; veya kütüphane ile ilgili çok düşünmek istemiyorum. O yüzden hemen kendime yardımcı bir fonksiyon yazıyorum. Yapmak istediğim; satranç tahtasının durumu (&lt;em&gt;FEN&lt;/em&gt; string), motor yetenek seviyesi (0-20 arasında bir sayı) ve arama derinliği (sayı) verildiği zaman, bana en iyi hamleyi dönen bir fonksiyon. Bu fonksiyonun genel yapısı şöyle olucak:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;module.exports = () =&amp;gt; {
 	// aslında bunu fonksiyon parametresi olarak almak daha mantıklı(DI), ama oraya hiç girmiyorum.
@@ -137,38 +137,35 @@ setTimeout(() =&amp;gt; [...new Array(10000)].map(() =&amp;gt; stockfishCustom.g
 };
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Artık bu kodu şu şekilde kullanabiliriz:&lt;/p&gt;
+&lt;p&gt;Artık bu kodu şu şekilde kullanabilirim:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;const { getBestMove } = require(&#39;./customStockfish.js&#39;)();
 const bestMove = await getBestMove(&#39;...&#39;, 20, ...);
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Tek aklımızda tutmamız gereken, bu kütüphaneyi her require edip çağırdığımız zaman, yeni bir Stockfish instance&amp;rsquo;ı oluşacak. O yüzden bunu process başına 1 kez yapmak mantıklı. Bu yardımcı kodun tam implementasyonunu &lt;a href=&#34;https://github.com/Yengas/stockfish-cluster-example/blob/ec3258455a3c276b1a460232e8aab97d7c55a6d6/stockfish/index.js&#34;&gt;burada&lt;/a&gt; bulabilirisiniz.&lt;/p&gt;
+&lt;p&gt;Tek aklımda tutmam gereken, bu kütüphaneyi her require edip çağırdığım zaman, yeni bir Stockfish instance&amp;rsquo;ı oluşacak. O yüzden bunu process başına 1 kez yapmak mantıklı. Bu yardımcı kodun tam implementasyonu &lt;a href=&#34;https://github.com/Yengas/stockfish-cluster-example/blob/ec3258455a3c276b1a460232e8aab97d7c55a6d6/stockfish/index.js&#34;&gt;burada&lt;/a&gt; bulunabilir.&lt;/p&gt;
 
 &lt;h2 id=&#34;kütüphaneyi-kullanmanın-farklı-stratejileri&#34;&gt;Kütüphaneyi Kullanmanın Farklı Stratejileri&lt;/h2&gt;
 
-&lt;p&gt;Şimdi eğlenceli kısma gelebiliriz. Bu kütüphaneyi farklı şekillerde nasıl kullanabiliriz. Ve mimarimiz nasıl olacak? Kütüphanenin implementasyonu yüzünden, aynı anda birden fazla fonksiyon çağrısı yapamıyoruz. Çünkü fonksiyon çağırma ve cevap alma birbirinden bağımsız. Yani &lt;code&gt;stockfish.postMessage()&lt;/code&gt; yapıyorum ama cevap string olarak &lt;code&gt;stockfish.onmessage&lt;/code&gt;&amp;lsquo;a verdiğim fonksiyona geliyor. Aynı Stockfish instance&amp;rsquo;ına paralelde birden fazla &lt;em&gt;postMessage&lt;/em&gt; yaparsam, bir şeylerin birbirine karışacağı aşikar. O yüzden kodumuzu yazarken bunu da hesaba katmamız lazım. İlk önce Node.js işlemimiz ile aynı thread içerisinde neler yapabiliyoruz ona bakalım.&lt;/p&gt;
+&lt;p&gt;Şimdi eğlenceli kısma gelebilirim. Bu kütüphaneyi farklı şekillerde nasıl kullanabilirim? Mimarim nasıl olacak? Kütüphanenin implementasyonu yüzünden, aynı anda birden fazla fonksiyon çağrısı yapamıyorum. Çünkü fonksiyon çağırma ve cevap alma birbirinden bağımsız. Yani &lt;code&gt;stockfish.postMessage()&lt;/code&gt; yapıyorum ama cevap string olarak &lt;code&gt;stockfish.onmessage&lt;/code&gt;&amp;lsquo;a verdiğim fonksiyona geliyor. Aynı Stockfish instance&amp;rsquo;ına paralelde birden fazla &lt;em&gt;postMessage&lt;/em&gt; yaparsam, bir şeylerin birbirine karışacağı aşikar. O yüzden kodumu yazarken bunu da hesaba katmam lazım. İlk önce ana Node.js işlemim içerisinde neler yapabiliyorum ona bakıyorum.&lt;/p&gt;
 
 &lt;h3 id=&#34;her-istek-başına-stockfish-motoru&#34;&gt;Her İstek Başına Stockfish Motoru&lt;/h3&gt;
 
-&lt;p&gt;Eğer Stockfish motorunu aynı anda birden fazla kez çağıramıyorsak, birden fazla Stockfish motorunu aynı anda birer kez çağırabiliriz. Bunun kodu oldukça basit.&lt;/p&gt;
+&lt;p&gt;Eğer Stockfish motorunu aynı anda birden fazla kez çağıramıyorsam, birden fazla Stockfish motorunu aynı anda birer kez çağırabilirim. Bunun kodu oldukça basit.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;const customStockfishCreator = require(&#39;../customStockfish&#39;);
 
 module.exports = {
 	async getBestMove(fen, level, depth) {
-		const { getBestMove: realGetBestMove, quit } = customStockFishCreator();
+		const { getBestMove: realGetBestMove } = customStockFishCreator();
 		const result = await realGetBestMove(fen, level, depth);
 		
-		// bu quit fonksiyonu malesef modülü düzgün temizleyemiyor... 
-		// yani işlevsiz. belki başka bir kütüphanede bunu çalıştırabiliriz?
-		quit();
 		return result;
 	},
 };
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Daha önce oluşturduğumuz yardımcı fonksiyon kütüphanesi, her gelen istek için sıfırdan bir Stockfish motoru oluşturup, onun üzerinde tek istek yapabiliriz.&lt;/p&gt;
+&lt;p&gt;Daha önce oluşturduğum yardımcı fonksiyon kütüphanesini kullanarak, her gelen istek için sıfırdan bir Stockfish motoru oluşturup, bu motor üzerinde tek bir istek yapabilirim.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;await Promise.all([
 	getBestMove(...),
@@ -176,19 +173,19 @@ module.exports = {
 ]);
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Yaptığımız zaman, 2 tane stockfish motoru oluşur, ve aynı anda istekleri işlerler. Araştırmamızı yapmasaydık, bununla yetinebilirdik belki. Ama buradaki sorunları artık görebiliyoruz.&lt;/p&gt;
+&lt;p&gt;Yaptığım zaman, 2 tane stockfish motoru oluşur ve aynı anda istekleri işlerler. Araştırmamı yapmasaydım, bununla yetinebilirdim belki. Ama buradaki sorunları artık görebiliyorum.&lt;/p&gt;
 
 &lt;ol&gt;
 &lt;li&gt;Stockfish motoru oluşturmak ucuz bir işlem değil, her istek min 120 ms sürecek.&lt;/li&gt;
-&lt;li&gt;Stockfish motoru her açıldığında Memory&amp;rsquo;de yer kaplıyor ve bunu free etmenin bir yolunu bulamadık.&lt;/li&gt;
-&lt;li&gt;Stockfish motoru bizim tek threadimizde çalışıyor. O yüzden bu iki motorun çalışması birbirini blocklayacak, birden fazla motor oluşturmak, avantajımıza olmayacak.&lt;/li&gt;
+&lt;li&gt;Stockfish motoru her açıldığında Memory&amp;rsquo;de yer kaplıyor ve bunu free etmenin bir yolunu bulamadım.&lt;/li&gt;
+&lt;li&gt;Stockfish motoru ana Node.js thread&amp;rsquo;im üzerinde çalışıyor. O yüzden bu iki motorun çalışması birbirini blocklayacak, birden fazla motor oluşturmak, avantajıma olmayacak.&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;p&gt;Bu yöntem az kullanıcı ile çalışacak olsa da, kullanıcı sayımız arttıkca patlayacak. Bunu &lt;a href=&#34;https://github.com/Yengas/stockfish-cluster-example&#34;&gt;örnek projede&lt;/a&gt; rahatlıkla görebiliriz. Örnek projeyi localinize çekin, ve &lt;code&gt;npm run per_call:benchmark&lt;/code&gt; çalıştırın. Bu komut bu strateji ile, 1.000 tane hamle hesaplaması yapmaya çalışacak. Bilgisayarınızın RAM kullanımın artışını, ve bir süre sonra işlemin patlamasını seyredin. Bu kütüphane için, bu yöntemi kullanmak mantıklı değil gibi&amp;hellip; Eğer Memory free etmenin bir yolunu bulsak, ve yavaşlık bizim için sıkıntı olmasa, belki kullanılabilirdi?&lt;/p&gt;
+&lt;p&gt;Bu yöntem az kullanıcı ile çalışabilir. Fakat kullanıcı sayısı artınca patlayacak. Bu &lt;a href=&#34;https://github.com/Yengas/stockfish-cluster-example&#34;&gt;örnek projede&lt;/a&gt; rahatlıkla görülebilir. Örnek projeyi localinize çekin ve &lt;code&gt;npm run per_call:benchmark&lt;/code&gt; çalıştırın. Bu komut; bahsedilen strateji ile, eş zamanlı 1.000 tane hamle hesaplaması yapmaya çalışacak. Bilgisayarın RAM kullanımının artışı ve bir süre sonra işlemin patlaması seyredilebilir. Bu kütüphane için, bu yöntemi kullanmak mantıklı değil gibi&amp;hellip; Eğer Memory free etmenin bir yolunu bulsam ve yavaşlık benim için sıkıntı olmasa&amp;hellip; Belki kullanabilirdim?&lt;/p&gt;
 
 &lt;h3 id=&#34;aynı-işlemde-tek-bir-stockfish-motoru&#34;&gt;Aynı İşlemde Tek Bir Stockfish Motoru&lt;/h3&gt;
 
-&lt;p&gt;O zaman aynı işlem içinde uygulayabileceğimiz bir başka seçeneği deniyelim. Sadece bir tane Stockfish motorumuz olsun, ama her hamle hesaplama isteğini bir sıraya dizip, tek tek işleyelim. Bunu bir array&amp;rsquo;e tüm istekleri pushlayıp, array&amp;rsquo;deki işleri işleyen bir fonksiyon ile yapabiliriz. Ya da Promise chaining ile çok daha kolay ve temiz yapabiliriz. Promise chaining ile ilerleyelim.&lt;/p&gt;
+&lt;p&gt;O zaman aynı işlem içinde uygulayabileceğim bir başka seçeneği deniyorum. Sadece bir tane Stockfish motorum olsun, ama her hamle hesaplama isteğini bir sıraya dizip, tek tek işleyeyim. Bunu bir array&amp;rsquo;e tüm istekleri pushlayıp, array&amp;rsquo;deki işleri işleyen bir fonksiyon ile yapabilirim. Ya da Promise chaining ile çok daha kolay ve temiz yapabilirim. Promise chaining ile ilerliyorum.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;const { getBestMove: realGetBestMove } = require(&#39;../customStockfish&#39;)();
 let work = Promise.resolve();
@@ -200,7 +197,7 @@ module.exports = {
 };
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Bu kadar basit. Tek bir Promise&amp;rsquo;imiz var, her bir hamle hesaplama isteği geldiğinde, bu promise&amp;rsquo;in ucuna bu işlemi ekleyip, dönüyoruz. Biraz kafa karıştırabilir. Ama bu şekilde, her bir hamle hesaplama isteği, sıralı şekilde çalışıyor. Yani artık:&lt;/p&gt;
+&lt;p&gt;Bu kadar basit. Tek bir Promise&amp;rsquo;im var. Her bir hamle hesaplama isteği geldiğinde, bu promise&amp;rsquo;in ucuna hamle öneri işlemi ekleyip, dönüyorum. Biraz kafa karıştırabilir. Ama bu şekilde, her bir hamle hesaplama isteği, sıralı şekilde çalışıyor. Yani artık:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;await Promise.all([
 	getBestMove(...),
@@ -208,24 +205,24 @@ module.exports = {
 ]);
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Yaptığımız zaman, bu iki işlem paralel gibi gözükse de, aslında tek bir Stockfish motoru tarafından, tek tek işleniyor. Bunun da eksileri var.&lt;/p&gt;
+&lt;p&gt;Yaptığım zaman, bu iki işlem paralel gibi gözükse de, aslında tek bir Stockfish motoru tarafından, tek tek işleniyor. Bunun da eksileri var.&lt;/p&gt;
 
 &lt;ol&gt;
-&lt;li&gt;Kullanıcı sayımız arttıkca, Stockfish motoru üzerinde iş birikecek, ve cevap süremiz artacak.&lt;/li&gt;
-&lt;li&gt;Hala tek CPU üzerinde işlem yapıyoruz. Stockfish motoru CPU&amp;rsquo;yu kilitleyip, sunucumuzu kötü etkileyecek.&lt;/li&gt;
+&lt;li&gt;Kullanıcı sayısı arttıkça, Stockfish motoru üzerinde iş birikecek ve cevap süresi artacak.&lt;/li&gt;
+&lt;li&gt;Hala tek CPU üzerinde işlem yapıyorum. Stockfish motoru CPU&amp;rsquo;yu kilitleyip, sunucumu kötü etkileyebilir.&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;p&gt;Bu strateji için örnek projede 10.000 hamle işlemi yapmak isterseniz, &lt;code&gt;BENCHMARK_ANALYSIS_COUNT=10000 npm run single:benchmark&lt;/code&gt; komutunu çalıştırabilirsiniz. Benim bilgisayarımda yaklaşık 3 dakika sonra tüm işlemler bitiyor. Aynı işlemde bir kaç takla daha atarak iyileştirme yapmayı deneyebiliriz. Örneğin 1. sorunu &amp;ldquo;çözmek&amp;rdquo; için, yukarıdaki dosyayı 1 kere require etmek yerine, birden fazla require edilebilecek hale getiririz. Ve her istekte round robin şekilde o motorlardan birine istek göndeririz. Ama tek CPU çalıştığımız için bu bize fayda sağlamayacak. Artık tek işlemden kurtulup, birden fazla işlem ile çalışmamız lazım.&lt;/p&gt;
+&lt;p&gt;Bu strateji için örnek projede eş zamanlı 10.000 hamle öneri işlemi yapmak için, &lt;code&gt;BENCHMARK_ANALYSIS_COUNT=10000 npm run single:benchmark&lt;/code&gt; komutu çalıştırılabilir. Benim bilgisayarımda yaklaşık 3 dakika sonra tüm işlemler bitiyor. Aynı işlemde bir kaç takla daha atarak iyileştirme yapmayı deneyebilirim. Örneğin 1. sorunu &amp;ldquo;çözmek&amp;rdquo; için, yukarıdaki dosyayı 1 kere require etmek yerine, birden fazla require edilebilecek hale getirebilirim ve her istekte round robin şekilde o motorlardan birine istek gönderirim. Ama tek CPU çalıştığım için bu bana fayda sağlamayacak. Artık tek işlemden kurtulup, birden fazla işlem ile çalışmam lazım.&lt;/p&gt;
 
 &lt;h3 id=&#34;alt-işlemler-ile-birden-fazla-stockfish-motoru&#34;&gt;Alt İşlemler ile Birden Fazla Stockfish Motoru&lt;/h3&gt;
 
-&lt;p&gt;Artık kararımızı verdik. Stockfish motorumuz ana işlemimiz ile aynı CPU&amp;rsquo;yu kullanmayacak. Ve her işlem başına 1 Stockfish motorumuz olacak. Peki bu Stockfish işlemlerini nasıl başlatabiliriz? Ana işlem ile bu Stockfish motorları arasında nasıl iletişim kurabiliriz? Bunun en basit yollarından biri, Node.js ile sunulan &lt;a href=&#34;https://nodejs.org/api/child_process.html&#34;&gt;child_process&lt;/a&gt; kütüphanesini kullanmak. Bu kütüphane, istediğimiz bir Javascript dosyasını, kendi işlemimiz ile arasında bir haberleşme köprüsü olacak şekilde çalıştırmamızı sağlıyor. Ana işlemimize Master, alt işlemlerimize de Worker diyelim.&lt;/p&gt;
+&lt;p&gt;Artık kararımı verdim. Stockfish motorum ana işlemim ile aynı CPU&amp;rsquo;yu kullanmayacak ve her işlem başına bir Stockfish motorum olacak. Peki bu Stockfish işlemlerini nasıl başlatabilirim? Ana işlem ile bu Stockfish motorları arasında nasıl iletişim kurabilirim? Bunun en basit yollarından biri, Node.js ile sunulan &lt;a href=&#34;https://nodejs.org/api/child_process.html&#34;&gt;child_process&lt;/a&gt; kütüphanesini kullanmak. Bu kütüphane, istediğim bir Javascript dosyasını, kendi işlemim ile arasında bir haberleşme köprüsü olacak şekilde çalıştırmamı sağlıyor. Ana işlemime Master, alt işlemlere Worker diyorum.&lt;/p&gt;
 
-&lt;p&gt;Burada işi Workerlar arasında dağıtmak için farklı yöntemler kullanabiliriz. Örneğin N adet Worker başlattık ve her birinde 1 adet Stockfish motoru çalışıyor. Bunların hangilerinin müsait olduğunun takibini yaparız(şu anda hamle hesaplaması yapmıyor). Ana işlemde tüm istekleri biriktirip, müsait olan motora işlemleri sırasıyla verebiliriz.&lt;/p&gt;
+&lt;p&gt;Burada işi Workerlar arasında dağıtmak için farklı yöntemler kullanabilirim. Örneğin N adet Worker başlattım ve her birinde 1 adet Stockfish motoru çalıştırıyorum. Bunların hangilerinin müsait olduğunun takibini yaparım(şu anda hamle hesaplaması yapmıyor). Ana işlemde tüm istekleri biriktirip, müsait olan motora işlemleri sırasıyla veririm.&lt;/p&gt;
 
-&lt;p&gt;Ya da bize gelen tüm işleri bir dağıtma stratejisi kullanarak(round robin, random, en az kaynak kullanan vs.) Stockfish motoru çalışan işlemlere göndeririz, onlar sıralamayı kendi içerisinde yapar. Bu yöntemde kodumuz bir önceki bölüme çok benzeyecek. O yüzden bu yöntemi tercih edelim. Mastera gelen her istek, rastgele şekilde Workerlardan birine gönderilsin. Workerlar kendi içerisinde sıralı olarak işleyip, Mastera cevabı göndersin.&lt;/p&gt;
+&lt;p&gt;Ya da bana gelen tüm işleri bir dağıtma stratejisi kullanarak(round robin, random, en az kaynak kullanan vs.) Stockfish motoru çalışan işlemlere gönderirim. Onlar sıralamayı kendi içerisinde yapar. Bu yöntemde kodum bir önceki bölüme çok benzeyecek. O yüzden bu yöntemi tercih ediyorum. Master&amp;rsquo;a gelen her istek, rastgele şekilde Workerlardan birine gönderilsin. Workerlar kendi içerisinde sıralı olarak işleyip, Mastera cevabı göndersin.&lt;/p&gt;
 
-&lt;p&gt;İlk önce &lt;em&gt;worker.js&lt;/em&gt; kodumuz ile başlayalım:&lt;/p&gt;
+&lt;p&gt;İlk önce &lt;em&gt;worker.js&lt;/em&gt; kodum ile başlıyorum:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;const { getBestMove } = require(&#39;../customStockfish&#39;)();
 
@@ -235,7 +232,7 @@ async function findBestMoveAndSendReply({ id: workId, params: { fen, level, dept
 		
 		process.send({ workId, reply });
 	} catch(err) {
-		// eğer bu işleme spesifik bir hata olursa, Promsie chain&#39;i durdurmak istemeyiz.
+		// eğer bu işleme spesifik bir hata olursa, Promsie chain&#39;i durdurmak istemiyorum.
 		console.error(&#39;there was an error when processing work:&#39;, err.message);
 	}
 }
@@ -249,9 +246,9 @@ process.on(&#39;message&#39;, workData =&amp;gt; {
 });
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Burada kullanılan 2 fonksiyon Node.js&amp;rsquo;in bize sağladığı haberleşme köprüsünden geliyor. &lt;code&gt;process.on(&#39;message&#39;, ...)&lt;/code&gt; ana işlem&amp;rsquo;den bir istek geldiğinde çalışan fonksiyonumuz. &lt;code&gt;process.send(...)&lt;/code&gt; ise ana işleme mesaj göndermek için kullandığımız fonksiyon. Worker tarafı tamamdır. Bu &lt;em&gt;worker.js&lt;/em&gt; dosyasını &lt;code&gt;child_process.fork&lt;/code&gt; ile çalıştırdığımız zaman, hamle hesaplama için iş göndermeye başlayabiliriz. Bizim işlemimizden bağımsız şekilde, çalışmaya başlayacak. Örnek projede &lt;a href=&#34;https://github.com/Yengas/stockfish-cluster-example/blob/ec3258455a3c276b1a460232e8aab97d7c55a6d6/child_process/worker.js&#34;&gt;worker.js&lt;/a&gt; implementasyonuna da bakmak isteyebilirsiniz.&lt;/p&gt;
+&lt;p&gt;Burada kullanılan 2 fonksiyon Node.js&amp;rsquo;in sağladığı haberleşme köprüsünden geliyor. &lt;code&gt;process.on(&#39;message&#39;, ...)&lt;/code&gt; ana işlem&amp;rsquo;den bir istek geldiğinde çalışan fonksiyon. &lt;code&gt;process.send(...)&lt;/code&gt; ise ana işleme mesaj göndermek için kullandığım fonksiyon. Worker tarafı tamamdır. Bu &lt;em&gt;worker.js&lt;/em&gt; dosyasını &lt;code&gt;child_process.fork&lt;/code&gt; ile çalıştırdığım zaman, hamle önerisi hesaplama için iş göndermeye başlayabilirim. Ana işlemimden bağımsız şekilde çalışmaya başlayacak. Örnek projede &lt;em&gt;worker.js&lt;/em&gt; dosyasına &lt;a href=&#34;https://github.com/Yengas/stockfish-cluster-example/blob/ec3258455a3c276b1a460232e8aab97d7c55a6d6/child_process/worker.js&#34;&gt;buradan&lt;/a&gt; erişilebilir.&lt;/p&gt;
 
-&lt;p&gt;Şimdi işlem göndermek ile yükümlü olan kodumuza gelelim. &lt;em&gt;master.js&lt;/em&gt; dosyasında workerlara iş dağıtmamız lazım. Worker işlem başlatma kodunu şimdilik dışarıda tutalım. &lt;em&gt;master.js&lt;/em&gt; kodumuzda Workerların başka yerden geldiğini kabul edelim.&lt;/p&gt;
+&lt;p&gt;Şimdi işlem göndermek ile yükümlü olan koduma geliyorum. &lt;em&gt;master.js&lt;/em&gt; dosyasında workerlara iş dağıtmam lazım. Worker işlem başlatma kodunu şimdilik dışarıda tutuyorum. &lt;em&gt;master.js&lt;/em&gt; dosyasına Workerların başka yerden geldiğini kabul ederek kodluyorum.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;const uuidv4 = require(&#39;uuid/v4&#39;);
 
@@ -262,7 +259,7 @@ module.exports = {
 	addWorker(worker) {
 		workers.push(worker);
 		
-		// worker&#39;dan cevap geldiği zaman, bekleyen fonksiyonları çağıralım
+		// worker&#39;dan cevap geldiği zaman, bekleyen fonksiyonları çağırıyorum
 		worker.on(&#39;message&#39;, action =&amp;gt; {
 			const { workId, reply } = action;
 			const waitingFunctions = workWaitingMap.get(workId);
@@ -295,12 +292,12 @@ module.exports = {
 &lt;p&gt;Bu kod biraz daha karmaşık görünüyor. Ama oldukça basit:&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;em&gt;addWorker&lt;/em&gt; fonksiyonu ile alt işlem referansımızı alıyoruz. Bir dizi&amp;rsquo;de ileride kullanmak için saklıyoruz, ve gelen mesajlardan cevabımızı çıkarıp, cevap için beklemekte olan fonksiyonları çağırıyoruz.&lt;/li&gt;
-&lt;li&gt;&lt;em&gt;addWork&lt;/em&gt; verilen parametreler ile bir iş oluşturuyor. İş oluştururken, random bir id atıyor. Böylece Workerlardan cevap geldiği zaman, hangi işimizin cevabını olduğunu takip edebileceğiz(correlation id). Daha sonrada random bir Worker&amp;rsquo;a, bu işi gönderiyor ve işin id&amp;rsquo;sini bize dönüyor.&lt;/li&gt;
-&lt;li&gt;&lt;em&gt;waitWorkReply&lt;/em&gt; verilen id&amp;rsquo;li işin cevabını bekleyen bir promise döndürüyor. Böylece iş gönderdikten sonra, cevabını beklemek için yardımcı bir fonksiyonumuz olmuş oluyor.&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;addWorker&lt;/em&gt; fonksiyonu ile alt işlem referansını alıyorum. Bir dizi&amp;rsquo;de ileride kullanmak için saklıyorum ve gelen mesajlardan cevap çıkarıp, bu cevap için beklemekte olan fonksiyonları çağırıyorum.&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;addWork&lt;/em&gt; fonksiyonuna verilen parametreler ile bir iş oluşturuyorum. İş oluştururken, random bir id atıyorum. Böylece Workerlardan cevap geldiği zaman, hangi işimin cevabı olduğunu takip edebileceğim(correlation id). Daha sonra da random bir Worker&amp;rsquo;a, bu işi gönderiyorum ve işin id&amp;rsquo;sini dönüyorum.&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;waitWorkReply&lt;/em&gt; ise verilen id&amp;rsquo;li işin cevabını bekleyen bir promise döndürmek için kullanılıyor. Böylece iş gönderdikten sonra, cevabını beklemek için yardımcı bir fonksiyonum olmuş oldu.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;Artık &lt;code&gt;const workId = master.addWork({ fen: xxx, level: y, depth: z })&lt;/code&gt; diyerek bir iş oluşturabiliriz. Ve cevabını almak için de &lt;code&gt;const bestMove = await master.waitWorkReply(workId)&lt;/code&gt; diyebiliriz. Bunu tek fonksiyona da indirgeyebiliriz.&lt;/p&gt;
+&lt;p&gt;Artık &lt;code&gt;const workId = master.addWork({ fen: xxx, level: y, depth: z })&lt;/code&gt; diyerek bir iş oluşturabilirim ve cevabını almak için de &lt;code&gt;const bestMove = await master.waitWorkReply(workId)&lt;/code&gt; diyebilirim. Bunu tek fonksiyona da indirgeyebilirim.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;function getBestMove(fen, level, depth) {
 	const workId = master.addWork({ fen, level, depth });
@@ -309,7 +306,7 @@ module.exports = {
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Şimdi yapmamız gereken, &lt;em&gt;master.js&lt;/em&gt;&amp;lsquo;e ekleyeceğimiz Workerları oluşturmaya. Birden fazla alt işlem olarak çalıştırmamız lazım. Bunu uygulamamızın başlangıcında yapabiliriz. Kod şu şekilde:&lt;/p&gt;
+&lt;p&gt;Şimdi yapmam gereken, &lt;em&gt;master.js&lt;/em&gt;&amp;lsquo;e ekleyeceğim Workerları oluşturmak. Birden fazla alt işlem olarak çalıştırmam lazım. Bunu uygulamamın başlangıcında yapabilirim. Kod şu şekilde:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;const child_process = require(&#39;child_process&#39;);
 const clusterMaster = require(&#39;../child_process/master&#39;);
@@ -323,26 +320,26 @@ for (let i = 0; i &amp;lt; NUM_OF_WORKERS; i++) {
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;artık &lt;em&gt;clusterMaster&lt;/em&gt;&amp;lsquo;ı kullanarak hamle hesaplaması yapabiliriz. Bu kodların çalışan halini &lt;a href=&#34;https://github.com/Yengas/stockfish-cluster-example/blob/ec3258455a3c276b1a460232e8aab97d7c55a6d6/child_process/master.js&#34;&gt;master.js&lt;/a&gt;, &lt;a href=&#34;https://github.com/Yengas/stockfish-cluster-example/blob/ec3258455a3c276b1a460232e8aab97d7c55a6d6/child_process/master.js&#34;&gt;child_process/index.js&lt;/a&gt; ve &lt;a href=&#34;https://github.com/Yengas/stockfish-cluster-example/blob/ec3258455a3c276b1a460232e8aab97d7c55a6d6/entrypoints/child_process.js&#34;&gt;entrypoints/child_process.js&lt;/a&gt; dosyalarında, örnek projede görebilirsiniz. &lt;code&gt;BENCHMARK_ANALYSIS_COUNT=10000 npm run child_process:benchmark&lt;/code&gt; komutunu çalıştırarak test ettiğimde, 10.000 hamlenin 20 saniyede hesaplandığını görüyorum.&lt;/p&gt;
+&lt;p&gt;artık &lt;em&gt;clusterMaster&lt;/em&gt;&amp;lsquo;ı kullanarak hamle hesaplaması yapabilirim. Bu kodların çalışan hali &lt;a href=&#34;https://github.com/Yengas/stockfish-cluster-example/blob/ec3258455a3c276b1a460232e8aab97d7c55a6d6/child_process/master.js&#34;&gt;master.js&lt;/a&gt;, &lt;a href=&#34;https://github.com/Yengas/stockfish-cluster-example/blob/ec3258455a3c276b1a460232e8aab97d7c55a6d6/child_process/master.js&#34;&gt;child_process/index.js&lt;/a&gt; ve &lt;a href=&#34;https://github.com/Yengas/stockfish-cluster-example/blob/ec3258455a3c276b1a460232e8aab97d7c55a6d6/entrypoints/child_process.js&#34;&gt;entrypoints/child_process.js&lt;/a&gt; dosyalarında, örnek projede görülebilir. &lt;code&gt;BENCHMARK_ANALYSIS_COUNT=10000 npm run child_process:benchmark&lt;/code&gt; komutu çalıştırılarak test edilebilir. Bilgisayarımda eş zamanlı 10.000 hamlenin 20 saniyede hesaplandığını görüyorum.&lt;/p&gt;
 
-&lt;p&gt;Performans artışı sağladık, ve artık ana işlemimizi Stockfish motoru ile kitlemiyoruz. Bizim için bu kadar mühendislik yeterli olabilir. Ama bir kaç noktaya değinelim.&lt;/p&gt;
+&lt;p&gt;Performans artışı sağladım ve artık ana işlemimim Stockfish motoru ile kitlenmiyor. Bu kadar mühendislik yeterli olabilir. Ama bir kaç noktayı daha düşünüyorum.&lt;/p&gt;
 
 &lt;ol&gt;
 &lt;li&gt;Her ana işlem (Selim&amp;rsquo;in durumunda WebSocket sunucusu) kendisi ile birlikte N tane Stockfish motoru başlatıyor. Ama aynı makinede, birden fazla process olarak çalışıyorlar. Hala birbirlerinin çalışmasını etkileyebilirler.&lt;/li&gt;
-&lt;li&gt;WebSocket sunucumuzu, Stockfish motorlarımızdan bağımsız ölçekleyemiyoruz. İkinci bir makinede Stockfish motoru çalıştırmak istersek, WebSocket sunucumuzu da orada çalıştırmamız gerekiyor.&lt;/li&gt;
+&lt;li&gt;WebSocket sunucumu, Stockfish motorlarımdan bağımsız ölçekleyemiyorum. İkinci bir makinede Stockfish motoru çalıştırmak istersem, WebSocket sunucumu da orada çalıştırmam gerekiyor.&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;p&gt;Bunlar bizim için bir sorun olmayabilir. 4 çekirdekli bir sunucuda, 100 kullanıcıya hizmet verecek bir şeyler yapıyor olabiliriz. Bu kadar mühendislik bizim için yeterli olabilir. Ama uygulamamızı yayınladığımız ortam, kurulumumuz, veya kullanıcı sayımız böyle bir çözüm ile yetinmememize sebep olabilir. O yüzden bir strateji daha inceleyip, konuşmak istiyorum.&lt;/p&gt;
+&lt;p&gt;Bunlar bir sorun olmayabilir. 4 çekirdekli bir sunucuda, 100 kullanıcıya hizmet verecek bir şeyler yapıyor olabilirim. Bu kadar mühendislik benim için yeterli olabilir. Ama uygulamamı yayınladığım ortam, kurulumum veya kullanıcı sayım böyle bir çözüm ile tatmin olmamama sebep olabilir. O yüzden bir strateji daha inceliyeceğim.&lt;/p&gt;
 
 &lt;h3 id=&#34;bağımsız-işlemler-ile-birden-fazla-stockfish-motoru&#34;&gt;Bağımsız İşlemler ile Birden Fazla Stockfish Motoru&lt;/h3&gt;
 
-&lt;p&gt;&lt;a href=&#34;https://nodejs.org/api/child_process.html&#34;&gt;child_process&lt;/a&gt; kullanarak, ana işlemimiz ile aynı sunucuda, bağımlı işlemler başlatabiliyoruz. Ama Stockfish motorlarını bizim işlemimizden tamamen bağımsız yapmak istersek ne yapacağız? 100 kullanıcımız varken 3 motor, 1000 kullanıcımız varken 10 motor çalıştırmak istiyorsak? Stockfish motorlarının donanım gereksinimleri farklı ise ve onları özel makinelerde çalıştırmak istiyorsak? Bunları sağlamak için, araya ağ katmanı koymamız lazım. Örneğin Stockfish motorunu bir REST API haline getirebiliriz, veya herhangi bir queue teknolojisini, bu amaç için kullanabiliriz(örn. &lt;a href=&#34;https://www.rabbitmq.com&#34;&gt;RabbitMQ&lt;/a&gt;, &lt;a href=&#34;https://redis.io/topics/pubsub&#34;&gt;Redis&lt;/a&gt;).&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://nodejs.org/api/child_process.html&#34;&gt;child_process&lt;/a&gt; kullanarak, ana işlemim ile aynı sunucuda, bağımlı işlemler başlatabiliyorum. Ama Stockfish motorlarını benim işlemimden tamamen bağımsız yapmak istersem ne ne yapacağım? 100 kullanıcım varken 3 motor, 1000 kullanıcım varken 10 motor çalıştırmak istiyorsam? Stockfish motorlarının donanım gereksinimleri farklı ise ve onları özel makinelerde çalıştırmak istiyorsam? Bunları sağlamak için, araya ağ katmanı koymam lazım. Örneğin Stockfish motorunu bir REST API haline getirebilirim veya herhangi bir queue teknolojisini, bu amaç için kullanabilirim(örn. &lt;a href=&#34;https://www.rabbitmq.com&#34;&gt;RabbitMQ&lt;/a&gt;, &lt;a href=&#34;https://redis.io/topics/pubsub&#34;&gt;Redis&lt;/a&gt;).&lt;/p&gt;
 
 &lt;h4 id=&#34;rest-api-ile&#34;&gt;REST API ile&lt;/h4&gt;
 
-&lt;p&gt;Stockfish motorunu ayrı bir işleme çıkartıp, bu işlemde REST API sunucusu ayağa kaldırabiliriz. Böylece ana işlemimiz Stockfish motoru çalıştıran sunuculardan birine REST isteği gönderebilir, ve en iyi hamle önerisini alabilir. Burada ana işlemimizin, birden fazla Stockfish REST API çalıştırdığımız zaman, hangisine istek atacağını nasıl bulacağı gibi bir sorun ortaya çıkıyor(Service Discovery). Bu sorunu deployment ortamımıza göre çözebiliriz. &lt;em&gt;Kubernetes&lt;/em&gt; tarafında Service, veya nginx ile reverse proxy kullanmamız gerekebilir. Şimdilik bunu unutalım.&lt;/p&gt;
+&lt;p&gt;Stockfish motorunu ayrı bir işleme çıkartıp, bu işlemde REST API sunucusu ayağa kaldırabilirim. Böylece ana işlemim Stockfish motoru çalıştıran sunuculardan birine REST isteği gönderebilir ve en iyi hamle önerisini alabilir. Burada ana işlemimin, birden fazla Stockfish REST API çalıştırdığım zaman, hangisine istek atacağını nasıl bulacağı gibi bir sorun ortaya çıkıyor(Service Discovery). Bu sorunu deployment ortamına göre çözebilirim. &lt;em&gt;Kubernetes&lt;/em&gt; tarafında Service veya &lt;em&gt;nginx&lt;/em&gt; ile reverse proxy kullanmak gerekebilir. Şimdilik bunu unutalım.&lt;/p&gt;
 
-&lt;p&gt;Bu şekilde ilerlemeyi seçersek, &lt;a href=&#34;https://github.com/Yengas/stockfish-cluster-example/blob/260165f4bfac62b52858116b624417f7482034d9/rest/server.js&#34;&gt;server.js&lt;/a&gt; kodumuz:&lt;/p&gt;
+&lt;p&gt;Bu şekilde ilerlemeyi seçersem, &lt;a href=&#34;https://github.com/Yengas/stockfish-cluster-example/blob/260165f4bfac62b52858116b624417f7482034d9/rest/server.js&#34;&gt;server.js&lt;/a&gt; kodum:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;const fastify = require(&#39;fastify&#39;)();
 const { getBestMove } = require(&#39;../stockfish&#39;)();
@@ -358,7 +355,7 @@ fastify.get(&#39;/chess&#39;, (request) =&amp;gt; {
 fastify.listen(process.argv[2]);
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Ana &lt;a href=&#34;https://github.com/Yengas/stockfish-cluster-example/blob/260165f4bfac62b52858116b624417f7482034d9/rest/index.js&#34;&gt;işlemimizden&lt;/a&gt; bu sunucuya bir çağrı:&lt;/p&gt;
+&lt;p&gt;Ana &lt;a href=&#34;https://github.com/Yengas/stockfish-cluster-example/blob/260165f4bfac62b52858116b624417f7482034d9/rest/index.js&#34;&gt;işlemimden&lt;/a&gt; bu sunucuya bir çağrı:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;const axios = require(&#39;axios&#39;);
 
@@ -375,24 +372,26 @@ module.exports = () =&amp;gt; {
 };
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;REST API sunucusundan istediğimiz kadar, istediğimiz sayıda makinede çalıştırabiliriz. Tek yapmamız gereken ana işlemimize girdiğimiz &lt;code&gt;localhost:8080&lt;/code&gt; url&amp;rsquo;sini, load balancer URL&amp;rsquo;i ile değiştirmek. Load balancer çalışmakta olan REST API sunucularına yükü dağıtmakla yükümlü olucak. Demo&amp;rsquo;da load balancer yerine, N tane sunucu farklı portlarda başlatılıyor, ve istek atılırken bu sunuculardan birinin portu rastgele seçiliyor. &lt;code&gt;BENCHMARK_ANALYSIS_COUNT=10000 npm run rest:benchmark&lt;/code&gt; komutunu çalıştırarak bunu test edebilirsiniz. Benim makinemde 10.000 istekte, REST API sunucuları timeout vermeye başlıyor ve benchmark fail oluyor. 5.000 istekte 12 saniyede cevap alabiliyorum. Bunun sebebi REST API sunucularının tüm istekleri bir kerede üstüne alması, ve sıralı işlem yaparken bu isteklerin timeout alması. Bu sorunun &lt;em&gt;fastify&lt;/em&gt; mı yoksa &lt;em&gt;axios&lt;/em&gt; tarafından mı kaynaklandığını çözemedim. Pratikte her sunucunun eş zamanlı 1.000 istek almayacağını varsaydığımız için, bu yöntemi sıkıntılı olarak düşünmeyin. Güzel bir kurulum ile, sorun olmayacaktır.&lt;/p&gt;
+&lt;p&gt;REST API sunucusundan istediğim kadar, istediğim sayıda makinede çalıştırabilirim. Tek yapmam gereken ana işlemime girdiğim &lt;code&gt;localhost:8080&lt;/code&gt; url&amp;rsquo;sini, load balancer URL&amp;rsquo;i ile değiştirmek. Load balancer çalışmakta olan REST API sunucularına yükü dağıtmakla yükümlü olucak. Demo&amp;rsquo;da load balancer yerine, N tane sunucu farklı portlarda başlatılıyor ve istek atılırken bu sunuculardan birinin portu rastgele seçiliyor.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;BENCHMARK_ANALYSIS_COUNT=10000 npm run rest:benchmark&lt;/code&gt; komutu çalıştırılarak bu test edebilir. Benim makinemde 10.000 istekte, REST API sunucuları timeout vermeye başlıyor ve benchmark fail oluyor. 5.000 istekte 12 saniyede cevap alabiliyorum. Bunun sebebi REST API sunucularının tüm istekleri bir kerede üstüne alması ve sıralı işlem yaparken bu isteklerin timeout alması. Bu sorunun &lt;em&gt;fastify&lt;/em&gt; mı yoksa &lt;em&gt;axios&lt;/em&gt; tarafından mı kaynaklandığını çözemedim. Pratikte her sunucunun eş zamanlı 1.000 istek almayacağını varsaydığım için, bu yöntemi sıkıntılı olarak düşünmüyorum. Güzel bir kurulum ve daha iyi kod ile, sorun olmayacaktır.&lt;/p&gt;
 
 &lt;h4 id=&#34;queue-teknolojisi-ile&#34;&gt;Queue Teknolojisi ile&lt;/h4&gt;
 
-&lt;p&gt;REST API&amp;rsquo;ye alternatif olarak, Queue teknolojisi de kullanabiliriz. Eğer kurulum ortamımız da REST API ile yük dağıtımı yapmak zor olacaksa, bu iş için Queue&amp;rsquo;da kullanabiliriz. Queue teknolojilerinin bize getirdiği &lt;a href=&#34;https://www.rabbitmq.com/features.html&#34;&gt;kolaylıklar&lt;/a&gt; ve &lt;a href=&#34;https://www.rabbitmq.com/tutorials/amqp-concepts.html&#34;&gt;soyutlamalar&lt;/a&gt; da işimize yarayabilir. Küçük bir araştırma sonucunda, Redis kullanan, ve ihtiyacımız olan her şeyi basit bir API ile sağlayan &lt;a href=&#34;https://github.com/bee-queue/bee-queue&#34;&gt;bee-queue&lt;/a&gt; adında kütüphane buldum.&lt;/p&gt;
+&lt;p&gt;REST API&amp;rsquo;ye alternatif olarak, Queue teknolojisi de kullanabilirim. Eğer kurulum ortamımda REST API ile yük dağıtımı yapmak zor olacaksa, bu iş için Queue&amp;rsquo;da kullanabilirim. Queue teknolojilerinin getirdiği &lt;a href=&#34;https://www.rabbitmq.com/features.html&#34;&gt;kolaylıklar&lt;/a&gt; ve &lt;a href=&#34;https://www.rabbitmq.com/tutorials/amqp-concepts.html&#34;&gt;soyutlamalar&lt;/a&gt; da işime yarayabilir. Küçük bir araştırma sonucunda, Redis kullanan ve ihtiyacım olan her şeyi basit bir API ile sağlayan &lt;a href=&#34;https://github.com/bee-queue/bee-queue&#34;&gt;bee-queue&lt;/a&gt; adında bir kütüphane buldum.&lt;/p&gt;
 
-&lt;p&gt;Bu kütüphane ile &lt;a href=&#34;https://github.com/Yengas/stockfish-cluster-example/blob/ec3258455a3c276b1a460232e8aab97d7c55a6d6/queue/worker.js&#34;&gt;worker.js&lt;/a&gt; kodumuz:&lt;/p&gt;
+&lt;p&gt;Bu kütüphane ile &lt;a href=&#34;https://github.com/Yengas/stockfish-cluster-example/blob/ec3258455a3c276b1a460232e8aab97d7c55a6d6/queue/worker.js&#34;&gt;worker.js&lt;/a&gt; kodu:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;const { getBestMove } = require(&#39;../stockfish&#39;)();
 const queue = require(&#39;./createQueue&#39;)();
 
-// .process fonksiyonu default olarak, aynı anda max 1 tane işlem yapıyor.
+// .process fonksiyonu default olarak, aynı anda max 1 tane işlem çalıştırıyor.
 queue.process(({ data: { fen, level, depth }}) =&amp;gt; (
 	getBestMove(fen, level, depth)
 ));
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;&lt;a href=&#34;https://github.com/Yengas/stockfish-cluster-example/blob/ec3258455a3c276b1a460232e8aab97d7c55a6d6/queue/index.js&#34;&gt;master.js&lt;/a&gt; kodumuz:&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/Yengas/stockfish-cluster-example/blob/ec3258455a3c276b1a460232e8aab97d7c55a6d6/queue/index.js&#34;&gt;master.js&lt;/a&gt; kodu:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;const createQueue = require(&#39;./createQueue&#39;);
 
@@ -416,12 +415,11 @@ module.exports = () =&amp;gt; {
 };
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;&lt;a href=&#34;https://github.com/Yengas/stockfish-cluster-example/blob/ec3258455a3c276b1a460232e8aab97d7c55a6d6/queue/createQueue.js&#34;&gt;createQueue.js&lt;/a&gt; kodumuz:&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/Yengas/stockfish-cluster-example/blob/ec3258455a3c276b1a460232e8aab97d7c55a6d6/queue/createQueue.js&#34;&gt;createQueue.js&lt;/a&gt; kodu:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;const Queue = require(&#39;bee-queue&#39;);
 
 module.exports = () =&amp;gt; {
-	// auto generated by the queue entrypoint
 	const { ip: host, port } = require(&#39;./config.json&#39;);
 
 	return new Queue(&#39;chess&#39;, { redis: { host, port } });
@@ -430,35 +428,35 @@ module.exports = () =&amp;gt; {
 
 &lt;h4 id=&#34;sonuç&#34;&gt;Sonuç&lt;/h4&gt;
 
-&lt;p&gt;REST API veya Queue farketmez, tek yapmamız gereken, bu Master/Worker işlemleri birbirinden bağımsız şekilde çalıştırmak. Bunu &lt;a href=&#34;http://pm2.keymetrics.io/&#34;&gt;pm2&lt;/a&gt; kullanarak da yapabilirsiniz, &lt;a href=&#34;https://aws.amazon.com/ecs/&#34;&gt;ECS&lt;/a&gt; kullanarak da, &lt;a href=&#34;https://kubernetes.io&#34;&gt;Kubernetes&lt;/a&gt; kullanarak da. Örneğin Kubernetes üzerinde WebSocket sunucusunu ve Stockfish workerlarını farklı deployment yapabiliriz. Stockfish CPU kullanımı artınca otomatik ölçeklenmesini söyleyebiliriz. Böylelikle kullanıcı sayımız arttıkca, WebSocket sunucumuzdan bağımsız olarak, Stockfish motorlarımız ölçeklenebilir. Kod tarafı bu basitlikte iken, nasıl bir kurulum ortamımız olduğuna göre, istediğimiz gibi ölçeklenebiliriz.&lt;/p&gt;
+&lt;p&gt;REST API veya Queue farketmez, tek yapmam gereken, bu Master/Worker işlemleri birbirinden bağımsız şekilde çalıştırmak. Bunu &lt;a href=&#34;http://pm2.keymetrics.io/&#34;&gt;pm2&lt;/a&gt; kullanarak da yapabilirim, &lt;a href=&#34;https://aws.amazon.com/ecs/&#34;&gt;ECS&lt;/a&gt; kullanarak da, &lt;a href=&#34;https://kubernetes.io&#34;&gt;Kubernetes&lt;/a&gt; kullanarak da. Örneğin Kubernetes üzerinde WebSocket sunucusunu ve Stockfish workerlarını farklı deployment yapabilirim. Stockfish CPU kullanımı artınca otomatik ölçeklenmesini söyleyebilirim. Böylelikle kullanıcı sayısı arttıkça, WebSocket sunucumdan bağımsız olarak, Stockfish motorlarım ölçeklenebilir. Kod tarafı bu basitlikte iken, nasıl bir kurulum ortamım olduğuna göre, istediğim gibi ölçeklenebilirim.&lt;/p&gt;
 
-&lt;p&gt;Aynı zamanda araya Node.js&amp;rsquo;e spesifik bir iletişim protokolü (&lt;em&gt;child_process&lt;/em&gt; IPC) değil de, ağ katmanı koyduğumuz için, Stockfish motorunu istediğimiz dilde çalıştırmak da oldukça kolay olacak. İstersek C++ ile bir proje yazarız ve ağ üzerinden erişiriz, istersek Rust ile. Böylelikle belki tek bir motorumuz ile birden fazla CPU kullanabiliriz? Kısaca faydalarından ve dezavantajlarından bahsedelim:&lt;/p&gt;
+&lt;p&gt;Aynı zamanda araya Node.js&amp;rsquo;e spesifik bir iletişim protokolü (&lt;em&gt;child_process&lt;/em&gt; IPC) değil de, ağ katmanı koyduğum için, Stockfish motorunu istediğim dilde çalıştırmak da oldukça kolay olacak. İstersem C++ ile bir proje yazarım ve ağ üzerinden erişirim, istersem Rust ile. Böylelikle belki tek bir motoru birden fazla CPU kullanacak hale getirebilirim? Kısaca faydalarından ve dezavantajlarından bahsetmek gerekirse;&lt;/p&gt;
 
 &lt;ol&gt;
-&lt;li&gt;Ölçeklenmemizi limitleyecek şey Queue teknolojimiz veya Load Balancer&amp;rsquo;ımız haline geldi. İstediğimiz kadar makinede, istediğimiz kadar Worker çalıştırabiliriz. Queue/Load Balancer teknolojimiz, mesaj sayımızı kaldırmayana kadar. Bu çoğu proje için ulaşılamayacak bir limit.&lt;/li&gt;
-&lt;li&gt;Anlık yüke göre Stockfish motoru sayımızı değiştirebiliriz.&lt;/li&gt;
-&lt;li&gt;WebSocket sunucusu ve Stockfish motorunu tamamen farklı makinelarda çalıştırabiliriz.&lt;/li&gt;
-&lt;li&gt;İstersek Node.js modülünü kullanmaya devam edebiliriz, veya farklı bir dilde Stockfish motorunu kullanarak işlem yapabiliriz.&lt;/li&gt;
+&lt;li&gt;Ölçeklenmemi limitleyecek şey Queue teknolojim veya Load Balancer haline geldi. İstediğim kadar makinede, istediğim kadar Worker çalıştırabilirim. Queue/Load Balancer teknolojim, mesaj sayısını kaldırmayana kadar. Bu çoğu proje için ulaşılamayacak bir limit.&lt;/li&gt;
+&lt;li&gt;Anlık yüke göre Stockfish motoru sayımı değiştirebilirim.&lt;/li&gt;
+&lt;li&gt;WebSocket sunucusu ve Stockfish motorunu tamamen farklı makinelerde çalıştırabilirim.&lt;/li&gt;
+&lt;li&gt;İstersem Node.js modülünü kullanmaya devam edebilirim, veya farklı bir dilde Stockfish motorunu kullanarak işlem yapabilirim.&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;p&gt;Eğer bilgisayarınızda docker yüklü ise &lt;code&gt;npm run queue:benchmark&lt;/code&gt; çalıştırarak, bu queue stratejisini deneyebilirsiniz. REST API stratejisi için ise &lt;code&gt;npm run rest:benchmark&lt;/code&gt; çalıştırabilirsiniz.&lt;/p&gt;
+&lt;p&gt;Docker yüklü bilgisayarlarda &lt;code&gt;npm run queue:benchmark&lt;/code&gt; çalıştırarak, bu queue stratejisi denenebilir. REST API stratejisi için ise &lt;code&gt;npm run rest:benchmark&lt;/code&gt; çalıştırılabilir.&lt;/p&gt;
 
-&lt;p&gt;Bu maddelere bağımlı olarak, deployment sürecimiz kompleksleşti. Queue durumunda ise yeni bir veritabanı bağımlılığımız oldu. Bu dezavantajları kabullenip, böyle bir yapı kurmak, bazen bir seçenek olabilir. Ama bazen de zorunluluk haline gelebilir. Bu benim kişisel projem olsaydı, ben ne yapardım sorusuna aşağıda cevap veriyorum.&lt;/p&gt;
+&lt;p&gt;Bu maddelere bağımlı olarak, deployment sürecim kompleksleşti. Queue durumunda ise yeni bir veritabanı bağımlılığım oldu. Bu dezavantajları kabullenip, böyle bir yapı kurmak, bazen bir seçenek olabilir. Ama bazen de zorunluluk haline gelebilir. Bu benim kişisel projem olsaydı, ben ne yapardım sorusuna aşağıda cevap veriyorum.&lt;/p&gt;
 
-&lt;h2 id=&#34;nasıl-bir-mimari-yapalım&#34;&gt;Nasıl bir mimari yapalım?&lt;/h2&gt;
+&lt;h2 id=&#34;nasıl-bir-mimari-yaparım&#34;&gt;Nasıl bir mimari yaparım?&lt;/h2&gt;
 
-&lt;p&gt;Her zaman en iyi çözümü uygulamak, harcadığımız efora değmeyecek. O yüzden eğer kişisel projem olsaydı, çözümleri şu sırada denerdim:&lt;/p&gt;
+&lt;p&gt;Her zaman en iyi çözümü uygulamak, harcadığımız efora değmeyebilir. O yüzden eğer kişisel projem olsaydı, çözümleri şu sırada denerdim:&lt;/p&gt;
 
 &lt;ol&gt;
-&lt;li&gt;Yükümün az olduğunu varsayıyorum. WebSocket projesi içinde Stockfish modülünü kullanırdım. &lt;a href=&#34;https://nodejs.org/api/child_process.html&#34;&gt;child_process&lt;/a&gt; veya &lt;a href=&#34;https://nodejs.org/api/worker_threads.html&#34;&gt;worker_threads&lt;/a&gt; kullanarak Stockfish modülünü çalıştırırdım. Ama mesajlaşma yönetimini kendim yapmak yerine, &lt;em&gt;bee-queue&lt;/em&gt;&amp;lsquo;yu redis olmadan &lt;em&gt;worker_threads&lt;/em&gt; ile çalıştırmayı denerdim.&lt;/li&gt;
-&lt;li&gt;Yüküm arttı veya Stockfish JS düzgün çalışmadığını farkettim. Araya REST API koyardım. Bunu yapınca, benim için Stockfish&amp;rsquo;i Node.js ile çalıştırmanın bir anlamı kalmıyor. Bir Docker imajı oluşturup, içine C++ Stockfish motorunu koyardım. Node.JS veya C++ ile bu motor ile konuşup, REST API sunan bir kod yazardım. Kubernetes ile çalıştırarak load balancing ve auto scaling sorunlarını çözerdim. Demo&amp;rsquo;da eş zamanlı 10.000 istek sıkıntı yaratsa da, deployment sırasında güzel bir kurulum ve daha iyi kod ile sorunun çözülebileceğini düşünüyorum.&lt;/li&gt;
+&lt;li&gt;Yükümün az olduğunu varsayıyorum. WebSocket projesi içinde Stockfish modülünü kullanırdım. &lt;a href=&#34;https://nodejs.org/api/child_process.html&#34;&gt;child_process&lt;/a&gt; veya &lt;a href=&#34;https://nodejs.org/api/worker_threads.html&#34;&gt;worker_threads&lt;/a&gt; kullanarak Stockfish modülünü çalıştırırdım. Ama mesajlaşma yönetimini kendim yapmak yerine, &lt;em&gt;bee-queue&lt;/em&gt;&amp;lsquo;yu redis olmadan &lt;em&gt;worker_threads&lt;/em&gt;/&lt;em&gt;cluster&lt;/em&gt; ile çalıştırmayı denerdim.&lt;/li&gt;
+&lt;li&gt;Yüküm arttı veya Stockfish JS&amp;rsquo;in düzgün çalışmadığını farkettim. Araya REST API koyardım. Bunu yapınca, benim için Stockfish&amp;rsquo;i Node.js ile çalıştırmanın bir anlamı kalmıyor. Bir Docker imajı oluşturup, içine C++ Stockfish motorunu koyardım. Node.JS veya C++ ile bu motor ile konuşup, REST API sunan bir kod yazardım. Kubernetes ile çalıştırarak load balancing ve auto scaling sorunlarını çözerdim. Demo&amp;rsquo;da eş zamanlı 10.000 istek sıkıntı yaratsa da, deployment sırasında güzel bir kurulum ve daha iyi kod ile sorunun çözülebileceğini düşünüyorum.&lt;/li&gt;
 &lt;/ol&gt;
 
 &lt;p&gt;Eğer ağ üzerinden gönderilen veriler ve gelen cevaplar büyük olsaydı(fen, level, depth çok küçük), o zaman REST API yerine GRPC deneyebilirdim? Veya yeniden deneme stratejileri, işlerin Worker üzerinde birikmesi gibi sorunlar olsaydı Queue koymayı deneyebilirdim. Ne olursa olsun ilk önce basit başlar, ondan sonra yaşadığım sorunlara göre çözümler ve yeni bir mimari üretirdim.&lt;/p&gt;
 
 &lt;h2 id=&#34;örnek-proje&#34;&gt;Örnek Proje&lt;/h2&gt;
 
-&lt;p&gt;Bahsettiğim stratejilerin hepsini &lt;a href=&#34;https://github.com/Yengas/stockfish-cluster-example/tree/ec3258455a3c276b1a460232e8aab97d7c55a6d6&#34;&gt;örnek proje&amp;rsquo;de&lt;/a&gt; inceleyebilirsiniz. &lt;code&gt;npm run child_process:benchmark&lt;/code&gt; &lt;em&gt;child_process&lt;/em&gt; stratejisine 1.000 eş zamanlı hamle öneri isteği gönderiyor, ve ne kadar sürdüğünü ekrana bastırıyor.&lt;/p&gt;
+&lt;p&gt;Bahsettiğim stratejilerin hepsini &lt;a href=&#34;https://github.com/Yengas/stockfish-cluster-example/tree/ec3258455a3c276b1a460232e8aab97d7c55a6d6&#34;&gt;örnek proje&amp;rsquo;de&lt;/a&gt; inceleyebilirsiniz. &lt;code&gt;npm run child_process:benchmark&lt;/code&gt; &lt;em&gt;child_process&lt;/em&gt; stratejisine 1.000 eş zamanlı hamle öneri isteği gönderiyor ve ne kadar sürdüğünü ekrana bastırıyor.&lt;/p&gt;
 
 &lt;p&gt;Eğer &lt;code&gt;npm run child_process&lt;/code&gt; komutunu çalıştırırsanız, &lt;em&gt;child_process&lt;/em&gt; stratejisini kullanan bir WebSocket sunucusu başlatıyor. Bu WebSocket sunucusuna &lt;code&gt;npm run client&lt;/code&gt; diyerek bağlanıp, &lt;em&gt;FEN&lt;/em&gt; gönderebilirsiniz. Size o tahta durumu için, en iyi olduğunu düşündüğü hamleyi söylecek.&lt;/p&gt;
 </description>
