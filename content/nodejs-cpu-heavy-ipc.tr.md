@@ -107,7 +107,6 @@ Burada gözlemlediğim şu: Ekrana 500 ms sonra bir kez *ping* yazılıyor ve he
 
 ```js
 module.exports = () => {
-	// aslında bunu fonksiyon parametresi olarak almak daha mantıklı(DI), ama oraya hiç girmiyorum.
 	const stockfish = require('stockfish')();
 	
 	function getBestMove(fen, level, depth) {
@@ -170,11 +169,11 @@ O zaman aynı işlem içinde uygulayabileceğim bir başka seçeneği deniyorum.
 
 ```js
 const { getBestMove: realGetBestMove } = require('../customStockfish')();
-let work = Promise.resolve();
+let workChain = Promise.resolve();
 
 module.exports = {
 	async getBestMove(fen, level, depth) {
-		return work = work.then(() => realGetBestMove(fen, level, depth).catch(console.error));
+		return workChain = workChain.then(() => realGetBestMove(fen, level, depth).catch(console.error));
 	},
 };
 ```
@@ -312,7 +311,7 @@ Performans artışı sağladım ve artık ana işlemimim Stockfish motoru ile ki
 Bunlar bir sorun olmayabilir. 4 çekirdekli bir sunucuda, 100 kullanıcıya hizmet verecek bir şeyler yapıyor olabilirim. Bu kadar mühendislik benim için yeterli olabilir. Ama uygulamamı yayınladığım ortam, kurulumum veya kullanıcı sayım böyle bir çözüm ile tatmin olmamama sebep olabilir. O yüzden bir strateji daha inceliyeceğim.
 
 ### Bağımsız İşlemler ile Birden Fazla Stockfish Motoru
-[child_process](https://nodejs.org/api/child_process.html) kullanarak, ana işlemim ile aynı sunucuda, bağımlı işlemler başlatabiliyorum. Ama Stockfish motorlarını benim işlemimden tamamen bağımsız yapmak istersem ne ne yapacağım? 100 kullanıcım varken 3 motor, 1000 kullanıcım varken 10 motor çalıştırmak istiyorsam? Stockfish motorlarının donanım gereksinimleri farklı ise ve onları özel makinelerde çalıştırmak istiyorsam? Bunları sağlamak için, araya ağ katmanı koymam lazım. Örneğin Stockfish motorunu bir REST API haline getirebilirim veya herhangi bir queue teknolojisini, bu amaç için kullanabilirim(örn. [RabbitMQ](https://www.rabbitmq.com), [Redis](https://redis.io/topics/pubsub)).
+[child_process](https://nodejs.org/api/child_process.html) kullanarak, ana işlemim ile aynı sunucuda, bağımlı işlemler başlatabiliyorum. Ama Stockfish motorlarını benim işlemimden tamamen bağımsız yapmak istersem ne ne yapacağım? 100 kullanıcım varken 3 motor, 1000 kullanıcım varken 10 motor çalıştırmak istiyorsam? Stockfish motorlarının donanım gereksinimleri farklı ise ve onları özel makinelerde çalıştırmak istiyorsam? Bunları sağlamak için, araya ağ katmanı koymam lazım. Örneğin Stockfish motorunu bir REST API haline getirebilirim veya herhangi bir queue teknolojisini, bu amaç için kullanabilirim(örn. [RabbitMQ](https://www.rabbitmq.com), [Redis](https://redis.io/topics/pubsub)). Bunlar seçeneklerimden sadece birkaçı.
 
 #### REST API ile
 Stockfish motorunu ayrı bir işleme çıkartıp, bu işlemde REST API sunucusu ayağa kaldırabilirim. Böylece ana işlemim Stockfish motoru çalıştıran sunuculardan birine REST isteği gönderebilir ve en iyi hamle önerisini alabilir. Burada ana işlemimin, birden fazla Stockfish REST API çalıştırdığım zaman, hangisine istek atacağını nasıl bulacağı gibi bir sorun ortaya çıkıyor(Service Discovery). Bu sorunu deployment ortamına göre çözebilirim. *Kubernetes* tarafında Service veya *nginx* ile reverse proxy kullanmak gerekebilir. Şimdilik bunu unutalım. 
@@ -322,12 +321,12 @@ Bu şekilde ilerlemeyi seçersem, [server.js](https://github.com/Yengas/stockfis
 const fastify = require('fastify')();
 const { getBestMove } = require('../stockfish')();
 
-let work = Promise.resolve();
+let workChain = Promise.resolve();
 
 fastify.get('/chess', (request) => {
 	const { fen, level, depth } = request.query;
 
-	return work = work.then(() => getBestMove(fen, level, depth));
+	return workChain = workChain.then(() => getBestMove(fen, level, depth));
 });
 
 fastify.listen(process.argv[2]);

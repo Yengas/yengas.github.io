@@ -36,7 +36,7 @@ taxonomies:
   series: "series"
 params:
   sidebartitle: "Yengas"
-  sidebartagline: "Definitely not a romantic."
+  sidebartagline: "Making things work."
   socialsharing: "true"
   languages:
     - { name: "en", href: "/" }
