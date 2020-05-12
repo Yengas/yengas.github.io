@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: [ source ]
+  pull_request:
+    branches: [ source ]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Setup Hugo
+        run: |
+          wget "https://github.com/gohugoio/hugo/releases/download/v0.17/hugo_0.17_Linux-64bit.tar.gz"
+          tar xzvf hugo*.tar.gz
+          sudo mv ./hugo_0.17_linux_amd64/hugo_0.17_linux_amd64 /usr/local/bin/hugo
+          sudo chmod +x /usr/local/bin/hugo
+
+      - name: Build
+        run: hugo --theme=redlounge
+
+      - name: Publish
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          publish_branch: master
