@@ -20,7 +20,7 @@
 <meta property="og:description" content="" />
 <meta property="og:type" content="website" />
 <meta property="og:locale" content="en_US" />
-<meta property="og:url" content="https://www.yigitcan.dev/kairosdb-inner-workings/" />
+<meta property="og:url" content="https://blog.yigitcan.dev/kairosdb-inner-workings/" />
 
 
   
@@ -32,7 +32,7 @@
   
   
 
-  <link rel="stylesheet" href="https://www.yigitcan.dev//css/redlounge.css">
+  <link rel="stylesheet" href="https://blog.yigitcan.dev//css/redlounge.css">
   <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet">
   <link href='//fonts.googleapis.com/css?family=Raleway:400,200,100,700,300,500,600,800' rel='stylesheet' type='text/css'>
   <link href='//fonts.googleapis.com/css?family=Libre+Baskerville:400,700,400italic' rel='stylesheet' type='text/css'>
@@ -76,7 +76,7 @@
 
     <nav class="nav">
       <ul class="nav-list" >
-        <li class="nav-item"><span class="nav-item-separator">//</span><a href="https://www.yigitcan.dev/">Home</a></li>
+        <li class="nav-item"><span class="nav-item-separator">//</span><a href="https://blog.yigitcan.dev/">Home</a></li>
         
           <li class="nav-item"><span class="nav-item-separator">//</span><a href="/about">About</a></li>
         
@@ -94,7 +94,7 @@
         
           <li class="nav-item">
               
-                <a href="https://www.yigitcan.dev/tr/">tr</a>
+                <a href="https://blog.yigitcan.dev/tr/">tr</a>
               
           </li>
         
@@ -206,21 +206,21 @@
 			
 				<div class="post-categories">
 				
-					<a class="post-category post-category-database" href="https://www.yigitcan.dev/categories/database">Database</a>
+					<a class="post-category post-category-database" href="https://blog.yigitcan.dev/categories/database">Database</a>
 				
-					<a class="post-category post-category-optimization" href="https://www.yigitcan.dev/categories/optimization">Optimization</a>
+					<a class="post-category post-category-optimization" href="https://blog.yigitcan.dev/categories/optimization">Optimization</a>
 				
-					<a class="post-category post-category-cassandra" href="https://www.yigitcan.dev/categories/cassandra">Cassandra</a>
+					<a class="post-category post-category-cassandra" href="https://blog.yigitcan.dev/categories/cassandra">Cassandra</a>
 				
 				</div>
 			
 
 			
 		    	<div class="social-sharing">
-	<a class="share-button-facebook" onClick="return popupShare(this.href);" href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.yigitcan.dev%2fkairosdb-inner-workings%2f" target="_blank"><i class="fa fa-facebook"><span>Like</span></i></a>
-	<a class="share-button-google-plus" onClick="return popupShare(this.href);" href="https://plus.google.com/share?url=https%3a%2f%2fwww.yigitcan.dev%2fkairosdb-inner-workings%2f" target="_blank"><i class="fa fa-google-plus"><span>Google +1</span></i></a>
-	<a class="share-button-linkedin" onClick="return popupShare(this.href);" href="http://www.linkedin.com/shareArticle?mini=true&url=https%3a%2f%2fwww.yigitcan.dev%2fkairosdb-inner-workings%2f&title=KairosDB%20inner%20workings%3b%20how%20does%20it%20store%20data%20in%20Cassandra%3f&summary=KairosDB%20is%20a%20timeseries%20database%20built%20on%20Cassandra.%20Even%20though%20it%20is%20coded%20in%20a%20way%20to%20support%20different%20database%20backends%2c%20it%20is%20known%20mostly%20by%20its%20usage%20of%20Cassandra%20as%20a%20scaleable%20and%20performant%20time%20series%20data%20storage.%20With%20KairosDB%2c%20you%20can%20store%20timeseries%20metric%20data%20in%20different%20types%20and%20then%20query%20them%20with%20aggregations%20over%20time%20units.%20In%20this%20article%2c%20we%20will%20look%20into%20the%20details%20of%20KairosDB%20and%20its%20two%20different%20Cassandra%20schema%20to%20understand%20how%20the%20insert%2c%20delete%20and%20read%20operations%20we%20do%2c%20work%20under%20the%20cover.}&source=Yengas" target="_blank"><i class="fa fa-linkedin"><span>Share on LinkedIn</span></i></a>
-	<a class="share-button-twitter" onClick="return popupShare(this.href);" href="http://twitter.com/share?text=KairosDB%20inner%20workings%3b%20how%20does%20it%20store%20data%20in%20Cassandra%3f&url=https%3a%2f%2fwww.yigitcan.dev%2fkairosdb-inner-workings%2f" target="_blank"><i class="fa fa-twitter"><span>Tweet</span></i></a>	
+	<a class="share-button-facebook" onClick="return popupShare(this.href);" href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.yigitcan.dev%2fkairosdb-inner-workings%2f" target="_blank"><i class="fa fa-facebook"><span>Like</span></i></a>
+	<a class="share-button-google-plus" onClick="return popupShare(this.href);" href="https://plus.google.com/share?url=https%3a%2f%2fblog.yigitcan.dev%2fkairosdb-inner-workings%2f" target="_blank"><i class="fa fa-google-plus"><span>Google +1</span></i></a>
+	<a class="share-button-linkedin" onClick="return popupShare(this.href);" href="http://www.linkedin.com/shareArticle?mini=true&url=https%3a%2f%2fblog.yigitcan.dev%2fkairosdb-inner-workings%2f&title=KairosDB%20inner%20workings%3b%20how%20does%20it%20store%20data%20in%20Cassandra%3f&summary=KairosDB%20is%20a%20timeseries%20database%20built%20on%20Cassandra.%20Even%20though%20it%20is%20coded%20in%20a%20way%20to%20support%20different%20database%20backends%2c%20it%20is%20known%20mostly%20by%20its%20usage%20of%20Cassandra%20as%20a%20scaleable%20and%20performant%20time%20series%20data%20storage.%20With%20KairosDB%2c%20you%20can%20store%20timeseries%20metric%20data%20in%20different%20types%20and%20then%20query%20them%20with%20aggregations%20over%20time%20units.%20In%20this%20article%2c%20we%20will%20look%20into%20the%20details%20of%20KairosDB%20and%20its%20two%20different%20Cassandra%20schema%20to%20understand%20how%20the%20insert%2c%20delete%20and%20read%20operations%20we%20do%2c%20work%20under%20the%20cover.}&source=Yengas" target="_blank"><i class="fa fa-linkedin"><span>Share on LinkedIn</span></i></a>
+	<a class="share-button-twitter" onClick="return popupShare(this.href);" href="http://twitter.com/share?text=KairosDB%20inner%20workings%3b%20how%20does%20it%20store%20data%20in%20Cassandra%3f&url=https%3a%2f%2fblog.yigitcan.dev%2fkairosdb-inner-workings%2f" target="_blank"><i class="fa fa-twitter"><span>Tweet</span></i></a>	
 </div>
 		    
 
@@ -371,10 +371,10 @@
 	
 			
 		    	<div class="social-sharing">
-	<a class="share-button-facebook" onClick="return popupShare(this.href);" href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.yigitcan.dev%2fkairosdb-inner-workings%2f" target="_blank"><i class="fa fa-facebook"><span>Like</span></i></a>
-	<a class="share-button-google-plus" onClick="return popupShare(this.href);" href="https://plus.google.com/share?url=https%3a%2f%2fwww.yigitcan.dev%2fkairosdb-inner-workings%2f" target="_blank"><i class="fa fa-google-plus"><span>Google +1</span></i></a>
-	<a class="share-button-linkedin" onClick="return popupShare(this.href);" href="http://www.linkedin.com/shareArticle?mini=true&url=https%3a%2f%2fwww.yigitcan.dev%2fkairosdb-inner-workings%2f&title=KairosDB%20inner%20workings%3b%20how%20does%20it%20store%20data%20in%20Cassandra%3f&summary=KairosDB%20is%20a%20timeseries%20database%20built%20on%20Cassandra.%20Even%20though%20it%20is%20coded%20in%20a%20way%20to%20support%20different%20database%20backends%2c%20it%20is%20known%20mostly%20by%20its%20usage%20of%20Cassandra%20as%20a%20scaleable%20and%20performant%20time%20series%20data%20storage.%20With%20KairosDB%2c%20you%20can%20store%20timeseries%20metric%20data%20in%20different%20types%20and%20then%20query%20them%20with%20aggregations%20over%20time%20units.%20In%20this%20article%2c%20we%20will%20look%20into%20the%20details%20of%20KairosDB%20and%20its%20two%20different%20Cassandra%20schema%20to%20understand%20how%20the%20insert%2c%20delete%20and%20read%20operations%20we%20do%2c%20work%20under%20the%20cover.}&source=Yengas" target="_blank"><i class="fa fa-linkedin"><span>Share on LinkedIn</span></i></a>
-	<a class="share-button-twitter" onClick="return popupShare(this.href);" href="http://twitter.com/share?text=KairosDB%20inner%20workings%3b%20how%20does%20it%20store%20data%20in%20Cassandra%3f&url=https%3a%2f%2fwww.yigitcan.dev%2fkairosdb-inner-workings%2f" target="_blank"><i class="fa fa-twitter"><span>Tweet</span></i></a>	
+	<a class="share-button-facebook" onClick="return popupShare(this.href);" href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.yigitcan.dev%2fkairosdb-inner-workings%2f" target="_blank"><i class="fa fa-facebook"><span>Like</span></i></a>
+	<a class="share-button-google-plus" onClick="return popupShare(this.href);" href="https://plus.google.com/share?url=https%3a%2f%2fblog.yigitcan.dev%2fkairosdb-inner-workings%2f" target="_blank"><i class="fa fa-google-plus"><span>Google +1</span></i></a>
+	<a class="share-button-linkedin" onClick="return popupShare(this.href);" href="http://www.linkedin.com/shareArticle?mini=true&url=https%3a%2f%2fblog.yigitcan.dev%2fkairosdb-inner-workings%2f&title=KairosDB%20inner%20workings%3b%20how%20does%20it%20store%20data%20in%20Cassandra%3f&summary=KairosDB%20is%20a%20timeseries%20database%20built%20on%20Cassandra.%20Even%20though%20it%20is%20coded%20in%20a%20way%20to%20support%20different%20database%20backends%2c%20it%20is%20known%20mostly%20by%20its%20usage%20of%20Cassandra%20as%20a%20scaleable%20and%20performant%20time%20series%20data%20storage.%20With%20KairosDB%2c%20you%20can%20store%20timeseries%20metric%20data%20in%20different%20types%20and%20then%20query%20them%20with%20aggregations%20over%20time%20units.%20In%20this%20article%2c%20we%20will%20look%20into%20the%20details%20of%20KairosDB%20and%20its%20two%20different%20Cassandra%20schema%20to%20understand%20how%20the%20insert%2c%20delete%20and%20read%20operations%20we%20do%2c%20work%20under%20the%20cover.}&source=Yengas" target="_blank"><i class="fa fa-linkedin"><span>Share on LinkedIn</span></i></a>
+	<a class="share-button-twitter" onClick="return popupShare(this.href);" href="http://twitter.com/share?text=KairosDB%20inner%20workings%3b%20how%20does%20it%20store%20data%20in%20Cassandra%3f&url=https%3a%2f%2fblog.yigitcan.dev%2fkairosdb-inner-workings%2f" target="_blank"><i class="fa fa-twitter"><span>Tweet</span></i></a>	
 </div>
 		    
 
@@ -382,17 +382,17 @@
 				<div class="tags-list">
 					<span class="dark-red">Tags</span><span class="decorative-marker">//</span>
 					
-	                <a class="post-tag post-tag-kairosdb" href="https://www.yigitcan.dev/tags/kairosdb">kairosdb</a>,
+	                <a class="post-tag post-tag-kairosdb" href="https://blog.yigitcan.dev/tags/kairosdb">kairosdb</a>,
 	                
-	                <a class="post-tag post-tag-cassandra" href="https://www.yigitcan.dev/tags/cassandra">cassandra</a>,
+	                <a class="post-tag post-tag-cassandra" href="https://blog.yigitcan.dev/tags/cassandra">cassandra</a>,
 	                
-	                <a class="post-tag post-tag-schema" href="https://www.yigitcan.dev/tags/schema">schema</a>,
+	                <a class="post-tag post-tag-schema" href="https://blog.yigitcan.dev/tags/schema">schema</a>,
 	                
-	                <a class="post-tag post-tag-performance" href="https://www.yigitcan.dev/tags/performance">performance</a>,
+	                <a class="post-tag post-tag-performance" href="https://blog.yigitcan.dev/tags/performance">performance</a>,
 	                
-	                <a class="post-tag post-tag-optimization" href="https://www.yigitcan.dev/tags/optimization">optimization</a>,
+	                <a class="post-tag post-tag-optimization" href="https://blog.yigitcan.dev/tags/optimization">optimization</a>,
 	                
-	                <a class="post-tag post-tag-tips" href="https://www.yigitcan.dev/tags/tips">tips</a>,
+	                <a class="post-tag post-tag-tips" href="https://blog.yigitcan.dev/tags/tips">tips</a>,
 	                
 				</div>
 			

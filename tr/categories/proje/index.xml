@@ -2,18 +2,18 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Yengas</title>
-    <link>https://www.yigitcan.dev/tr/categories/proje/index.xml</link>
+    <link>https://blog.yigitcan.dev/tr/categories/proje/index.xml</link>
     <description>Recent content on Yengas</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <atom:link href="https://www.yigitcan.dev/tr/categories/proje/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://blog.yigitcan.dev/tr/categories/proje/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>Bu siteyi nasıl yaptım?</title>
-      <link>https://www.yigitcan.dev/tr/personal-website/</link>
+      <link>https://blog.yigitcan.dev/tr/personal-website/</link>
       <pubDate>Sun, 20 Nov 2016 16:30:00 +0300</pubDate>
       
-      <guid>https://www.yigitcan.dev/tr/personal-website/</guid>
+      <guid>https://blog.yigitcan.dev/tr/personal-website/</guid>
       <description>&lt;blockquote&gt;
 &lt;p&gt;&lt;a href=&#34;https://github.com/features/actions&#34;&gt;Github Actions&lt;/a&gt; yayınlandıktan sonra, bu projeyi wercker yerine Github Actions kullanacak şekilde değiştirdim. Blog yazıları ve Hugo konfigürasyonu &lt;a href=&#34;https://github.com/Yengas/yengas.github.io/tree/source&#34;&gt;Yengas/yengas.github.io&lt;/a&gt; projesinin &lt;em&gt;source&lt;/em&gt; branch&amp;rsquo;inde yer alıyor. Bu branch&amp;rsquo;de yapılan her değişiklikte Github Actions html/css/js dosyalarını oluşturup, aynı projenin &lt;em&gt;master&lt;/em&gt; branch&amp;rsquo;ine bu dosyaları gönderiyor.&lt;/p&gt;
 &lt;/blockquote&gt;

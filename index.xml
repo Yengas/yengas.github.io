@@ -2,19 +2,19 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Yengas</title>
-    <link>https://www.yigitcan.dev/index.xml</link>
+    <link>https://blog.yigitcan.dev/index.xml</link>
     <description>Recent content on Yengas</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Thu, 03 Aug 2017 16:10:00 +0300</lastBuildDate>
-    <atom:link href="https://www.yigitcan.dev/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://blog.yigitcan.dev/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>KairosDB inner workings; how does it store data in Cassandra?</title>
-      <link>https://www.yigitcan.dev/kairosdb-inner-workings/</link>
+      <link>https://blog.yigitcan.dev/kairosdb-inner-workings/</link>
       <pubDate>Thu, 03 Aug 2017 16:10:00 +0300</pubDate>
       
-      <guid>https://www.yigitcan.dev/kairosdb-inner-workings/</guid>
+      <guid>https://blog.yigitcan.dev/kairosdb-inner-workings/</guid>
       <description>
 
 &lt;p&gt;KairosDB is a timeseries database built on Cassandra. Even though it is coded in a way to support different database backends, it is known mostly by its usage of Cassandra as a scaleable and performant time series data storage. With KairosDB, you can store timeseries metric data in different types and then query them with aggregations over time units. In this article, we will look into the details of KairosDB and its two different Cassandra schema to understand how the insert, delete and read operations we do, work under the cover. Cassandra is a database that you need to model your data, regarding to your queries. That is why its important to know how your queries are made to the Cassandra according to your KairosDB data model!&lt;/p&gt;
@@ -161,10 +161,10 @@
     
     <item>
       <title>Using Docker and Docker-Compose to setup a local working environment, ready to be scaled.</title>
-      <link>https://www.yigitcan.dev/docker-compose-node/</link>
+      <link>https://blog.yigitcan.dev/docker-compose-node/</link>
       <pubDate>Tue, 31 Jan 2017 03:30:00 +0300</pubDate>
       
-      <guid>https://www.yigitcan.dev/docker-compose-node/</guid>
+      <guid>https://blog.yigitcan.dev/docker-compose-node/</guid>
       <description>
 
 &lt;p&gt;Let&amp;rsquo;s talk about running your Node.js applications, in a way that makes it easier to migrate to continuous integration and deployment pipelines later on the road. There are too many things that you can do in DevOps layer that will make your code more readable and easier to maintain. For example:&lt;/p&gt;
@@ -396,10 +396,10 @@ services:
     
     <item>
       <title>How I Made This Blog?</title>
-      <link>https://www.yigitcan.dev/personal-website/</link>
+      <link>https://blog.yigitcan.dev/personal-website/</link>
       <pubDate>Sun, 20 Nov 2016 16:30:00 +0300</pubDate>
       
-      <guid>https://www.yigitcan.dev/personal-website/</guid>
+      <guid>https://blog.yigitcan.dev/personal-website/</guid>
       <description>&lt;blockquote&gt;
 &lt;p&gt;After the release of &lt;a href=&#34;https://github.com/features/actions&#34;&gt;Github Actions&lt;/a&gt; i refactored this project to work with it instead of wercker. Blog posts and configuration for the Hugo is stored under the &lt;em&gt;source&lt;/em&gt; branch of &lt;a href=&#34;https://github.com/Yengas/yengas.github.io/tree/source&#34;&gt;Yengas/yengas.github.io&lt;/a&gt;, Github Actions builds and pushes html/css/js files on the &lt;em&gt;master&lt;/em&gt; branch of the same repository.&lt;/p&gt;
 &lt;/blockquote&gt;
@@ -424,10 +424,10 @@ services:
     
     <item>
       <title>About</title>
-      <link>https://www.yigitcan.dev/about/</link>
+      <link>https://blog.yigitcan.dev/about/</link>
       <pubDate>Sat, 19 Nov 2016 00:00:00 +0300</pubDate>
       
-      <guid>https://www.yigitcan.dev/about/</guid>
+      <guid>https://blog.yigitcan.dev/about/</guid>
       <description>&lt;p&gt;Hello, I&amp;rsquo;m Yiğitcan! I have been programming since my late highschool years. I&amp;rsquo;m currently studying &lt;strong&gt;Computer Science&lt;/strong&gt; at &lt;strong&gt;Trakya University&lt;/strong&gt;.&lt;/p&gt;
 
 &lt;p&gt;I&amp;rsquo;ve played with various technologies and programming languages for the past 5 years. I&amp;rsquo;ve had the chance of working with Web, Mobile and Desktop platforms.&lt;/p&gt;

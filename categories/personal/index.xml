@@ -2,18 +2,18 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Yengas</title>
-    <link>https://www.yigitcan.dev/categories/personal/index.xml</link>
+    <link>https://blog.yigitcan.dev/categories/personal/index.xml</link>
     <description>Recent content on Yengas</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <atom:link href="https://www.yigitcan.dev/categories/personal/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://blog.yigitcan.dev/categories/personal/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>How I Made This Blog?</title>
-      <link>https://www.yigitcan.dev/personal-website/</link>
+      <link>https://blog.yigitcan.dev/personal-website/</link>
       <pubDate>Sun, 20 Nov 2016 16:30:00 +0300</pubDate>
       
-      <guid>https://www.yigitcan.dev/personal-website/</guid>
+      <guid>https://blog.yigitcan.dev/personal-website/</guid>
       <description>&lt;blockquote&gt;
 &lt;p&gt;After the release of &lt;a href=&#34;https://github.com/features/actions&#34;&gt;Github Actions&lt;/a&gt; i refactored this project to work with it instead of wercker. Blog posts and configuration for the Hugo is stored under the &lt;em&gt;source&lt;/em&gt; branch of &lt;a href=&#34;https://github.com/Yengas/yengas.github.io/tree/source&#34;&gt;Yengas/yengas.github.io&lt;/a&gt;, Github Actions builds and pushes html/css/js files on the &lt;em&gt;master&lt;/em&gt; branch of the same repository.&lt;/p&gt;
 &lt;/blockquote&gt;
@@ -38,10 +38,10 @@
     
     <item>
       <title>About</title>
-      <link>https://www.yigitcan.dev/about/</link>
+      <link>https://blog.yigitcan.dev/about/</link>
       <pubDate>Sat, 19 Nov 2016 00:00:00 +0300</pubDate>
       
-      <guid>https://www.yigitcan.dev/about/</guid>
+      <guid>https://blog.yigitcan.dev/about/</guid>
       <description>&lt;p&gt;Hello, I&amp;rsquo;m Yiğitcan! I have been programming since my late highschool years. I&amp;rsquo;m currently studying &lt;strong&gt;Computer Science&lt;/strong&gt; at &lt;strong&gt;Trakya University&lt;/strong&gt;.&lt;/p&gt;
 
 &lt;p&gt;I&amp;rsquo;ve played with various technologies and programming languages for the past 5 years. I&amp;rsquo;ve had the chance of working with Web, Mobile and Desktop platforms.&lt;/p&gt;

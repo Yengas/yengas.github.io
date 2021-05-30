@@ -2,18 +2,18 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Yengas</title>
-    <link>https://www.yigitcan.dev/tr/tags/ghpages/index.xml</link>
+    <link>https://blog.yigitcan.dev/tr/tags/ghpages/index.xml</link>
     <description>Recent content on Yengas</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <atom:link href="https://www.yigitcan.dev/tr/tags/ghpages/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://blog.yigitcan.dev/tr/tags/ghpages/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>Bu siteyi nasıl yaptım?</title>
-      <link>https://www.yigitcan.dev/tr/personal-website/</link>
+      <link>https://blog.yigitcan.dev/tr/personal-website/</link>
       <pubDate>Sun, 20 Nov 2016 16:30:00 +0300</pubDate>
       
-      <guid>https://www.yigitcan.dev/tr/personal-website/</guid>
+      <guid>https://blog.yigitcan.dev/tr/personal-website/</guid>
       <description>&lt;blockquote&gt;
 &lt;p&gt;&lt;a href=&#34;https://github.com/features/actions&#34;&gt;Github Actions&lt;/a&gt; yayınlandıktan sonra, bu projeyi wercker yerine Github Actions kullanacak şekilde değiştirdim. Blog yazıları ve Hugo konfigürasyonu &lt;a href=&#34;https://github.com/Yengas/yengas.github.io/tree/source&#34;&gt;Yengas/yengas.github.io&lt;/a&gt; projesinin &lt;em&gt;source&lt;/em&gt; branch&amp;rsquo;inde yer alıyor. Bu branch&amp;rsquo;de yapılan her değişiklikte Github Actions html/css/js dosyalarını oluşturup, aynı projenin &lt;em&gt;master&lt;/em&gt; branch&amp;rsquo;ine bu dosyaları gönderiyor.&lt;/p&gt;
 &lt;/blockquote&gt;
@@ -38,10 +38,10 @@
     
     <item>
       <title>Statik Website Oluşturucuları nedir? Neden tercih edilir?</title>
-      <link>https://www.yigitcan.dev/tr/static-website-generator/</link>
+      <link>https://blog.yigitcan.dev/tr/static-website-generator/</link>
       <pubDate>Sun, 20 Nov 2016 15:00:00 +0300</pubDate>
       
-      <guid>https://www.yigitcan.dev/tr/static-website-generator/</guid>
+      <guid>https://blog.yigitcan.dev/tr/static-website-generator/</guid>
       <description>
 
 &lt;p&gt;Web&amp;rsquo;in ilk zamanlarında, tamamen statik olarak çalışan websiteleri, daha sonradan kullanıcılar için özelleştirilmiş deneyimler sunmak ve kullanıcı girdisine göre işlem yaparak çıktı verebilmek için dinamik bir hal aldı. Fakat tarayıcılarımız güçlendikce; bir çok şeyi &lt;code&gt;Javascript&lt;/code&gt; kullanarak yapabilir hale geldik. Bu durum hem websitelerinin istemci kısmının daha çok yük üstlenebilmesini, hemde bir websitesinin bir masaüstü veya mobil uygulama gibi, uzak sunucusundan tamamen bağımsız çalışabilmesine olanak sağladı.&lt;/p&gt;
@@ -98,7 +98,7 @@
 
 &lt;p&gt;Alternatif hosting yöntemleri için kişisel sunucunuza &lt;code&gt;Nginx&lt;/code&gt; web sunucusu kurabilir, veya &lt;code&gt;Amazon Web Services&lt;/code&gt; gibi cloud çözümleri inceleyebilirsiniz.&lt;/p&gt;
 
-&lt;p&gt;Eğer &lt;code&gt;Hugo&lt;/code&gt; ile &lt;code&gt;Github Pages&lt;/code&gt; üzerine kurduğum, tamamen otomatik olarak çalışan bu blog&amp;rsquo;u nasıl yaptığımı incelemek isterseniz, &lt;a href=&#34;https://www.yigitcan.dev/tr/personal-website&#34;&gt;Bu bloğu nasıl yaptım?&lt;/a&gt; başlıklı makalemi okuyabilirsiniz.&lt;/p&gt;
+&lt;p&gt;Eğer &lt;code&gt;Hugo&lt;/code&gt; ile &lt;code&gt;Github Pages&lt;/code&gt; üzerine kurduğum, tamamen otomatik olarak çalışan bu blog&amp;rsquo;u nasıl yaptığımı incelemek isterseniz, &lt;a href=&#34;https://blog.yigitcan.dev/tr/personal-website&#34;&gt;Bu bloğu nasıl yaptım?&lt;/a&gt; başlıklı makalemi okuyabilirsiniz.&lt;/p&gt;
 
 &lt;h2 id=&#34;yararlı-kaynaklar&#34;&gt;Yararlı Kaynaklar&lt;/h2&gt;
 

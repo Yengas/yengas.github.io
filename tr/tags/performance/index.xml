@@ -2,25 +2,25 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Yengas</title>
-    <link>https://www.yigitcan.dev/tr/tags/performance/index.xml</link>
+    <link>https://blog.yigitcan.dev/tr/tags/performance/index.xml</link>
     <description>Recent content on Yengas</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <atom:link href="https://www.yigitcan.dev/tr/tags/performance/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://blog.yigitcan.dev/tr/tags/performance/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>Bir Satranç Oyunu, Node.JS ile İşlemler Arası İletişim ve İş Dağıtımı</title>
-      <link>https://www.yigitcan.dev/tr/nodejs-cpu-heavy-ipc/</link>
+      <link>https://blog.yigitcan.dev/tr/nodejs-cpu-heavy-ipc/</link>
       <pubDate>Fri, 16 Aug 2019 12:00:00 +0300</pubDate>
       
-      <guid>https://www.yigitcan.dev/tr/nodejs-cpu-heavy-ipc/</guid>
+      <guid>https://blog.yigitcan.dev/tr/nodejs-cpu-heavy-ipc/</guid>
       <description>
 
 &lt;p&gt;Bu makalenin konusu, Facebook gruplarından birinde karşılaştığım güzel bir sorudan geliyor. Soru hem temel konularda bilgi sahibi olmayı, hem de kullanılacak aracı iyi tanımayı gerektiriyor. Bu konuda fikirlerimi kısa bir cevap olarak yazarsam, haksızlık ederim diye düşündüm. Aynı zamanda bir şeyler öğrenmek ve kod maymunluğu yapmak için eğlenceli bir konu bulmuş oldum. Ortaya bu makale ve github üzerinde yayınladığım &lt;a href=&#34;https://github.com/Yengas/stockfish-cluster-example&#34;&gt;örnek kodlar&lt;/a&gt; çıktı. Soruya bakarak, esas konumuzu yavaş yavaş işleyelim.&lt;/p&gt;
 
 &lt;h2 id=&#34;bir-satranç-oyunu&#34;&gt;Bir Satranç Oyunu&lt;/h2&gt;
 
-&lt;p&gt;&lt;center&gt;&lt;img src=&#34;https://www.yigitcan.dev/img/articles/selim-question.png&#34; alt=&#34;drawing&#34; style=&#34;width:70%; max-width: 600px; @media (min-width: 768px) { width: 50%; }&#34;/&gt;&lt;/center&gt;&lt;/p&gt;
+&lt;p&gt;&lt;center&gt;&lt;img src=&#34;https://blog.yigitcan.dev/img/articles/selim-question.png&#34; alt=&#34;drawing&#34; style=&#34;width:70%; max-width: 600px; @media (min-width: 768px) { width: 50%; }&#34;/&gt;&lt;/center&gt;&lt;/p&gt;
 
 &lt;p&gt;Anlaşıldığı üzere, arkadaş bir satranç oyunu yapıyor ve kullanıcıyı bilgisayara karşı yarıştırmak istiyor. Stockfish motorunu(hamle önerisi yapan bir program), uygulamalarını yayınladığı ortama kurmuş ve şimdi bunu Node.js socket sunucusu ile entegre ederken kafasında soru işaretleri var. Bu soruya bakınca aklımda ilişkili sorular uçuşmaya başlıyor:&lt;/p&gt;
 
@@ -462,10 +462,10 @@ module.exports = () =&amp;gt; {
     
     <item>
       <title>Node.JS Event Loop, Sync/Async, Promise, Async/Await ve RxJS üzerine...</title>
-      <link>https://www.yigitcan.dev/tr/nodejs-async/</link>
+      <link>https://blog.yigitcan.dev/tr/nodejs-async/</link>
       <pubDate>Sat, 10 Mar 2018 03:28:00 +0300</pubDate>
       
-      <guid>https://www.yigitcan.dev/tr/nodejs-async/</guid>
+      <guid>https://blog.yigitcan.dev/tr/nodejs-async/</guid>
       <description>
 
 &lt;p&gt;Bu makalede Event Loop, Sync/Async, Promise, Async/Await, RxJS kavramlarını anlatmaya ve tüm bu kavramları tek bir örnek üzerinde kodlayarak göstermeye çalışacağım. Kendi sisteminizde denemeler yapmak istiyorsanız Node versiyonunuzun 8&amp;rsquo;in üzerinde olduğundan emin olun.&lt;/p&gt;
