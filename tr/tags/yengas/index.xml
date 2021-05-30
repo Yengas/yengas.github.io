@@ -2,18 +2,18 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Yengas</title>
-    <link>https://yengas.github.io/tr/tags/yengas/index.xml</link>
+    <link>https://www.yigitcan.dev/tr/tags/yengas/index.xml</link>
     <description>Recent content on Yengas</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <atom:link href="https://yengas.github.io/tr/tags/yengas/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://www.yigitcan.dev/tr/tags/yengas/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>Hakkımda</title>
-      <link>https://yengas.github.io/tr/about/</link>
+      <link>https://www.yigitcan.dev/tr/about/</link>
       <pubDate>Sat, 19 Nov 2016 00:00:00 +0300</pubDate>
       
-      <guid>https://yengas.github.io/tr/about/</guid>
+      <guid>https://www.yigitcan.dev/tr/about/</guid>
       <description>&lt;p&gt;Merhaba, ben Yiğitcan! Lise yıllarımdan beri yazılımla ilgileniyorum. Şuanda &lt;strong&gt;Trakya Üniversitesi&lt;/strong&gt;&amp;lsquo;nde &lt;strong&gt;Bilgisayar Teknolojisi ve Bilişim Sistemleri&lt;/strong&gt; okumaktayım.&lt;/p&gt;
 
 &lt;p&gt;Son 5 yılda, bir çok dil ve teknoloji ile haşır neşir oldum. Web, Mobil ve Masaüstü olmak üzere bir çok platformda yazılım yapma şansı yakaladım.&lt;/p&gt;

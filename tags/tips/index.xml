@@ -2,18 +2,18 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Yengas</title>
-    <link>https://yengas.github.io/tags/tips/index.xml</link>
+    <link>https://www.yigitcan.dev/tags/tips/index.xml</link>
     <description>Recent content on Yengas</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <atom:link href="https://yengas.github.io/tags/tips/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://www.yigitcan.dev/tags/tips/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>KairosDB inner workings; how does it store data in Cassandra?</title>
-      <link>https://yengas.github.io/kairosdb-inner-workings/</link>
+      <link>https://www.yigitcan.dev/kairosdb-inner-workings/</link>
       <pubDate>Thu, 03 Aug 2017 16:10:00 +0300</pubDate>
       
-      <guid>https://yengas.github.io/kairosdb-inner-workings/</guid>
+      <guid>https://www.yigitcan.dev/kairosdb-inner-workings/</guid>
       <description>
 
 &lt;p&gt;KairosDB is a timeseries database built on Cassandra. Even though it is coded in a way to support different database backends, it is known mostly by its usage of Cassandra as a scaleable and performant time series data storage. With KairosDB, you can store timeseries metric data in different types and then query them with aggregations over time units. In this article, we will look into the details of KairosDB and its two different Cassandra schema to understand how the insert, delete and read operations we do, work under the cover. Cassandra is a database that you need to model your data, regarding to your queries. That is why its important to know how your queries are made to the Cassandra according to your KairosDB data model!&lt;/p&gt;

@@ -2,18 +2,18 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Yengas</title>
-    <link>https://yengas.github.io/tags/yengas/index.xml</link>
+    <link>https://www.yigitcan.dev/tags/yengas/index.xml</link>
     <description>Recent content on Yengas</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <atom:link href="https://yengas.github.io/tags/yengas/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://www.yigitcan.dev/tags/yengas/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>About</title>
-      <link>https://yengas.github.io/about/</link>
+      <link>https://www.yigitcan.dev/about/</link>
       <pubDate>Sat, 19 Nov 2016 00:00:00 +0300</pubDate>
       
-      <guid>https://yengas.github.io/about/</guid>
+      <guid>https://www.yigitcan.dev/about/</guid>
       <description>&lt;p&gt;Hello, I&amp;rsquo;m Yiğitcan! I have been programming since my late highschool years. I&amp;rsquo;m currently studying &lt;strong&gt;Computer Science&lt;/strong&gt; at &lt;strong&gt;Trakya University&lt;/strong&gt;.&lt;/p&gt;
 
 &lt;p&gt;I&amp;rsquo;ve played with various technologies and programming languages for the past 5 years. I&amp;rsquo;ve had the chance of working with Web, Mobile and Desktop platforms.&lt;/p&gt;

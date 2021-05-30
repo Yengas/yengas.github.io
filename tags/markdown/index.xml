@@ -2,18 +2,18 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Yengas</title>
-    <link>https://yengas.github.io/tags/markdown/index.xml</link>
+    <link>https://www.yigitcan.dev/tags/markdown/index.xml</link>
     <description>Recent content on Yengas</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <atom:link href="https://yengas.github.io/tags/markdown/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://www.yigitcan.dev/tags/markdown/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>How I Made This Blog?</title>
-      <link>https://yengas.github.io/personal-website/</link>
+      <link>https://www.yigitcan.dev/personal-website/</link>
       <pubDate>Sun, 20 Nov 2016 16:30:00 +0300</pubDate>
       
-      <guid>https://yengas.github.io/personal-website/</guid>
+      <guid>https://www.yigitcan.dev/personal-website/</guid>
       <description>&lt;blockquote&gt;
 &lt;p&gt;After the release of &lt;a href=&#34;https://github.com/features/actions&#34;&gt;Github Actions&lt;/a&gt; i refactored this project to work with it instead of wercker. Blog posts and configuration for the Hugo is stored under the &lt;em&gt;source&lt;/em&gt; branch of &lt;a href=&#34;https://github.com/Yengas/yengas.github.io/tree/source&#34;&gt;Yengas/yengas.github.io&lt;/a&gt;, Github Actions builds and pushes html/css/js files on the &lt;em&gt;master&lt;/em&gt; branch of the same repository.&lt;/p&gt;
 &lt;/blockquote&gt;

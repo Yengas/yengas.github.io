@@ -2,18 +2,18 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Yengas</title>
-    <link>https://yengas.github.io/tr/categories/programming-paradigms/index.xml</link>
+    <link>https://www.yigitcan.dev/tr/categories/programming-paradigms/index.xml</link>
     <description>Recent content on Yengas</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <atom:link href="https://yengas.github.io/tr/categories/programming-paradigms/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://www.yigitcan.dev/tr/categories/programming-paradigms/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>Node.JS Event Loop, Sync/Async, Promise, Async/Await ve RxJS üzerine...</title>
-      <link>https://yengas.github.io/tr/nodejs-async/</link>
+      <link>https://www.yigitcan.dev/tr/nodejs-async/</link>
       <pubDate>Sat, 10 Mar 2018 03:28:00 +0300</pubDate>
       
-      <guid>https://yengas.github.io/tr/nodejs-async/</guid>
+      <guid>https://www.yigitcan.dev/tr/nodejs-async/</guid>
       <description>
 
 &lt;p&gt;Bu makalede Event Loop, Sync/Async, Promise, Async/Await, RxJS kavramlarını anlatmaya ve tüm bu kavramları tek bir örnek üzerinde kodlayarak göstermeye çalışacağım. Kendi sisteminizde denemeler yapmak istiyorsanız Node versiyonunuzun 8&amp;rsquo;in üzerinde olduğundan emin olun.&lt;/p&gt;

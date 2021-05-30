@@ -2,26 +2,26 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Yengas</title>
-    <link>https://yengas.github.io/tr/index.xml</link>
+    <link>https://www.yigitcan.dev/tr/index.xml</link>
     <description>Recent content on Yengas</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Fri, 16 Aug 2019 12:00:00 +0300</lastBuildDate>
-    <atom:link href="https://yengas.github.io/tr/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://www.yigitcan.dev/tr/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>Bir Satranç Oyunu, Node.JS ile İşlemler Arası İletişim ve İş Dağıtımı</title>
-      <link>https://yengas.github.io/tr/nodejs-cpu-heavy-ipc/</link>
+      <link>https://www.yigitcan.dev/tr/nodejs-cpu-heavy-ipc/</link>
       <pubDate>Fri, 16 Aug 2019 12:00:00 +0300</pubDate>
       
-      <guid>https://yengas.github.io/tr/nodejs-cpu-heavy-ipc/</guid>
+      <guid>https://www.yigitcan.dev/tr/nodejs-cpu-heavy-ipc/</guid>
       <description>
 
 &lt;p&gt;Bu makalenin konusu, Facebook gruplarından birinde karşılaştığım güzel bir sorudan geliyor. Soru hem temel konularda bilgi sahibi olmayı, hem de kullanılacak aracı iyi tanımayı gerektiriyor. Bu konuda fikirlerimi kısa bir cevap olarak yazarsam, haksızlık ederim diye düşündüm. Aynı zamanda bir şeyler öğrenmek ve kod maymunluğu yapmak için eğlenceli bir konu bulmuş oldum. Ortaya bu makale ve github üzerinde yayınladığım &lt;a href=&#34;https://github.com/Yengas/stockfish-cluster-example&#34;&gt;örnek kodlar&lt;/a&gt; çıktı. Soruya bakarak, esas konumuzu yavaş yavaş işleyelim.&lt;/p&gt;
 
 &lt;h2 id=&#34;bir-satranç-oyunu&#34;&gt;Bir Satranç Oyunu&lt;/h2&gt;
 
-&lt;p&gt;&lt;center&gt;&lt;img src=&#34;https://yengas.github.io/img/articles/selim-question.png&#34; alt=&#34;drawing&#34; style=&#34;width:70%; max-width: 600px; @media (min-width: 768px) { width: 50%; }&#34;/&gt;&lt;/center&gt;&lt;/p&gt;
+&lt;p&gt;&lt;center&gt;&lt;img src=&#34;https://www.yigitcan.dev/img/articles/selim-question.png&#34; alt=&#34;drawing&#34; style=&#34;width:70%; max-width: 600px; @media (min-width: 768px) { width: 50%; }&#34;/&gt;&lt;/center&gt;&lt;/p&gt;
 
 &lt;p&gt;Anlaşıldığı üzere, arkadaş bir satranç oyunu yapıyor ve kullanıcıyı bilgisayara karşı yarıştırmak istiyor. Stockfish motorunu(hamle önerisi yapan bir program), uygulamalarını yayınladığı ortama kurmuş ve şimdi bunu Node.js socket sunucusu ile entegre ederken kafasında soru işaretleri var. Bu soruya bakınca aklımda ilişkili sorular uçuşmaya başlıyor:&lt;/p&gt;
 
@@ -463,10 +463,10 @@ module.exports = () =&amp;gt; {
     
     <item>
       <title>Node.JS Event Loop, Sync/Async, Promise, Async/Await ve RxJS üzerine...</title>
-      <link>https://yengas.github.io/tr/nodejs-async/</link>
+      <link>https://www.yigitcan.dev/tr/nodejs-async/</link>
       <pubDate>Sat, 10 Mar 2018 03:28:00 +0300</pubDate>
       
-      <guid>https://yengas.github.io/tr/nodejs-async/</guid>
+      <guid>https://www.yigitcan.dev/tr/nodejs-async/</guid>
       <description>
 
 &lt;p&gt;Bu makalede Event Loop, Sync/Async, Promise, Async/Await, RxJS kavramlarını anlatmaya ve tüm bu kavramları tek bir örnek üzerinde kodlayarak göstermeye çalışacağım. Kendi sisteminizde denemeler yapmak istiyorsanız Node versiyonunuzun 8&amp;rsquo;in üzerinde olduğundan emin olun.&lt;/p&gt;
@@ -967,10 +967,10 @@ async function main(){
     
     <item>
       <title>Bu siteyi nasıl yaptım?</title>
-      <link>https://yengas.github.io/tr/personal-website/</link>
+      <link>https://www.yigitcan.dev/tr/personal-website/</link>
       <pubDate>Sun, 20 Nov 2016 16:30:00 +0300</pubDate>
       
-      <guid>https://yengas.github.io/tr/personal-website/</guid>
+      <guid>https://www.yigitcan.dev/tr/personal-website/</guid>
       <description>&lt;blockquote&gt;
 &lt;p&gt;&lt;a href=&#34;https://github.com/features/actions&#34;&gt;Github Actions&lt;/a&gt; yayınlandıktan sonra, bu projeyi wercker yerine Github Actions kullanacak şekilde değiştirdim. Blog yazıları ve Hugo konfigürasyonu &lt;a href=&#34;https://github.com/Yengas/yengas.github.io/tree/source&#34;&gt;Yengas/yengas.github.io&lt;/a&gt; projesinin &lt;em&gt;source&lt;/em&gt; branch&amp;rsquo;inde yer alıyor. Bu branch&amp;rsquo;de yapılan her değişiklikte Github Actions html/css/js dosyalarını oluşturup, aynı projenin &lt;em&gt;master&lt;/em&gt; branch&amp;rsquo;ine bu dosyaları gönderiyor.&lt;/p&gt;
 &lt;/blockquote&gt;
@@ -995,10 +995,10 @@ async function main(){
     
     <item>
       <title>Statik Website Oluşturucuları nedir? Neden tercih edilir?</title>
-      <link>https://yengas.github.io/tr/static-website-generator/</link>
+      <link>https://www.yigitcan.dev/tr/static-website-generator/</link>
       <pubDate>Sun, 20 Nov 2016 15:00:00 +0300</pubDate>
       
-      <guid>https://yengas.github.io/tr/static-website-generator/</guid>
+      <guid>https://www.yigitcan.dev/tr/static-website-generator/</guid>
       <description>
 
 &lt;p&gt;Web&amp;rsquo;in ilk zamanlarında, tamamen statik olarak çalışan websiteleri, daha sonradan kullanıcılar için özelleştirilmiş deneyimler sunmak ve kullanıcı girdisine göre işlem yaparak çıktı verebilmek için dinamik bir hal aldı. Fakat tarayıcılarımız güçlendikce; bir çok şeyi &lt;code&gt;Javascript&lt;/code&gt; kullanarak yapabilir hale geldik. Bu durum hem websitelerinin istemci kısmının daha çok yük üstlenebilmesini, hemde bir websitesinin bir masaüstü veya mobil uygulama gibi, uzak sunucusundan tamamen bağımsız çalışabilmesine olanak sağladı.&lt;/p&gt;
@@ -1055,7 +1055,7 @@ async function main(){
 
 &lt;p&gt;Alternatif hosting yöntemleri için kişisel sunucunuza &lt;code&gt;Nginx&lt;/code&gt; web sunucusu kurabilir, veya &lt;code&gt;Amazon Web Services&lt;/code&gt; gibi cloud çözümleri inceleyebilirsiniz.&lt;/p&gt;
 
-&lt;p&gt;Eğer &lt;code&gt;Hugo&lt;/code&gt; ile &lt;code&gt;Github Pages&lt;/code&gt; üzerine kurduğum, tamamen otomatik olarak çalışan bu blog&amp;rsquo;u nasıl yaptığımı incelemek isterseniz, &lt;a href=&#34;https://yengas.github.io/tr/personal-website&#34;&gt;Bu bloğu nasıl yaptım?&lt;/a&gt; başlıklı makalemi okuyabilirsiniz.&lt;/p&gt;
+&lt;p&gt;Eğer &lt;code&gt;Hugo&lt;/code&gt; ile &lt;code&gt;Github Pages&lt;/code&gt; üzerine kurduğum, tamamen otomatik olarak çalışan bu blog&amp;rsquo;u nasıl yaptığımı incelemek isterseniz, &lt;a href=&#34;https://www.yigitcan.dev/tr/personal-website&#34;&gt;Bu bloğu nasıl yaptım?&lt;/a&gt; başlıklı makalemi okuyabilirsiniz.&lt;/p&gt;
 
 &lt;h2 id=&#34;yararlı-kaynaklar&#34;&gt;Yararlı Kaynaklar&lt;/h2&gt;
 
@@ -1068,10 +1068,10 @@ async function main(){
     
     <item>
       <title>Hakkımda</title>
-      <link>https://yengas.github.io/tr/about/</link>
+      <link>https://www.yigitcan.dev/tr/about/</link>
       <pubDate>Sat, 19 Nov 2016 00:00:00 +0300</pubDate>
       
-      <guid>https://yengas.github.io/tr/about/</guid>
+      <guid>https://www.yigitcan.dev/tr/about/</guid>
       <description>&lt;p&gt;Merhaba, ben Yiğitcan! Lise yıllarımdan beri yazılımla ilgileniyorum. Şuanda &lt;strong&gt;Trakya Üniversitesi&lt;/strong&gt;&amp;lsquo;nde &lt;strong&gt;Bilgisayar Teknolojisi ve Bilişim Sistemleri&lt;/strong&gt; okumaktayım.&lt;/p&gt;
 
 &lt;p&gt;Son 5 yılda, bir çok dil ve teknoloji ile haşır neşir oldum. Web, Mobil ve Masaüstü olmak üzere bir çok platformda yazılım yapma şansı yakaladım.&lt;/p&gt;

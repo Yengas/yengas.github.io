@@ -2,18 +2,18 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Yengas</title>
-    <link>https://yengas.github.io/tags/docker/index.xml</link>
+    <link>https://www.yigitcan.dev/tags/docker/index.xml</link>
     <description>Recent content on Yengas</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <atom:link href="https://yengas.github.io/tags/docker/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://www.yigitcan.dev/tags/docker/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>Using Docker and Docker-Compose to setup a local working environment, ready to be scaled.</title>
-      <link>https://yengas.github.io/docker-compose-node/</link>
+      <link>https://www.yigitcan.dev/docker-compose-node/</link>
       <pubDate>Tue, 31 Jan 2017 03:30:00 +0300</pubDate>
       
-      <guid>https://yengas.github.io/docker-compose-node/</guid>
+      <guid>https://www.yigitcan.dev/docker-compose-node/</guid>
       <description>
 
 &lt;p&gt;Let&amp;rsquo;s talk about running your Node.js applications, in a way that makes it easier to migrate to continuous integration and deployment pipelines later on the road. There are too many things that you can do in DevOps layer that will make your code more readable and easier to maintain. For example:&lt;/p&gt;
