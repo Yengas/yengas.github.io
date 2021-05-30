@@ -1,6 +1,6 @@
 DefaultContentLanguage: "en"
 
-baseurl: "https://www.yigitcan.dev/"
+baseurl: "https://blog.yigitcan.dev/"
 languageCode: "en-us"
 theme: "redlounge"
 
