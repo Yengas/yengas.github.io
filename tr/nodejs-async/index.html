@@ -14,7 +14,7 @@
 <meta name="description" content="">
 <meta name="keywords" content="">
 <meta name="author" content="">
-<meta name="generator" content="Hugo 0.17" />
+<meta name="generator" content="Hugo 0.117.0">
 
   <meta property="og:title" content="Node.JS Event Loop, Sync/Async, Promise, Async/Await ve RxJS üzerine..." />
 <meta property="og:description" content="" />
@@ -131,25 +131,23 @@
 		    <div id="toc" class="pure-u-1 pure-u-md-1-4">
 				<small class="toc-label">İçerikler</small>
 		   	 	<nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#problem">Problem</a></li>
-<li><a href="#tek-bir-film-sync-olarak-işlem-yapmak">Tek bir film, sync olarak işlem yapmak.</a></li>
-<li><a href="#birden-fazla-film-sync-olarak-işlem-yapmak">Birden fazla film, sync olarak işlem yapmak.</a></li>
-<li><a href="#node-js-işlemi-ve-async">Node.js işlemi ve Async</a></li>
-<li><a href="#event-loop">Event Loop</a></li>
-<li><a href="#promiseler-ve-async-await">Promiseler ve Async/Await</a></li>
-<li><a href="#async-olarak-tek-bir-film-ile-işlem-yapmak">Async olarak, tek bir film ile işlem yapmak.</a></li>
-<li><a href="#async-olarak-birden-fazla-film-ile-işlem-yapmak">Async olarak, birden fazla film ile işlem yapmak</a>
-<ul>
-<li><a href="#fonksiyonlara-ayrıştırmak">Fonksiyonlara ayrıştırmak</a></li>
-<li><a href="#promise-kullanarak-çoklu-işlemde-performansı-arttırmak">Promise kullanarak çoklu işlemde performansı arttırmak</a></li>
-<li><a href="#rxjs-ile-async-birden-fazla-film-işlemenin-yeniden-yazılması">RxJs ile async, birden fazla film işlemenin yeniden yazılması</a></li>
-</ul></li>
-<li><a href="#çıkarımlar">Çıkarımlar</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#problem">Problem</a></li>
+    <li><a href="#tek-bir-film-sync-olarak-işlem-yapmak">Tek bir film, sync olarak işlem yapmak.</a></li>
+    <li><a href="#birden-fazla-film-sync-olarak-işlem-yapmak">Birden fazla film, sync olarak işlem yapmak.</a></li>
+    <li><a href="#nodejs-işlemi-ve-async">Node.js işlemi ve Async</a></li>
+    <li><a href="#event-loop">Event Loop</a></li>
+    <li><a href="#promiseler-ve-asyncawait">Promiseler ve Async/Await</a></li>
+    <li><a href="#async-olarak-tek-bir-film-ile-işlem-yapmak">Async olarak, tek bir film ile işlem yapmak.</a></li>
+    <li><a href="#async-olarak-birden-fazla-film-ile-işlem-yapmak">Async olarak, birden fazla film ile işlem yapmak</a>
+      <ul>
+        <li><a href="#fonksiyonlara-ayrıştırmak">Fonksiyonlara ayrıştırmak</a></li>
+        <li><a href="#promise-kullanarak-çoklu-işlemde-performansı-arttırmak">Promise kullanarak çoklu işlemde performansı arttırmak</a></li>
+        <li><a href="#rxjs-ile-async-birden-fazla-film-işlemenin-yeniden-yazılması">RxJs ile async, birden fazla film işlemenin yeniden yazılması</a></li>
+      </ul>
+    </li>
+    <li><a href="#çıkarımlar">Çıkarımlar</a></li>
+  </ul>
 </nav>
 		    </div>
 		    
@@ -194,19 +192,12 @@
 
 			
 
-            
-
-<p>Bu makalede Event Loop, Sync/Async, Promise, Async/Await, RxJS kavramlarını anlatmaya ve tüm bu kavramları tek bir örnek üzerinde kodlayarak göstermeye çalışacağım. Kendi sisteminizde denemeler yapmak istiyorsanız Node versiyonunuzun 8&rsquo;in üzerinde olduğundan emin olun.</p>
-
+            <p>Bu makalede Event Loop, Sync/Async, Promise, Async/Await, RxJS kavramlarını anlatmaya ve tüm bu kavramları tek bir örnek üzerinde kodlayarak göstermeye çalışacağım. Kendi sisteminizde denemeler yapmak istiyorsanız Node versiyonunuzun 8&rsquo;in üzerinde olduğundan emin olun.</p>
 <p>Bu makalede yazılan tüm kodların, çalışır hallerine, <a href="https://github.com/Yengas/async-blog-post">yengas/async-blog-post</a>@Github adresinden ulaşabilirsiniz.</p>
-
 <h2 id="problem">Problem</h2>
-
 <p>İlk önce problemimiz ile başlayalım&hellip; Elimde daha önce izlemek için kaydettiğim Ghibli filmlerinin id&rsquo;leri var. Bu filmlerin hepsinin adını ve açıklamasını almak istiyorum.</p>
-
 <p>İlk önce elimdeki dosyanın formatına bakalım&hellip;</p>
-
-<pre><code>2baf70d1-42bb-4437-b551-e5fed5a87abe
+<pre tabindex="0"><code>2baf70d1-42bb-4437-b551-e5fed5a87abe
 12cfb892-aac0-4c5b-94af-521852e46d6a
 58611129-2dbc-4a81-a72f-77ddfc1b1b49
 ea660b10-85c4-4ae3-8a5f-41cea3648e3e
@@ -226,458 +217,347 @@ cd3d059c-09f4-4ff3-8d63-bc765a5184fa
 67405111-37a5-438f-81cc-4666af60c800
 578ae244-7750-4d9f-867b-f3cd3d6fecf4
 5fdfb320-2a02-49a7-94ff-5ca418cae602
-</code></pre>
-
-<p>Her satır, açıklamasını ve başlığını almak istediğim filmin id&rsquo;sini ifade ediyor. Güzel&hellip; Yeni satır karakteri &lsquo;\n&rsquo; ile, satırları birbirinden ayırmam yetecek. Ama ilk önce tüm listeyi işlemeye başlamadan önce, tek bir id için başlık ve açıklama alabileceğimden emin olmam lazım.</p>
-
+</code></pre><p>Her satır, açıklamasını ve başlığını almak istediğim filmin id&rsquo;sini ifade ediyor. Güzel&hellip; Yeni satır karakteri &lsquo;\n&rsquo; ile, satırları birbirinden ayırmam yetecek. Ama ilk önce tüm listeyi işlemeye başlamadan önce, tek bir id için başlık ve açıklama alabileceğimden emin olmam lazım.</p>
 <h2 id="tek-bir-film-sync-olarak-işlem-yapmak">Tek bir film, sync olarak işlem yapmak.</h2>
-
 <p>Algoritma basit. Bir değişkende, bilgilerini bulmak istediğim filmin id&rsquo;sini tutacağım, API&rsquo;ye bir istek göndereceğim, gelen cevabı JSON olarak işleyip, obje&rsquo;ye dönüştüreceğim, ve obje&rsquo;min içindeki başlık ve açıklama bilgisini ekrana yazdıracağım! Tamamen düz mantık.</p>
-
-<pre><code class="language-js">// Sync olarak request yapmamızı sağlayacak, kütüphane.
-const request = require('sync-request');
-// bilgilerini almak istediğimiz filmin id'si.
-const movieID = '2baf70d1-42bb-4437-b551-e5fed5a87abe';
-
-// API'ye yaptığımız istek
-const result = request('GET', `https://ghibliapi.herokuapp.com/films/${movieID}`);
-// API'den gelen string cevabı, javascript objesini çevirmek için JSON parse işlemi
-const body = JSON.parse(result.body.toString());
-// obje içerisindeki title ve description değerlerinin, aynı isimle değişkene atanması.
-const { title, description } = body;
-
-// Artık sonucu ekrana yazdırabiliriz, umarız şimdiye kadar hata olmamıştır...
-console.log(`Film Adı: ${title}`);
-console.log(`Filmin açıklaması: ${description}`);
-</code></pre>
-
-<p>bu script&rsquo;i çalıştırdığım zaman, çıktı olarak</p>
-
-<pre><code>Film Adı: Castle in the Sky
-Filmin açıklaması: The orphan Sheeta inherited a mysterious crystal that links her to the mythical sky-kingdom of Laputa. With the help of resourceful Pazu and a rollicking band of sky pirates, she makes her way to the ruins of the once-great civilization. Sheeta and Pazu must outwit the evil Muska, who plans to use Laputa's science to make himself ruler of the world.
-</code></pre>
-
-<p>görüyorum. Tamda istediğimiz şey! Tek bir film id için, filmin başlığını ve açıklamasını aldık. Artık bir sonraki adıma geçip, tüm id&rsquo;ler için bu işlemi yapabiliriz!</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#75715e">// Sync olarak request yapmamızı sağlayacak, kütüphane.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">request</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;sync-request&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// bilgilerini almak istediğimiz filmin id&#39;si.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">movieID</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;2baf70d1-42bb-4437-b551-e5fed5a87abe&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// API&#39;ye yaptığımız istek
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">result</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">request</span>(<span style="color:#e6db74">&#39;GET&#39;</span>, <span style="color:#e6db74">`https://ghibliapi.herokuapp.com/films/</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">movieID</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// API&#39;den gelen string cevabı, javascript objesini çevirmek için JSON parse işlemi
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">body</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">JSON</span>.<span style="color:#a6e22e">parse</span>(<span style="color:#a6e22e">result</span>.<span style="color:#a6e22e">body</span>.<span style="color:#a6e22e">toString</span>());
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// obje içerisindeki title ve description değerlerinin, aynı isimle değişkene atanması.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> { <span style="color:#a6e22e">title</span>, <span style="color:#a6e22e">description</span> } <span style="color:#f92672">=</span> <span style="color:#a6e22e">body</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Artık sonucu ekrana yazdırabiliriz, umarız şimdiye kadar hata olmamıştır...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`Film Adı: </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">title</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`Filmin açıklaması: </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">description</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
+</span></span></code></pre></div><p>bu script&rsquo;i çalıştırdığım zaman, çıktı olarak</p>
+<pre tabindex="0"><code>Film Adı: Castle in the Sky
+Filmin açıklaması: The orphan Sheeta inherited a mysterious crystal that links her to the mythical sky-kingdom of Laputa. With the help of resourceful Pazu and a rollicking band of sky pirates, she makes her way to the ruins of the once-great civilization. Sheeta and Pazu must outwit the evil Muska, who plans to use Laputa&#39;s science to make himself ruler of the world.
+</code></pre><p>görüyorum. Tamda istediğimiz şey! Tek bir film id için, filmin başlığını ve açıklamasını aldık. Artık bir sonraki adıma geçip, tüm id&rsquo;ler için bu işlemi yapabiliriz!</p>
 <h2 id="birden-fazla-film-sync-olarak-işlem-yapmak">Birden fazla film, sync olarak işlem yapmak.</h2>
-
 <p>Düz mantık devam ettiğim zaman, kodumda pek bir şey değişmemesi lazım. Tek yapmam gereken; tek bir film yerine, dosyamda bulunan her bir film için aynı kodu çalıştırmak. Kodumu düzenleyip, baktığımda, durum gerçektende böyle. Tek yapmamız gereken koda 2 şey eklemek oldu.</p>
-
 <p>Sabit bir film id&rsquo;si yerine, tüm dosyayı okuyup, her satırı diziye atamak:</p>
-
-<pre><code class="language-js">// Tüm film id'lerini, dosyamızı okuyarak ve '\n' karakterinden split yaparak, bir diziye atıyalım.
-const movieIDs = fs.readFileSync('../data/ghibli_movies.txt').toString().split('\n');
-</code></pre>
-
-<p>Ve istek gönderdiğimiz satırdan itibaren, tüm kodumu, for/let of döngüsü içine almak:</p>
-
-<pre><code class="language-js">for(let movieID of movieIDs){
-    const result = ...
-}
-</code></pre>
-
-<p>Elimizdeki kodun son hali:</p>
-
-<pre><code class="language-js">// Dosya okumak için node.js kütüphanemizi alalım.
-const fs = require('fs');
-// Sync olarak request yapmamızı sağlayacak, kütüphane.
-const request = require('sync-request');
-// Tüm film id'lerini, dosyamızı okuyarak ve '\n' karakterinden split yaparak, bir diziye atıyalım.
-const movieIDs = fs.readFileSync('../data/ghibli_movies.txt').toString().split('\n');
-
-for(let movieID of movieIDs){
-  // API'ye yaptığımız istek
-  const result = request('GET', `https://ghibliapi.herokuapp.com/films/${movieID}`);
-  // API'den gelen string cevabı, javascript objesini çevirmek için JSON parse işlemi
-  const body = JSON.parse(result.body.toString());
-  // obje içerisindeki title ve description değerlerinin, aynı isimle değişkene atanması.
-  const { title, description } = body;
-
-  // Artık sonucu ekrana yazdırabiliriz, umarız şimdiye kadar hata olmamıştır...
-  console.log(`Film Adı: ${title}`);
-  console.log(`Filmin açıklaması: ${description}`);
-}
-</code></pre>
-
-<p>Sonuç olarak, artık kodumuz tüm film id&rsquo;leri için başlık ve açıklamaları aldı ve bize gösterdi. Sorunumuz artık çözüldü. Bu problem için daha fazla kod yazmak gereksiz bile. Ama bir şeyi çok yanlış yapıyoruz. Bunu anlamak için, bir Node.js işleminin çalışma mantığına ve Event Loop&rsquo;a değinelim.</p>
-
-<h2 id="node-js-işlemi-ve-async">Node.js işlemi ve Async</h2>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#75715e">// Tüm film id&#39;lerini, dosyamızı okuyarak ve &#39;\n&#39; karakterinden split yaparak, bir diziye atıyalım.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">movieIDs</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">fs</span>.<span style="color:#a6e22e">readFileSync</span>(<span style="color:#e6db74">&#39;../data/ghibli_movies.txt&#39;</span>).<span style="color:#a6e22e">toString</span>().<span style="color:#a6e22e">split</span>(<span style="color:#e6db74">&#39;\n&#39;</span>);
+</span></span></code></pre></div><p>Ve istek gönderdiğimiz satırdan itibaren, tüm kodumu, for/let of döngüsü içine almak:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">movieID</span> <span style="color:#66d9ef">of</span> <span style="color:#a6e22e">movieIDs</span>){
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">result</span> <span style="color:#f92672">=</span> ...
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Elimizdeki kodun son hali:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#75715e">// Dosya okumak için node.js kütüphanemizi alalım.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">fs</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;fs&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Sync olarak request yapmamızı sağlayacak, kütüphane.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">request</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;sync-request&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Tüm film id&#39;lerini, dosyamızı okuyarak ve &#39;\n&#39; karakterinden split yaparak, bir diziye atıyalım.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">movieIDs</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">fs</span>.<span style="color:#a6e22e">readFileSync</span>(<span style="color:#e6db74">&#39;../data/ghibli_movies.txt&#39;</span>).<span style="color:#a6e22e">toString</span>().<span style="color:#a6e22e">split</span>(<span style="color:#e6db74">&#39;\n&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">movieID</span> <span style="color:#66d9ef">of</span> <span style="color:#a6e22e">movieIDs</span>){
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// API&#39;ye yaptığımız istek
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">result</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">request</span>(<span style="color:#e6db74">&#39;GET&#39;</span>, <span style="color:#e6db74">`https://ghibliapi.herokuapp.com/films/</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">movieID</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// API&#39;den gelen string cevabı, javascript objesini çevirmek için JSON parse işlemi
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">body</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">JSON</span>.<span style="color:#a6e22e">parse</span>(<span style="color:#a6e22e">result</span>.<span style="color:#a6e22e">body</span>.<span style="color:#a6e22e">toString</span>());
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// obje içerisindeki title ve description değerlerinin, aynı isimle değişkene atanması.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">const</span> { <span style="color:#a6e22e">title</span>, <span style="color:#a6e22e">description</span> } <span style="color:#f92672">=</span> <span style="color:#a6e22e">body</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Artık sonucu ekrana yazdırabiliriz, umarız şimdiye kadar hata olmamıştır...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`Film Adı: </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">title</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`Filmin açıklaması: </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">description</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Sonuç olarak, artık kodumuz tüm film id&rsquo;leri için başlık ve açıklamaları aldı ve bize gösterdi. Sorunumuz artık çözüldü. Bu problem için daha fazla kod yazmak gereksiz bile. Ama bir şeyi çok yanlış yapıyoruz. Bunu anlamak için, bir Node.js işleminin çalışma mantığına ve Event Loop&rsquo;a değinelim.</p>
+<h2 id="nodejs-işlemi-ve-async">Node.js işlemi ve Async</h2>
 <p>Yazdığımız Javascript kodunun, bir şekilde bilgisayarın anlayabileceği makine koduna dönüşmesi ve çalışması lazım. Tarayıcı&rsquo;da bunu bizim için tarayıcının kendisi yaparken, Node.js kullanırken, <code>node &lt;script_dosyamiz&gt;.js</code> komutunu kullanarak bu işlemi başlatıyoruz. Bu komut çalıştırıldığında, işletim sistemimiz&rsquo;de, bizim Javascript kodumuzu çalıştıran bir işlem oluşuyor. Ve Node.js&rsquo;in yardımları sayesinde, işletim sistemimizi kullanarak; dosya okuyabiliyoruz ve ağ üzerinden istekler gönderebiliyoruz.</p>
-
 <p>Buraya kadar olan kısım, şuana kadar yazdığımız kodu açıklıyor. Fakat burada daha optimize bir kod yazmamız için düşünmemiz gereken şey şu; bizim dosya okuma işlemimiz Harddisk veya SSD tarafından, ağ üzerinden yaptığımız istekler ise, ağ donanımımız üzerinden yapılıyor. Aslında sadece; dosyadan okuduğumuz değerleri diziye dönüştürmek, her bir dizi elemanı için yapılan istekleri <code>JSON.parse</code> ile obje&rsquo;ye dönüştürmek ve içerisindeki değerleri bu objeden çıkarıp, değişkene atamak için CPU&rsquo;muzu kullanıyoruz.</p>
-
 <p>Ama kodumuzdaki düz mantığa geri döndüğümüzde, her bir isteğin gönderilmeden önce, bir önceki isteğin bitmesini ve ekrana yazdırılmasını beklediğimizi görüyoruz. Bu durumdan kurtulmak, şu anki problemimize baktığımızda; bütün programlama yöntemlerimizi değiştirmemize değmeyecek gibi görünsede, ideal bir dünyada yapmak istediğimiz şey; tüm bilgisayar donanımlarımızı optimal şekilde kullanmaktır.</p>
-
 <p>Yani, bir kullanıcınıza ağ üzerinden veri gönderirken, diğerinin sadece CPU kullanacak işlemini bekletmek istemezsiniz. Burada bizi kurtaracak olan terim Async. Async işlem yapmak demek, birden fazla iş parçacağının birbiri ile kesişen zamanlarda çalışabilmesi demektir. Node.JS için bu, &ldquo;aynı anda&rdquo; çalışmak anlamına gelmez.</p>
-
 <p>Şöyle örnek vermek gerekirse; biz ağ donanımımız işlem yaparken, CPU ile işlem yapabiliriz ama, CPU&rsquo;muz birden fazla çekirdeğe sahip olsa bile, aynı anda 2 tane CPU gerektiren işlemi çalıştıramayız. Çünkü Node.JS bunu aynı işlem içinde desteklememektedir. Bu tek bir Node.js işleminin maksimum performans sınırını düşürmektedir. Fakat beraberinde birden fazla çekirdek kullanmanın getirebileceği sorunları çözmekte, ve bir çok async işleme kavramını kolaylaştırmaktadır. Sektörde Node.JS&rsquo;in bu sorunu çözmek için ortaya attığı tek çekirdekli Async yapı dışında, birden fazla çekirdek ile ve async çalışmayı kolaylaştıran yazılım paradigmaları bulunmaktadır(örn. green threading, channels, functional programming).</p>
-
 <p>Çoğu basit seviyede uygulama, CPU&rsquo;dan çok, diğer donanımları beklerken zaman harcamaktadır. Kaldı ki, bir Node.JS uygulamasında, sıkıntınız CPU olduğu zaman, birden fazla Node.JS işlemi çalıştırarak, birden fazla CPU kullanabilirsiniz. Burada dikkate alınması gereken durumlar tabiki olacaktır ama, bu bölümü kısa tutmak için, load balancing, state yönetimi gibi konulara girmek istemiyorum.</p>
-
 <p>Özet olarak, elimizdeki uygulamanın performansını iyileştirmek için, bir ağ isteği bitmeden, bir başkasını başlatabilir, ve ilk hangisi sonuçlanırsa onu işleyebiliriz. Ve bu işlem, Node.JS&rsquo;in tek çekirdek kullanan yapısında, oldukca basit olacaktır.</p>
-
 <h2 id="event-loop">Event Loop</h2>
-
 <p>Bir farklı detayına girmek istemediğim, ve basitleştirme yaparak anlatmak istediğim konu ise, Event Loop. Node.JS çalışmak isteyen tüm fonksiyonları, kendi içinde bir sıraya koyar. Uygulamanızı ilk başlattığınız kod sayfanız, ilk çalışan fonksiyonunuz olarak düşünülür. Daha sonra, bu ana fonksiyonunuz içinde yaptığınız her &ldquo;bloklayıcı(sync)&rdquo; fonksiyon çağrısı, bitmesi beklenecek şekilde çalıştırılır. Eğer async olarak çalışacak olan bir fonksiyon çağrılırsa, bu async işlem bittiğinde çalışması için başka bir fonksiyon daha verebilirsiniz. Node.JS arkaplanda bu fonksiyonu sıraya koyarak, çalıştırmakta olduğu fonksiyona devam edecek, daha sonra çalışmakta olan fonksiyon ve async işlem bittikten sonra çalışması için verdiğiniz fonksiyonu çağırıcaktır.</p>
-
 <p>Bunu daha iyi anlayabilmek için basit bir örnek yapalım, daha sonra async programlama kısmına geçiş yapalım.</p>
-
-<pre><code class="language-js">setTimeout(function yuzMilisaniyeSonra(){ console.log('1'); }, 100);
-setImmediate(function birSonrakiFonksiyon(){ console.log('2'); });
-setImmediate(function birSonrakiFonksiyon(){ console.log('4'); });
-console.log('start!');
-</code></pre>
-
-<p>Bu kodu çalıştırdığımız zaman ekranda göreceğimiz çıktı:</p>
-
-<pre><code>start!
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#a6e22e">setTimeout</span>(<span style="color:#66d9ef">function</span> <span style="color:#a6e22e">yuzMilisaniyeSonra</span>(){ <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#39;1&#39;</span>); }, <span style="color:#ae81ff">100</span>);
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">setImmediate</span>(<span style="color:#66d9ef">function</span> <span style="color:#a6e22e">birSonrakiFonksiyon</span>(){ <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#39;2&#39;</span>); });
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">setImmediate</span>(<span style="color:#66d9ef">function</span> <span style="color:#a6e22e">birSonrakiFonksiyon</span>(){ <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#39;4&#39;</span>); });
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#39;start!&#39;</span>);
+</span></span></code></pre></div><p>Bu kodu çalıştırdığımız zaman ekranda göreceğimiz çıktı:</p>
+<pre tabindex="0"><code>start!
 2
 4
 1
-</code></pre>
-
-<p>olacaktır. Tüm scriptimizi tek bir fonksiyon olarak kabul edelim. İlk önce 1. satır, <code>setTimeout</code> fonksiyonu ile 100 milisaniye sonra çalışması için bir fonksiyonu sıraya koyuyoruz, <code>setImmediate</code> ile event loop&rsquo;a direk olarak 2 fonksiyonu arka arkaya ekliyoruz. Bu fonksiyonlar sadece Event Loop&rsquo;a eklendi, ve daha çalışmadı. <code>setTimeout</code> ve <code>setImmediate</code> fonksiyonları sonlandıktan sonra, ana fonksiyonumuza hep geri dönüyoruz. Ve en son satırımızdaki <code>console.log</code> fonksiyonu çağrılıp, ekrana <code>start!</code> yazdırıldıktan sonra, sırasıyla Event Loop&rsquo;daki fonksiyonlar çalışmaya başlıyor.</p>
-
+</code></pre><p>olacaktır. Tüm scriptimizi tek bir fonksiyon olarak kabul edelim. İlk önce 1. satır, <code>setTimeout</code> fonksiyonu ile 100 milisaniye sonra çalışması için bir fonksiyonu sıraya koyuyoruz, <code>setImmediate</code> ile event loop&rsquo;a direk olarak 2 fonksiyonu arka arkaya ekliyoruz. Bu fonksiyonlar sadece Event Loop&rsquo;a eklendi, ve daha çalışmadı. <code>setTimeout</code> ve <code>setImmediate</code> fonksiyonları sonlandıktan sonra, ana fonksiyonumuza hep geri dönüyoruz. Ve en son satırımızdaki <code>console.log</code> fonksiyonu çağrılıp, ekrana <code>start!</code> yazdırıldıktan sonra, sırasıyla Event Loop&rsquo;daki fonksiyonlar çalışmaya başlıyor.</p>
 <p><code>setTimeout</code> ile sıraya koyduğumuz fonksiyonumuz, 100 ms saniye geçmeden çalışamıyacağı için, sırasıyla event loop&rsquo;a giren 2 yazdırma, 4 yazdırma fonksiyonları yazdırılıyor. Ve 100 ms geçtikten sonra ekrana 1 yazdırılıyor ve programımız sonlanıyor.</p>
-
 <p>İlk kodumuza döndüğümüz zaman, <code>fs.readFileSync('../data/ghibli_movieis.txt')</code> satırımızı görebiliriz. Burada bu fonksiyon, dosya okuma işlemi bitene kadar, event loop&rsquo;daki diğer fonksiyonların çalışmasını engellemiş oluyor. Hoş, bizim örneğimizde, event loopda başka bir fonksiyon olmadığı, ve programın çalışmaya devam etmesi için bu dosyayı okumamız gerektiği için bir önemi yok ama; <code>fs.readFile('../data/ghibli_movies.txt', function(err, data){ console.log(err, data); })</code> yaparak; dosya okuma işlemini başlatıp, işlem bittikten sonra çağrılmak üzere bir fonksiyonu event loop&rsquo;a ekleyebiliriz. Böylece dosya okuma işlemi, işletim sistemi tarafından, donanıma iletilir ve yapılırken, CPU ve Event Loop üzerinde başka fonksiyonlar çağırabiliriz. Alternatif olarak kısaca <code>fs.readFile('../data/ghibli_movies.txt', console.log);</code>&lsquo;da yapabiliriz. <code>console.log</code>&lsquo;da bir fonksiyon olduğu için, yazdığımız isimsiz fonksiyon gibi, dosya okuma işlemi bittikten sonra, sonuç parametreleri ile birlikte çağrılacaktır.</p>
-
-<h2 id="promiseler-ve-async-await">Promiseler ve Async/Await</h2>
-
+<h2 id="promiseler-ve-asyncawait">Promiseler ve Async/Await</h2>
 <p>Şimdi geldik, esas ilginç bölüme. Async değerler ile çalışmak için, Event Loop&rsquo;a fonksiyon koymamız gerektiğini söyledik. Ama bunu eski, error first Node.js yöntemi ile yapmak zorunda değiliz. Çünkü bu yöntem, bizi; kod seviyesinde, Node.JS&rsquo;in uydurduğu bir yapıya uymaya ve tüm async fonksiyonlara, standart tipte (hata, sonuç) tipinde parametreler kabul eden, fonksiyonlar vermeye zorluyor. Halbüki, sync çalışıyormuş gibi fonksiyonlar yazıp, sadece gerektiği yerde, async kavramları işin içine karıştırmamızı sağlayan bir yapı bulunmaktadır. Buna Promise denir.</p>
-
 <p>Örnek vermek gerekirse:</p>
-
-<pre><code class="language-js">// Bu fonksiyonun tek bildiği, Buffer tipiinde bir parametre aldığı ve her satırdan bir dizi oluşturması
-function idListesineCevir(dosyaIcerigiBuffer){
-	return dosyaIcerigiBuffer.toString().split('\n');
-}
-
-// bu fonksiyonu sync olarak kullanabiliriz.
-idListesineCevir(fs.readFileSync('../data/ghibli_movies.txt'))
-
-// bu fonksiyonu async olarak callback ile kullanabiliriz
-fs.readFile('../data/ghibli_movies.txt', function(err, buffer){
-	if(err) ...
-	const sonuc = idListesineCevir(buffer);
-});
-
-// bu fonksiyonu async olarak, Promise ile kullanabiliriz
-// Buffer döndüren bir Promise'i, Id listesi döndüren bir Promise'e dönüştürür.
-readFilePromise('../data/ghibli_movies.txt').then(idListesineCevir)
-</code></pre>
-
-<p>Burada dikkat çekmek istediğim şey, sync olarak bu fonksiyonumuzu kullandığımız zaman direk olarak, fonksiyon parametresi olarak Buffer veriyoruz. Promise kullanımı buna yakın ve temiz görünürken, eski tarz Node.js error first callback kullandığımız zaman, tamamen bu yapıya özel ekstra kod yazmamız gerekiyor. Error first callback kullanırken, hata olma durumunu kontrol etmek bizim sorumluluğumuzdayken, Promise&rsquo;lerde başarılı sonuçlanma, ve hata durumları için ayrı fonksiyonlar tanımlayabiliyoruz. Aynı zamanda Promise&rsquo;leri birbiri ardına bağlayarak kullanabilirken, error first callbackler ile bunu yapmak biraz daha uğraş verici oluyor.</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#75715e">// Bu fonksiyonun tek bildiği, Buffer tipiinde bir parametre aldığı ve her satırdan bir dizi oluşturması
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">idListesineCevir</span>(<span style="color:#a6e22e">dosyaIcerigiBuffer</span>){
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">dosyaIcerigiBuffer</span>.<span style="color:#a6e22e">toString</span>().<span style="color:#a6e22e">split</span>(<span style="color:#e6db74">&#39;\n&#39;</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// bu fonksiyonu sync olarak kullanabiliriz.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">idListesineCevir</span>(<span style="color:#a6e22e">fs</span>.<span style="color:#a6e22e">readFileSync</span>(<span style="color:#e6db74">&#39;../data/ghibli_movies.txt&#39;</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// bu fonksiyonu async olarak callback ile kullanabiliriz
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">fs</span>.<span style="color:#a6e22e">readFile</span>(<span style="color:#e6db74">&#39;../data/ghibli_movies.txt&#39;</span>, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">err</span>, <span style="color:#a6e22e">buffer</span>){
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">if</span>(<span style="color:#a6e22e">err</span>) ...
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">sonuc</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">idListesineCevir</span>(<span style="color:#a6e22e">buffer</span>);
+</span></span><span style="display:flex;"><span>});
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// bu fonksiyonu async olarak, Promise ile kullanabiliriz
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// Buffer döndüren bir Promise&#39;i, Id listesi döndüren bir Promise&#39;e dönüştürür.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">readFilePromise</span>(<span style="color:#e6db74">&#39;../data/ghibli_movies.txt&#39;</span>).<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">idListesineCevir</span>)
+</span></span></code></pre></div><p>Burada dikkat çekmek istediğim şey, sync olarak bu fonksiyonumuzu kullandığımız zaman direk olarak, fonksiyon parametresi olarak Buffer veriyoruz. Promise kullanımı buna yakın ve temiz görünürken, eski tarz Node.js error first callback kullandığımız zaman, tamamen bu yapıya özel ekstra kod yazmamız gerekiyor. Error first callback kullanırken, hata olma durumunu kontrol etmek bizim sorumluluğumuzdayken, Promise&rsquo;lerde başarılı sonuçlanma, ve hata durumları için ayrı fonksiyonlar tanımlayabiliyoruz. Aynı zamanda Promise&rsquo;leri birbiri ardına bağlayarak kullanabilirken, error first callbackler ile bunu yapmak biraz daha uğraş verici oluyor.</p>
 <p>Örnek vermek gerekirse:</p>
-
-<pre><code class="language-js">// Promise veya callback olmadan, sync kullanım. Eğer bir hata olursa, exception throwlanır.
-const ids = idListesineCevir(fs.readFileSync('../data/ghibli_movies.txt');
-console.log(islemYap(ids[0]));
-
-// zincirleme şekilde dosya okuma sonucunu id listesine çevir, ilk film id'si için işlem başlat, sonucu ekrana yazdır
-readFilePromise('../data/ghibli_movies.txt')
-	.then(idListesineCevir)
-	.then((ids) =&gt; islemYap(ids[0]))
-	.then(console.log)
-	// Herhangi bir adımda hata oluşurse, bu fonksiyon çağırılacak.
-	.catch(console.log);
-
-// aynı işlemi callback ile yapmak istediğimizde sonuç:
-fs.readFile('../data/ghibli_movies.txt', (err, buffer) =&gt; {
-	if(err) console.log(err);
-	const id = idListesineCevir(buffer)[0];
-	islemYap(id, function(err, result){
-		if(err) return console.log(err);
-		console.log(result);
-	});
-})
-
-</code></pre>
-
-<p>Yukarıdaki callback, daha düzgün bir şekilde, yeni fonksiyonlar tanımlanarak yazılabilir. Veya yardımcı bir kütüphane kullanılarak, daha düz hale getirilebilir, fakat&hellip; Promiseler için en önemli ve kritik özellik, Node&rsquo;un son versiyonlarında, kullanabilmeye başladığımız, async/await anahtar kelimeleri. Promise&rsquo;ler, temelde düşünüldüğü zaman, sync fonksiyonlar ile async fonksiyonlar arasında bağlantı sağlayan, sync olarak parametre verilerek başlayan, gelecekte ya başarılı bir değer, ya da hata döndüren birer fonksiyondur.</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#75715e">// Promise veya callback olmadan, sync kullanım. Eğer bir hata olursa, exception throwlanır.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">ids</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">idListesineCevir</span>(<span style="color:#a6e22e">fs</span>.<span style="color:#a6e22e">readFileSync</span>(<span style="color:#e6db74">&#39;../data/ghibli_movies.txt&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">islemYap</span>(<span style="color:#a6e22e">ids</span>[<span style="color:#ae81ff">0</span>]));
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// zincirleme şekilde dosya okuma sonucunu id listesine çevir, ilk film id&#39;si için işlem başlat, sonucu ekrana yazdır
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">readFilePromise</span>(<span style="color:#e6db74">&#39;../data/ghibli_movies.txt&#39;</span>)
+</span></span><span style="display:flex;"><span>	.<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">idListesineCevir</span>)
+</span></span><span style="display:flex;"><span>	.<span style="color:#a6e22e">then</span>((<span style="color:#a6e22e">ids</span>) =&gt; <span style="color:#a6e22e">islemYap</span>(<span style="color:#a6e22e">ids</span>[<span style="color:#ae81ff">0</span>]))
+</span></span><span style="display:flex;"><span>	.<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// Herhangi bir adımda hata oluşurse, bu fonksiyon çağırılacak.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	.<span style="color:#66d9ef">catch</span>(<span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// aynı işlemi callback ile yapmak istediğimizde sonuç:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">fs</span>.<span style="color:#a6e22e">readFile</span>(<span style="color:#e6db74">&#39;../data/ghibli_movies.txt&#39;</span>, (<span style="color:#a6e22e">err</span>, <span style="color:#a6e22e">buffer</span>) =&gt; {
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">if</span>(<span style="color:#a6e22e">err</span>) <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">err</span>);
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">id</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">idListesineCevir</span>(<span style="color:#a6e22e">buffer</span>)[<span style="color:#ae81ff">0</span>];
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">islemYap</span>(<span style="color:#a6e22e">id</span>, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">err</span>, <span style="color:#a6e22e">result</span>){
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">if</span>(<span style="color:#a6e22e">err</span>) <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">err</span>);
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">result</span>);
+</span></span><span style="display:flex;"><span>	});
+</span></span><span style="display:flex;"><span>})
+</span></span></code></pre></div><p>Yukarıdaki callback, daha düzgün bir şekilde, yeni fonksiyonlar tanımlanarak yazılabilir. Veya yardımcı bir kütüphane kullanılarak, daha düz hale getirilebilir, fakat&hellip; Promiseler için en önemli ve kritik özellik, Node&rsquo;un son versiyonlarında, kullanabilmeye başladığımız, async/await anahtar kelimeleri. Promise&rsquo;ler, temelde düşünüldüğü zaman, sync fonksiyonlar ile async fonksiyonlar arasında bağlantı sağlayan, sync olarak parametre verilerek başlayan, gelecekte ya başarılı bir değer, ya da hata döndüren birer fonksiyondur.</p>
 <p>Promiselerin dönüş yapısı sync fonksiyonların exception throwlamasına benzetilebilir. Ve gelecekte değer döndürme belirtmek ve beklemek için özel anahtar kelimeler kullanılabilir. Async/Await tamamen bunu yapmak için yaratılmıştır. Basit anlamda düşünürsek, sizin sync&rsquo;e benzer şekilde yazdığınız kodu, Promise&rsquo;lerdeki <code>.then</code> ve <code>.catch</code> yapısına çevirir. Promise&rsquo;ler ile tamamen uyumlu şekilde çalışırlar.</p>
-
 <p>Daha önceki örnekte bahsettiğim gibi, eğer bir Promise&rsquo;e fonksiyon vererek, içinde sync işlem yapsanız bile, sonuçta elinizde gene bir Promise olacak. Async/Await&rsquo;de bu mantıkla çalışmaktadır. Await kelimesi sadece async fonksiyonlar(yani Promise&rsquo;ler) içinde kullanılabilir ve async fonksiyonlar Promise&rsquo;den başka bir şey döndüremez.</p>
-
 <p>bir async fonksiyonun, promise olarak nasıl göründüğünü daha iyi anlıyalım.</p>
-
-<pre><code class="language-js">async function z(){
-  return 4;
-}
-async function x(){
-  const r = await z();
-  const r2 = await z();
-  return r + r2 + 5;
-}
-
-// async/await olmasaydı... iç içe .then yaptığımız bir promise gibi düşünebilirdik.
-function x2(){
-  return Promise.resolve().then(() =&gt; z().then(r =&gt; z().then(r2 =&gt; r + r2 + 5)))
-}
-
-x().then(console.log)
-x2().then(console.log)
-</code></pre>
-
-<p>hem x, hemde x2 fonksiyonu, sonuç olarak 13 döndürecektir.</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">z</span>(){
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">4</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">x</span>(){
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">r</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">z</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">r2</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">z</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">r</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">r2</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">5</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// async/await olmasaydı... iç içe .then yaptığımız bir promise gibi düşünebilirdik.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">x2</span>(){
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> Promise.<span style="color:#a6e22e">resolve</span>().<span style="color:#a6e22e">then</span>(() =&gt; <span style="color:#a6e22e">z</span>().<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">r</span> =&gt; <span style="color:#a6e22e">z</span>().<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">r2</span> =&gt; <span style="color:#a6e22e">r</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">r2</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">5</span>)))
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">x</span>().<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>)
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">x2</span>().<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>)
+</span></span></code></pre></div><p>hem x, hemde x2 fonksiyonu, sonuç olarak 13 döndürecektir.</p>
 <p>Async/Await hakkında bilgi sahibi olduktan sonra, yukarıdaki Promise ve Error First Callbacklere alternatif olarak, kodumuzu tekrar yazarsak;</p>
-
-<pre><code class="language-js">async function main(){
-	const buffer = await readFilePromise('../data/ghibli_movies.txt');
-	const id = idListesineCevir(buffer)[0];
-	console.log(await islemYap(id)); 
-}
-
-// Main bir async fonksiyon, yani Promise olduğu için, .then ve .catch kullanabiliriz.
-main().then(console.log).catch(console.log)
-</code></pre>
-
-<p>Bu kodun, ilk yazdığımız Sync örneğe ne kadar benzediğini kolayca görebilirsiniz. Async faydalarının hepsini Promise yapısını kullanarak, yine elde ediyoruz. Fakat, async/await kullanarak sync kod&rsquo;a oldukca benzeyen bir yapıya sahip oluyoruz! Oldukca güzel bir özellik!</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">main</span>(){
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">buffer</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">readFilePromise</span>(<span style="color:#e6db74">&#39;../data/ghibli_movies.txt&#39;</span>);
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">id</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">idListesineCevir</span>(<span style="color:#a6e22e">buffer</span>)[<span style="color:#ae81ff">0</span>];
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#66d9ef">await</span> <span style="color:#a6e22e">islemYap</span>(<span style="color:#a6e22e">id</span>)); 
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Main bir async fonksiyon, yani Promise olduğu için, .then ve .catch kullanabiliriz.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">main</span>().<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>).<span style="color:#66d9ef">catch</span>(<span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>)
+</span></span></code></pre></div><p>Bu kodun, ilk yazdığımız Sync örneğe ne kadar benzediğini kolayca görebilirsiniz. Async faydalarının hepsini Promise yapısını kullanarak, yine elde ediyoruz. Fakat, async/await kullanarak sync kod&rsquo;a oldukca benzeyen bir yapıya sahip oluyoruz! Oldukca güzel bir özellik!</p>
 <h2 id="async-olarak-tek-bir-film-ile-işlem-yapmak">Async olarak, tek bir film ile işlem yapmak.</h2>
-
 <p>Şimdi problemimize geri dönelim. Yaptığımız işlemlerin sync olduğunu, ve async kullanmamız gerektiğini söylemiştik. Şimdi async/await kullanarak kodumuz tekrar yazalım.</p>
-
-<pre><code class="language-js">// promise döndürecek şekilde async istek yapmamızı sağlayacak olan kütüphane.
-const request = require('request-promise-native');
-
-// sync benzeri kod yazabilmek için, async (promise döndüren) bir fonksiyon yazalım.
-async function main(){
-  const movieID = &quot;2baf70d1-42bb-4437-b551-e5fed5a87abe&quot;;
-
-  // API'ye yaptığımız istek
-  const resultStr = await request(`https://ghibliapi.herokuapp.com/films/${movieID}`);
-  // API'den gelen string cevabı, javascript objesini çevirmek için JSON parse işlemi
-  const body = JSON.parse(resultStr);
-  // obje içerisindeki title ve description değerlerinin, aynı isimle değişkene atanması.
-  const { title, description } = body;
-
-  // Artık sonucu ekrana yazdırabiliriz.
-  console.log(`Film Adı: ${title}`);
-  console.log(`Filmin açıklaması: ${description}`);
-}
-
-// main fonksiyonunu çalıştır, ve dönen promise değerinde sonuç ve hata olması durumunda, konsola çıktı ver.
-main().then(console.log, console.log);
-// main fonksiyonunun bloklamadığını kanıtlamak için, ekrana yazı yazalım.
-console.log('Main fonksiyonu çağrıldı!');
-</code></pre>
-
-<p>Bu scripti çalıştırdığımız zaman, çıktı olarak gözlemleyeceğimiz şey;</p>
-
-<pre><code>Main fonksiyonu çağrıldı!
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#75715e">// promise döndürecek şekilde async istek yapmamızı sağlayacak olan kütüphane.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">request</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;request-promise-native&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// sync benzeri kod yazabilmek için, async (promise döndüren) bir fonksiyon yazalım.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">main</span>(){
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">movieID</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;2baf70d1-42bb-4437-b551-e5fed5a87abe&#34;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// API&#39;ye yaptığımız istek
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">resultStr</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">request</span>(<span style="color:#e6db74">`https://ghibliapi.herokuapp.com/films/</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">movieID</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// API&#39;den gelen string cevabı, javascript objesini çevirmek için JSON parse işlemi
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">body</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">JSON</span>.<span style="color:#a6e22e">parse</span>(<span style="color:#a6e22e">resultStr</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// obje içerisindeki title ve description değerlerinin, aynı isimle değişkene atanması.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">const</span> { <span style="color:#a6e22e">title</span>, <span style="color:#a6e22e">description</span> } <span style="color:#f92672">=</span> <span style="color:#a6e22e">body</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Artık sonucu ekrana yazdırabiliriz.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`Film Adı: </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">title</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`Filmin açıklaması: </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">description</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// main fonksiyonunu çalıştır, ve dönen promise değerinde sonuç ve hata olması durumunda, konsola çıktı ver.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">main</span>().<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>, <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// main fonksiyonunun bloklamadığını kanıtlamak için, ekrana yazı yazalım.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#39;Main fonksiyonu çağrıldı!&#39;</span>);
+</span></span></code></pre></div><p>Bu scripti çalıştırdığımız zaman, çıktı olarak gözlemleyeceğimiz şey;</p>
+<pre tabindex="0"><code>Main fonksiyonu çağrıldı!
 Film Adı: Castle in the Sky
-Filmin açıklaması: The orphan Sheeta inherited a mysterious crystal that links her to the mythical sky-kingdom of Laputa. With the help of resourceful Pazu and a rollicking band of sky pirates, she makes her way to the ruins of the once-great civilization. Sheeta and Pazu must outwit the evil Muska, who plans to use Laputa's science to make himself ruler of the world.
+Filmin açıklaması: The orphan Sheeta inherited a mysterious crystal that links her to the mythical sky-kingdom of Laputa. With the help of resourceful Pazu and a rollicking band of sky pirates, she makes her way to the ruins of the once-great civilization. Sheeta and Pazu must outwit the evil Muska, who plans to use Laputa&#39;s science to make himself ruler of the world.
 undefined
-</code></pre>
-
-<p>Burada görüldüğü üzere, <code>Main fonksiyonu çağrıldı!</code> yazısı, main fonksiyonu çağrıldıktan sonra yazılmış olsa bile, main fonksiyonu bloklamadığı için, ilk önce bu yazıyı görüyoruz. Daha sonra ağ isteğimiz sonuçlanıyor, film bilgileri yazdırılıyor ve main fonksiyonumuzun döndürdüğü Promise sonlanıyor. Main fonksiyonundan herhangi bir değer döndürmediğimiz için, sonuç undefined oluyor ve <code>.then</code> fonksiyonunda bu undefined değeri ekrana yazdırılıyor.</p>
-
+</code></pre><p>Burada görüldüğü üzere, <code>Main fonksiyonu çağrıldı!</code> yazısı, main fonksiyonu çağrıldıktan sonra yazılmış olsa bile, main fonksiyonu bloklamadığı için, ilk önce bu yazıyı görüyoruz. Daha sonra ağ isteğimiz sonuçlanıyor, film bilgileri yazdırılıyor ve main fonksiyonumuzun döndürdüğü Promise sonlanıyor. Main fonksiyonundan herhangi bir değer döndürmediğimiz için, sonuç undefined oluyor ve <code>.then</code> fonksiyonunda bu undefined değeri ekrana yazdırılıyor.</p>
 <p>İlk sync versiyonumuza çok benzer bir şekilde, ağ işlemi; async olan bir kod yazmış olduk.</p>
-
 <h2 id="async-olarak-birden-fazla-film-ile-işlem-yapmak">Async olarak, birden fazla film ile işlem yapmak</h2>
-
 <p>İşlerin biraz kafa karıştırıcı hal aldığı durum burası. Aync/await kodun sync&rsquo;e benzerliği sayesinde, kolayca birden fazla filmi async olarak işleyebiliriz.</p>
-
-<pre><code class="language-js">// Dosya okumak için node.js kütüphanemizi alalım.
-const fs = require('fs');
-// node.js error-first callbackleri Promise'e çevirmemize yardımcı olan fonksiyon
-const { promisify } = require('util');
-// readFile error first async fonksiyonunu, promise döndürecek şekilde çeviriyoruz.
-const readFilePromise = promisify(fs.readFile);
-// promise döndürecek şekilde async istek yapmamızı sağlayacak olan kütüphane.
-const request = require('request-promise-native');
-
-// sync benzeri kod yazabilmek için, async (promise döndüren) bir fonksiyon yazalım.
-async function main(){
-  // Dosya okuyan async kodu başlatalım, sonuctaki her bir satırı, dizi elemanı olarak alalım.
-  const movieIDs = (await readFilePromise('../data/ghibli_movies.txt')).toString().split('\n');
-
-  // Her bir dizi elemanı için async olarak istek gönderelim.
-  for(let movieID of movieIDs){
-    // API'ye yaptığımız istek
-    const resultStr = await request(`https://ghibliapi.herokuapp.com/films/${movieID}`);
-    // API'den gelen string cevabı, javascript objesini çevirmek için JSON parse işlemi
-    const body = JSON.parse(resultStr);
-    // obje içerisindeki title ve description değerlerinin, aynı isimle değişkene atanması.
-    const { title, description } = body;
-
-    // Artık sonucu ekrana yazdırabiliriz.
-    console.log(`Film Adı: ${title}`);
-    console.log(`Filmin açıklaması: ${description}`);
-  }
-}
-
-// main fonksiyonunu çalıştır, ve dönen promise değerinde sonuç ve hata olması durumunda, konsola çıktı ver.
-main().then(console.log, console.log);
-// main fonksiyonunun bloklamadığını kanıtlamak için, ekrana yazı yazalım.
-console.log('Main fonksiyonu çağrıldı!');
-</code></pre>
-
-<p>Bu kodu çalıştırdığımızda, ağ işleminin async olmasına rağmen, beklediğimizden yavaş çalıştığını göreceğiz. Hani async sayesinde birden fazla ağ isteğini aynı anda yapabilecektik? İlk geleni işleyecektik? Buradaki sıkıntı async/await&rsquo;in, promise&rsquo;e dönüştürülürken, takip etmesi gereken adımlar. Şuanda bu yapı ile özet olarak şu şekilde bir yapıya sahip oluyoruz:</p>
-
-<pre><code class="language-js">let promise = Promise.resolve();
-for(let movieID of movieIDs){
-    promise = promise.then(() =&gt; request(...movieID)).then((result) =&gt; ...));
-}
-</code></pre>
-
-<p>yani tek bir Promise zinciri oluşturuluyor. Bu yüzden network isteklerimizden biri bitmeden, bir sonraki başlamıyor. Burada uygulamanın yavaş çalışmasına rağmen, not düşmek istediğim bir konu var. Tüm ağ isteklerini, sırayla başlatmak yerine, hepsini aynı anda başlatabiliriz. Ama bu bizim Node.js uygulamamızı blokladığımız zamanı değiştirmeyecek. Sadece bu işlemin daha hızlı sonlanmasını/toplamda daha az zaman almasını sağlayacak. Burada ne demek istiyorum?</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#75715e">// Dosya okumak için node.js kütüphanemizi alalım.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">fs</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;fs&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// node.js error-first callbackleri Promise&#39;e çevirmemize yardımcı olan fonksiyon
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> { <span style="color:#a6e22e">promisify</span> } <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;util&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// readFile error first async fonksiyonunu, promise döndürecek şekilde çeviriyoruz.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">readFilePromise</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">promisify</span>(<span style="color:#a6e22e">fs</span>.<span style="color:#a6e22e">readFile</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// promise döndürecek şekilde async istek yapmamızı sağlayacak olan kütüphane.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">request</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;request-promise-native&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// sync benzeri kod yazabilmek için, async (promise döndüren) bir fonksiyon yazalım.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">main</span>(){
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Dosya okuyan async kodu başlatalım, sonuctaki her bir satırı, dizi elemanı olarak alalım.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">movieIDs</span> <span style="color:#f92672">=</span> (<span style="color:#66d9ef">await</span> <span style="color:#a6e22e">readFilePromise</span>(<span style="color:#e6db74">&#39;../data/ghibli_movies.txt&#39;</span>)).<span style="color:#a6e22e">toString</span>().<span style="color:#a6e22e">split</span>(<span style="color:#e6db74">&#39;\n&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Her bir dizi elemanı için async olarak istek gönderelim.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">movieID</span> <span style="color:#66d9ef">of</span> <span style="color:#a6e22e">movieIDs</span>){
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// API&#39;ye yaptığımız istek
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">resultStr</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">request</span>(<span style="color:#e6db74">`https://ghibliapi.herokuapp.com/films/</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">movieID</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// API&#39;den gelen string cevabı, javascript objesini çevirmek için JSON parse işlemi
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">body</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">JSON</span>.<span style="color:#a6e22e">parse</span>(<span style="color:#a6e22e">resultStr</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// obje içerisindeki title ve description değerlerinin, aynı isimle değişkene atanması.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">const</span> { <span style="color:#a6e22e">title</span>, <span style="color:#a6e22e">description</span> } <span style="color:#f92672">=</span> <span style="color:#a6e22e">body</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Artık sonucu ekrana yazdırabiliriz.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`Film Adı: </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">title</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`Filmin açıklaması: </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">description</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// main fonksiyonunu çalıştır, ve dönen promise değerinde sonuç ve hata olması durumunda, konsola çıktı ver.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">main</span>().<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>, <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// main fonksiyonunun bloklamadığını kanıtlamak için, ekrana yazı yazalım.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#39;Main fonksiyonu çağrıldı!&#39;</span>);
+</span></span></code></pre></div><p>Bu kodu çalıştırdığımızda, ağ işleminin async olmasına rağmen, beklediğimizden yavaş çalıştığını göreceğiz. Hani async sayesinde birden fazla ağ isteğini aynı anda yapabilecektik? İlk geleni işleyecektik? Buradaki sıkıntı async/await&rsquo;in, promise&rsquo;e dönüştürülürken, takip etmesi gereken adımlar. Şuanda bu yapı ile özet olarak şu şekilde bir yapıya sahip oluyoruz:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">let</span> <span style="color:#a6e22e">promise</span> <span style="color:#f92672">=</span> Promise.<span style="color:#a6e22e">resolve</span>();
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">movieID</span> <span style="color:#66d9ef">of</span> <span style="color:#a6e22e">movieIDs</span>){
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">promise</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">promise</span>.<span style="color:#a6e22e">then</span>(() =&gt; <span style="color:#a6e22e">request</span>(...<span style="color:#a6e22e">movieID</span>)).<span style="color:#a6e22e">then</span>((<span style="color:#a6e22e">result</span>) =&gt; ...));
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>yani tek bir Promise zinciri oluşturuluyor. Bu yüzden network isteklerimizden biri bitmeden, bir sonraki başlamıyor. Burada uygulamanın yavaş çalışmasına rağmen, not düşmek istediğim bir konu var. Tüm ağ isteklerini, sırayla başlatmak yerine, hepsini aynı anda başlatabiliriz. Ama bu bizim Node.js uygulamamızı blokladığımız zamanı değiştirmeyecek. Sadece bu işlemin daha hızlı sonlanmasını/toplamda daha az zaman almasını sağlayacak. Burada ne demek istiyorum?</p>
 <p>Diyelim ki, her gönderdiğimiz istek 300 milisaniye alıyor, ve gelen cevabın işlenip ekrana yazdırılması ise 10 ms sürüyor. 300 milisaniyelik ağ isteği async olduğu için, nodejs işlemimiz bu ağ isteği gönderildikten sonra, çalışmasına devam edebilir, başka bir yerde, CPU harcayan bir kodunuz varsa(şuan bizim scriptimizde yok) onu çalıştırabilir. Ama ağ isteğinden cevap geldikten ve sıra işleme/yazdırma kodumuza geldiğinde 10 ms boyunca CPU&rsquo;yu bu fonksiyonumuz bloklayacak. Daha sonra 300 milisaniye süren, yeni bir ağ isteği başlatılacak, ve yine CPU kullanmak isteyen farklı bir kod parçacağı varsa o çağrılabilecek. Yani biz aslında bu kod ile, her film id&rsquo;si için sadece 10 milisaniye bloklamış oluyoruz. Ve toplam CPU bloklama süremiz, <code>10 * film id sayısı</code> milisaniye oluyor. Fakat algoritmamız: <code>ağ isteği gönder, cevabın gelmesini bekle, işle ve yazdır, ağ isteği gönder...</code> şeklinde olduğu için, toplam işlem süremiz:  <code>(300 + 10) * film id sayısı</code> milisaniye oluyor.</p>
-
 <p>Bu durumu, algoritmamımızı: <code>bir filmid için; ağ isteği başlatıp, sonucu işleyen ve yazdıran bir promise zinciri oluştur, tüm film id için bu promise zincirlerini aynı anda başlat</code> şeklinde değiştirirsek, bloklama süremiz yine değişmeyecek. Her işlemi işlemesi ve yazdırması 10 milisaniye süreceği için, gene <code>10 * film id sayısı</code> milisaniye CPU bloklamış olacağız. Fakat ağ istekleri aynı anda başlatıldığı için, hepsi farklı sürede bitecek, ve en uzun süren isteğin 500 ms olduğunu varsayarsak, <code>500 + (10 * film id sayısı)</code> milisaniye sonra, programımız sonlanmış olacak. Bu da script&rsquo;in çalışma süresinde çok büyük bir düşüşe sebep olmuş olacak. Hatta kendi bilgisayarımdan ve internet bağlantımdan örnek vermem gerekirse; şuanki kod 25 saniyede çalışırken, optimize edilmiş şekilde yazdığım kod, 1.5 saniye sürüyor. 20 tane film id&rsquo;si olduğunu varsayarsak, demek ki tek bir isteğin sonuçlanması ortalama 1.25 saniye sürüyor, ve tüm ağ isteklerini aynı anda başlattığımda, en uzun süren işlem 1.5 saniye tutuyor. Burada unutmamamız gereken, bloklama süresinin iki örnek içinde aynı olduğu. Yani eğer ağ istekleri 10 milisaniye tutsaydı, ve CPU işlemleri 1.5 saniye tutsaydı, iki örnekte benzer sürede bitecekti.</p>
-
 <p>Bu işlemin, daha hızlı biten versiyonunu yazabilmek için async/await fonksiyonları ile Promise bilgilerimizi birbiri ile birleştirip, ortaya bir karışım çıkarmamız gerkiyor. Bundan önce, uygulamamızı fonksiyonlara ayrıştırıp, kodumuzu daha düzenli hale getirelim. Ve son olarak, promise ile daha performanslı olarak yazmaya çalışalım.</p>
-
 <h3 id="fonksiyonlara-ayrıştırmak">Fonksiyonlara ayrıştırmak</h3>
-
 <p>Sync veya Async nasıl kodlarsak kodlayalım, uygulamamızın bazı kısımları tamamen saf, sync olarak çalışacak mantıklar içermektedir. Örnek vermek gerekirse, dosya okuma işlememiz sync/async olabilir ama, sonuç olarak elimizde olan değer string olduğu için, dosyayı dizi listesine çevirme işlemimiz hep aynı sync kod ile yapılıyor.</p>
-
 <p>Aynı şekilde network isteğimiz sync/async olabilir ama gelen string cevabı hep JSON&rsquo;a parselayıp, içindeki title ve description bilgisini aynı şekilde alıyoruz. Ve ekrana yazma fonksiyonumuzda aynı şekilde hep aynı kalıyor.</p>
-
 <p>Bu fonksiyonları ayırıp, bir önceki async/await kodumuzu tekrar yazdığımızda böyle bir şey elde ediyoruz:</p>
-
-<pre><code class="language-js">// Dosya okumak için node.js kütüphanemizi alalım.
-const fs = require('fs');
-// node.js error-first callbackleri Promise'e çevirmemize yardımcı olan fonksiyon
-const { promisify } = require('util');
-// readFile error first async fonksiyonunu, promise döndürecek şekilde çeviriyoruz.
-const readFilePromise = promisify(fs.readFile);
-// promise döndürecek şekilde async istek yapmamızı sağlayacak olan kütüphane.
-const request = require('request-promise-native');
-
-function convertFileBufferToIDArray(buffer){
-  return buffer.toString().split('\n');
-}
-
-// verilen string'i json parse yaparak, film modeline çevirme işlemi.
-function parseResponseToTitleAndDescription(resultStr){
-  const body = JSON.parse(resultStr);
-  return { title, description } = body;
-}
-
-// verilen başlık ve açıklamayı, konsola yazdırma
-function outputMovieToConsole({ title, description }){
-  console.log(`Film Adı: ${title}`);
-  console.log(`Filmin açıklaması: ${description}`);
-}
-
-// string olarak gelen cevabı film modeline işle ve ekrana bastır.
-function parseAndOutput(resultStr){
-  const movie = parseResponseToTitleAndDescription(resultStr);
-  return outputMovieToConsole(movie);
-}
-
-// sync benzeri kod yazabilmek için, async (promise döndüren) bir fonksiyon yazalım.
-async function main(){
-  // Dosya okuyan async kodu başlatalım, sonuctaki her bir satırı, dizi elemanı olarak alalım.
-  const buffer = await readFilePromise('../data/ghibli_movies.txt');
-  const movieIDs = convertFileBufferToIDArray(buffer);
-
-  // Her bir dizi elemanı için async olarak istek gönderelim.
-  for(let movieID of movieIDs){
-    // API'ye yaptığımız istek
-    const resultStr = await request(`https://ghibliapi.herokuapp.com/films/${movieID}`);
-    parseAndOutput(resultStr);
-  }
-}
-
-// main fonksiyonunu çalıştır, ve dönen promise değerinde sonuç ve hata olması durumunda, konsola çıktı ver.
-main().then(console.log, console.log);
-// main fonksiyonunun bloklamadığını kanıtlamak için, ekrana yazı yazalım.
-console.log('Main fonksiyonu çağrıldı!');
-</code></pre>
-
-<p>Uygulamamızın sabit mantığını fonksiyonlara taşıyarak, async içerisindeki kodu oldukca azalttık. Artık sync veya farklı bir şekilde kod yazsak bile, async kısma bulaşmayan kodumuz aynı çalışacak.</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#75715e">// Dosya okumak için node.js kütüphanemizi alalım.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">fs</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;fs&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// node.js error-first callbackleri Promise&#39;e çevirmemize yardımcı olan fonksiyon
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> { <span style="color:#a6e22e">promisify</span> } <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;util&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// readFile error first async fonksiyonunu, promise döndürecek şekilde çeviriyoruz.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">readFilePromise</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">promisify</span>(<span style="color:#a6e22e">fs</span>.<span style="color:#a6e22e">readFile</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// promise döndürecek şekilde async istek yapmamızı sağlayacak olan kütüphane.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">request</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;request-promise-native&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">convertFileBufferToIDArray</span>(<span style="color:#a6e22e">buffer</span>){
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">buffer</span>.<span style="color:#a6e22e">toString</span>().<span style="color:#a6e22e">split</span>(<span style="color:#e6db74">&#39;\n&#39;</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// verilen string&#39;i json parse yaparak, film modeline çevirme işlemi.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">parseResponseToTitleAndDescription</span>(<span style="color:#a6e22e">resultStr</span>){
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">body</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">JSON</span>.<span style="color:#a6e22e">parse</span>(<span style="color:#a6e22e">resultStr</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> { <span style="color:#a6e22e">title</span>, <span style="color:#a6e22e">description</span> } <span style="color:#f92672">=</span> <span style="color:#a6e22e">body</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// verilen başlık ve açıklamayı, konsola yazdırma
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">outputMovieToConsole</span>({ <span style="color:#a6e22e">title</span>, <span style="color:#a6e22e">description</span> }){
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`Film Adı: </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">title</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`Filmin açıklaması: </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">description</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// string olarak gelen cevabı film modeline işle ve ekrana bastır.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">parseAndOutput</span>(<span style="color:#a6e22e">resultStr</span>){
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">movie</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">parseResponseToTitleAndDescription</span>(<span style="color:#a6e22e">resultStr</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">outputMovieToConsole</span>(<span style="color:#a6e22e">movie</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// sync benzeri kod yazabilmek için, async (promise döndüren) bir fonksiyon yazalım.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">main</span>(){
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Dosya okuyan async kodu başlatalım, sonuctaki her bir satırı, dizi elemanı olarak alalım.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">buffer</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">readFilePromise</span>(<span style="color:#e6db74">&#39;../data/ghibli_movies.txt&#39;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">movieIDs</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">convertFileBufferToIDArray</span>(<span style="color:#a6e22e">buffer</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Her bir dizi elemanı için async olarak istek gönderelim.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">movieID</span> <span style="color:#66d9ef">of</span> <span style="color:#a6e22e">movieIDs</span>){
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// API&#39;ye yaptığımız istek
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">resultStr</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">request</span>(<span style="color:#e6db74">`https://ghibliapi.herokuapp.com/films/</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">movieID</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">parseAndOutput</span>(<span style="color:#a6e22e">resultStr</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// main fonksiyonunu çalıştır, ve dönen promise değerinde sonuç ve hata olması durumunda, konsola çıktı ver.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">main</span>().<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>, <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// main fonksiyonunun bloklamadığını kanıtlamak için, ekrana yazı yazalım.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#39;Main fonksiyonu çağrıldı!&#39;</span>);
+</span></span></code></pre></div><p>Uygulamamızın sabit mantığını fonksiyonlara taşıyarak, async içerisindeki kodu oldukca azalttık. Artık sync veya farklı bir şekilde kod yazsak bile, async kısma bulaşmayan kodumuz aynı çalışacak.</p>
 <h3 id="promise-kullanarak-çoklu-işlemde-performansı-arttırmak">Promise kullanarak çoklu işlemde performansı arttırmak</h3>
-
 <p>Bir Promise zinciri oluşturmak yerine, Promise oluşturma işlemini async await&rsquo;e bırakmak yerine, kendimiz belirleyerek, daha performanslı bir kod elde edebiliriz.</p>
-
-<pre><code class="language-js">// sync benzeri kod yazabilmek için, async (promise döndüren) bir fonksiyon yazalım.
-async function main(){
-  // Dosya okuyan async kodu başlatalım, sonuctaki her bir satırı, dizi elemanı olarak alalım.
-  const buffer = await readFilePromise('../data/ghibli_movies.txt');
-  const movieIDs = convertFileBufferToIDArray(buffer);
-
-  // Promise all kullanarak, aynı anda birden fazla async işlem başlatıp, hepsinin bitmesini bekleyebiliriz.
-  // await ile bu işlemler bitmeden main fonksiyonunu sonlandırmak istemediğimiz söylüyoruz.
-  await Promise.all(
-      // her bir film id için,
-      movieIDs.map((movieID) =&gt; 
-        // async bir işlem başlat
-        request(`https://ghibliapi.herokuapp.com/films/${movieID}`)
-          // bu işlem bittikten sonra, sonucu işle ve ekrana yazdır.
-          .then(parseAndOutput)
-      )
-  )
-
-  console.log('Main fonksiyonunun çalışması bitti.');
-}
-</code></pre>
-
-<p>Main fonksiyonumuzu bu şekilde değiştirdikten sonra, film çekilme işleminin hızlandığını ve çıktıların sıralarının her çalıştırmada değiştiğini görüyoruz. Artık tüm network istekleri eş zamanlı olarak çalıştırılıyor ve ilk biten istek için işleme ve ekrana yazdırma işlemi yapılıyor.</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#75715e">// sync benzeri kod yazabilmek için, async (promise döndüren) bir fonksiyon yazalım.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">main</span>(){
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Dosya okuyan async kodu başlatalım, sonuctaki her bir satırı, dizi elemanı olarak alalım.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">buffer</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">readFilePromise</span>(<span style="color:#e6db74">&#39;../data/ghibli_movies.txt&#39;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">movieIDs</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">convertFileBufferToIDArray</span>(<span style="color:#a6e22e">buffer</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Promise all kullanarak, aynı anda birden fazla async işlem başlatıp, hepsinin bitmesini bekleyebiliriz.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// await ile bu işlemler bitmeden main fonksiyonunu sonlandırmak istemediğimiz söylüyoruz.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">await</span> Promise.<span style="color:#a6e22e">all</span>(
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e">// her bir film id için,
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>      <span style="color:#a6e22e">movieIDs</span>.<span style="color:#a6e22e">map</span>((<span style="color:#a6e22e">movieID</span>) =&gt; 
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// async bir işlem başlat
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#a6e22e">request</span>(<span style="color:#e6db74">`https://ghibliapi.herokuapp.com/films/</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">movieID</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>)
+</span></span><span style="display:flex;"><span>          <span style="color:#75715e">// bu işlem bittikten sonra, sonucu işle ve ekrana yazdır.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>          .<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">parseAndOutput</span>)
+</span></span><span style="display:flex;"><span>      )
+</span></span><span style="display:flex;"><span>  )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#39;Main fonksiyonunun çalışması bitti.&#39;</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Main fonksiyonumuzu bu şekilde değiştirdikten sonra, film çekilme işleminin hızlandığını ve çıktıların sıralarının her çalıştırmada değiştiğini görüyoruz. Artık tüm network istekleri eş zamanlı olarak çalıştırılıyor ve ilk biten istek için işleme ve ekrana yazdırma işlemi yapılıyor.</p>
 <p>Özet olarak; async/await&rsquo;in okunulabilirlik açısından sağladığı faydaların, Promise kullanımı bilmeden, performansı kötü etkileyici bir faktör olabildiğini, ve Promise primitivelerini kullanarak uygulamamızı hızlandırabileceğimizi gördük.</p>
-
 <p>Fakat şöyle bir sıkıntı var. Bu tarz bir yapıda, eş zamanlı olarak kaç işlem başlatabileceğimizin, işlemlerin iptal edilebilmesinin kontrolü bizde değil. Ne kadar Promise&rsquo;ler ile çalışırken yardımcı kütüphaneler ile bu konularda biraz çözüm bulabilsekte, Promise&rsquo;ler tek bir async veri ile çalışmak üzere geliştirildiği için bu konularda eksiklik çekiyoruz. Burada devreye; kurtarıcımız, RxJS giriyor.</p>
-
 <h3 id="rxjs-ile-async-birden-fazla-film-işlemenin-yeniden-yazılması">RxJs ile async, birden fazla film işlemenin yeniden yazılması</h3>
-
 <p>Promise&rsquo;ler Async ve Tek veriler ile kullanıma uygun olduğu gibi, RxJS ise, async veri akışı ile çalışmak istediğimiz zamanda kullanılıyor. Promise&rsquo;ler, error first callbackler için nasıl güzel bir alternatif ise, RxJs&rsquo;de Node.JS streamleri için o kadar güzel bir alternatif. Promise&rsquo;ler gelecekte başarılı veya başarısız olabilecek tekil verileri ifade ederkeen, RxJs oberservable pattern kullanarak, zaman bağlı olarak bir veri akışını ifade ediyor. RxJs&rsquo;de Stream üzerindeki verileri tek tek işlemek için bir fonksiyon, hata olması durumunda başka bir fonksiyon ve Stream&rsquo;in sonuçlanmasında farklı bir fonksiyon tanımlayabiliyorsunuz.</p>
-
 <p>RxJs Streamleri, Promise&rsquo;ler gibi zincirlenme özelliklerine sahip, ve aynı zamanda kendi methodları içerisinde Promise&rsquo;leride destekliyor. RxJs&rsquo;in bir güzel özelliği ise, zamana bağlı işlemler için <a href="http://reactivex.io/documentation/operators.html">operator</a> adını verdiği methodlar içermesi. Bu methodlar ile el ile implemente etmesi zor olan bir çok veri akışı işleme özelliğini bedavaya alıyorsunuz.</p>
-
 <p>Az önceki kodumuza, eş zamanlı olarak maksimum 5 istek çağırmayı ve eğer toplam işlem süresi 2 saniyeyi geçerse tüm istekleri durdurmayı ekliyelim:</p>
-
 <p>İlk önce rxjs&rsquo;i projemize ekliyoruz.</p>
-
-<pre><code class="language-js">// rxjs kütüphanesini ekliyelim
-const Rx = require('rxjs/Rx');
-// kullanacağımız operatörleri alalım
-const { mergeMap, takeUntil } = require('rxjs/operators');
-</code></pre>
-
-<p>Daha sonrada projemizin sadece Main fonksiyon kısmını değiştiriyoruz:</p>
-
-<pre><code class="language-js">const timeoutPromise = new Promise((resolve, reject) =&gt; setTimeout(resolve, 2000));
-// sync benzeri kod yazabilmek için, async (promise döndüren) bir fonksiyon yazalım.
-async function main(){
-  // Dosya okuyan async kodu başlatalım, sonuctaki her bir satırı, dizi elemanı olarak alalım.
-  const buffer = await readFilePromise('../data/ghibli_movies.txt');
-  const movieIDs$ = Rx.Observable.from(convertFileBufferToIDArray(buffer));
-
-  // movieIDs streamini işlemek için bir hat oluştur, promise'e döndür ve bitmesini bekle.
-  await movieIDs$.pipe(
-      // her akıştan gelen veri için, verilen fonksiyondaki işlemi yap.
-      mergeMap((movieID) =&gt;
-        // movieID için istek gönder, sonucu işle.
-        request(`https://ghibliapi.herokuapp.com/films/${movieID}`).then(parseAndOutput),
-        undefined,
-        // aynı anda en fazla 5 promise bekliyor durumda olsun.
-        5
-      ),
-      // timeoutPromise bitene kadar çalış!
-      takeUntil(timeoutPromise)
-  ).toPromise();
-
-  console.log('Main fonksiyonunun çalışması bitti.');
-}
-</code></pre>
-
-<p>bunun sonucunda elde ettiğimiz scriptin, 2 saniyeden fazla çalışması durumunda kendini sonlandırdığını, ve anlık olarak en fazla 5 istek gönderdiğini görebiliriz. Umarım RxJs&rsquo;in operatörleri sayesinde kafanızdaki fikirleri, sonlu/sonsuz bir veri akışı üzerinde gerçekleştirmenin ne kadar kolay olduğunu anlayabilmişsinizdir.</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#75715e">// rxjs kütüphanesini ekliyelim
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">Rx</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;rxjs/Rx&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// kullanacağımız operatörleri alalım
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> { <span style="color:#a6e22e">mergeMap</span>, <span style="color:#a6e22e">takeUntil</span> } <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;rxjs/operators&#39;</span>);
+</span></span></code></pre></div><p>Daha sonrada projemizin sadece Main fonksiyon kısmını değiştiriyoruz:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">timeoutPromise</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Promise((<span style="color:#a6e22e">resolve</span>, <span style="color:#a6e22e">reject</span>) =&gt; <span style="color:#a6e22e">setTimeout</span>(<span style="color:#a6e22e">resolve</span>, <span style="color:#ae81ff">2000</span>));
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// sync benzeri kod yazabilmek için, async (promise döndüren) bir fonksiyon yazalım.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">main</span>(){
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Dosya okuyan async kodu başlatalım, sonuctaki her bir satırı, dizi elemanı olarak alalım.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">buffer</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">readFilePromise</span>(<span style="color:#e6db74">&#39;../data/ghibli_movies.txt&#39;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">movieIDs$</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">Rx</span>.<span style="color:#a6e22e">Observable</span>.<span style="color:#a6e22e">from</span>(<span style="color:#a6e22e">convertFileBufferToIDArray</span>(<span style="color:#a6e22e">buffer</span>));
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// movieIDs streamini işlemek için bir hat oluştur, promise&#39;e döndür ve bitmesini bekle.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">movieIDs$</span>.<span style="color:#a6e22e">pipe</span>(
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e">// her akıştan gelen veri için, verilen fonksiyondaki işlemi yap.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>      <span style="color:#a6e22e">mergeMap</span>((<span style="color:#a6e22e">movieID</span>) =&gt;
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// movieID için istek gönder, sonucu işle.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#a6e22e">request</span>(<span style="color:#e6db74">`https://ghibliapi.herokuapp.com/films/</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">movieID</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>).<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">parseAndOutput</span>),
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">undefined</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// aynı anda en fazla 5 promise bekliyor durumda olsun.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>      ),
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e">// timeoutPromise bitene kadar çalış!
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>      <span style="color:#a6e22e">takeUntil</span>(<span style="color:#a6e22e">timeoutPromise</span>)
+</span></span><span style="display:flex;"><span>  ).<span style="color:#a6e22e">toPromise</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#39;Main fonksiyonunun çalışması bitti.&#39;</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>bunun sonucunda elde ettiğimiz scriptin, 2 saniyeden fazla çalışması durumunda kendini sonlandırdığını, ve anlık olarak en fazla 5 istek gönderdiğini görebiliriz. Umarım RxJs&rsquo;in operatörleri sayesinde kafanızdaki fikirleri, sonlu/sonsuz bir veri akışı üzerinde gerçekleştirmenin ne kadar kolay olduğunu anlayabilmişsinizdir.</p>
 <p>Bu kullanım, JS dünyasında Thread olmadığı için, diğer dillere göre daha bir kolay ve eğlencelidir.</p>
-
 <p>Son oluşturduğumuz script&rsquo;de küçük bir hata&rsquo;da bulunmaktadır! Yaptığımız istekleri Promise olarak yaptığımız için, stream timeout sebebi ile sonlanması, Promise&rsquo;ler cancel edilebilir olmadığı için, istekleri durduramamaktadır. Bunuda <a href="https://github.com/Reactive-Extensions/RxJS-DOM/blob/master/doc/operators/ajax.md">RxJs.DOM.Ajax</a> kullanarak çözebiliriz.</p>
-
 <h2 id="çıkarımlar">Çıkarımlar</h2>
-
 <ul>
 <li>Bilgisayar donanımımızı ve kaynaklarımızı en optimize şekilde kullanmak için async işlem yapmaya ihtiyacımız vardır.</li>
 <li>Node.JS&rsquo;in tek çekirdekli yapısı, dili parallelikten yoksun bırakırken, async olarak çalışmayı kolaylaştırmaktadır.</li>
@@ -727,14 +607,14 @@ async function main(){
 					
 					<div class="paging-newer">
 						<span class="dark-red">Yeni</span><span class="decorative-marker">//</span>
-						<a class="paging-link" href="/tr/nodejs-cpu-heavy-ipc/">Bir Satranç Oyunu, Node.JS ile İşlemler Arası İletişim ve İş Dağıtımı</a>
+						<a class="paging-link" href="/tr/personal-website/">Bu siteyi nasıl yaptım?</a>
 		            </div>
 		            
 
 					
 					<div class="paging-older">
 						<span class="dark-red">Eski</span><span class="decorative-marker">//</span>
-			            <a class="paging-link" href="/tr/personal-website/">Bu siteyi nasıl yaptım?</a>
+			            <a class="paging-link" href="/tr/nodejs-cpu-heavy-ipc/">Bir Satranç Oyunu, Node.JS ile İşlemler Arası İletişim ve İş Dağıtımı</a>
 		            </div>
 		            
 	            </div>

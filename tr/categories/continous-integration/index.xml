@@ -1,39 +1,20 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Yengas</title>
-    <link>https://blog.yigitcan.dev/tr/categories/continous-integration/index.xml</link>
-    <description>Recent content on Yengas</description>
+    <title>Continous Integration on Yengas</title>
+    <link>https://blog.yigitcan.dev/tr/categories/continous-integration/</link>
+    <description>Recent content in Continous Integration on Yengas</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language>
-    <atom:link href="https://blog.yigitcan.dev/tr/categories/continous-integration/index.xml" rel="self" type="application/rss+xml" />
-    
+    <language>tr</language>
+    <lastBuildDate>Sun, 20 Nov 2016 16:30:00 +0300</lastBuildDate><atom:link href="https://blog.yigitcan.dev/tr/categories/continous-integration/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Bu siteyi nasıl yaptım?</title>
       <link>https://blog.yigitcan.dev/tr/personal-website/</link>
       <pubDate>Sun, 20 Nov 2016 16:30:00 +0300</pubDate>
       
       <guid>https://blog.yigitcan.dev/tr/personal-website/</guid>
-      <description>&lt;blockquote&gt;
-&lt;p&gt;&lt;a href=&#34;https://github.com/features/actions&#34;&gt;Github Actions&lt;/a&gt; yayınlandıktan sonra, bu projeyi wercker yerine Github Actions kullanacak şekilde değiştirdim. Blog yazıları ve Hugo konfigürasyonu &lt;a href=&#34;https://github.com/Yengas/yengas.github.io/tree/source&#34;&gt;Yengas/yengas.github.io&lt;/a&gt; projesinin &lt;em&gt;source&lt;/em&gt; branch&amp;rsquo;inde yer alıyor. Bu branch&amp;rsquo;de yapılan her değişiklikte Github Actions html/css/js dosyalarını oluşturup, aynı projenin &lt;em&gt;master&lt;/em&gt; branch&amp;rsquo;ine bu dosyaları gönderiyor.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Web platformunu bırakıp, &lt;code&gt;Android&lt;/code&gt; ve daha sonrada diğer platform ve teknolojiler ile ilgilenmeye başladığımdan beri, arayüzden çok, backend sistemler ile uğraşmaya başladım. Bu dönemde tamamladığım çoğu proje; ya tek sayfalık bir arayüze sahipti, yada direk olarak arkaplanda çalışıyordu.&lt;/p&gt;
-
-&lt;p&gt;Kişisel bir websitesi açmak istediğim zaman, son zamanlarda ne kadar Web ile ilgilenmemiş olsamda, hackernews benzeri sitelerden hakkında çok okuduğum: &lt;code&gt;static website generator&lt;/code&gt;&amp;lsquo;ları kullanmak istedim. Kısaca bir araştırma yaptıktan sonra, benim için en mantıklı tercihin &lt;code&gt;Hugo&lt;/code&gt; olduğuna karar verdim. Hosting olarak ise tüm projeyi &lt;code&gt;git&lt;/code&gt; ile yönetebilmek için, &lt;code&gt;Github&lt;/code&gt;&amp;lsquo;ın herkese bedava olarak sağladığı &lt;code&gt;Github Pages&lt;/code&gt; altyapısını kullanmaya karar verdim.&lt;/p&gt;
-
-&lt;p&gt;Aklımdaki senaryo, Github üzerinde 2 farklı proje oluşturmak, bunlardan birine &lt;code&gt;personal-website&lt;/code&gt; adını vermek; bu proje içerisinde Hugo konfigürasyonlarımı, makaleleri tutmak, diğer projeye &lt;code&gt;yengas.github.io&lt;/code&gt; adını vermek ve burada ise Hugo&amp;rsquo;nun oluşturduğu html/css/js website çıktısını barındırmaktı. Bu yapının üzerine kuracağım otomatik bir sistem, &lt;code&gt;personal-website&lt;/code&gt;&amp;lsquo;ye herhangi bir değişiklik gönderdiğimde, otomatik olarak &lt;code&gt;yengas.github.io&lt;/code&gt;&amp;lsquo;nun güncellenmesine sebep olacaktı. Github otomatik olarak &lt;code&gt;kullaniciadiniz.github.io&lt;/code&gt; adı ile oluşturduğunuz projeleri websitesi olarak yayınladığı için; git veya github kullanarak, istediğim yerden websitemi otomatik olarak güncelleyebilecektim.&lt;/p&gt;
-
-&lt;p&gt;İlk başlarda bu otomatik sistemi oluşturmak için bir &lt;code&gt;docker-compose&lt;/code&gt; konfigürasyonu hazırlayıp, kişisel sunucuma &lt;code&gt;Jenkins&lt;/code&gt; kurmayı ve kendi sunucumda bir &lt;code&gt;Continous Integration&lt;/code&gt; ortamı hazırlamayı düşünüyordum. Fakat biraz daha araştırdıktan ve Hugo dökümantasyonlarını okuduktan sonra, &lt;code&gt;wercker&lt;/code&gt; ismi verilen 3. parti bir servis ile, bu otomatik build işlemini yapabileceğimi öğrendim.&lt;/p&gt;
-
-&lt;p&gt;Bu kurulum ile tamamen ücretsiz bir şekilde, herhangi bir hosting veya domain ücreti vermeden, kişisel bir websitesi oluşturmayı başardım. Böylece sitemin performansı Github Pages&amp;rsquo;a ve sitemin güvenliği ise Github şifremi saklamama dayalı olan bir sistem kurmuş oldum.&lt;/p&gt;
-
-&lt;p&gt;Sistemi kurarken Github&amp;rsquo;ın &lt;code&gt;.github.io&lt;/code&gt; siteler için &lt;code&gt;master&lt;/code&gt; branch&amp;rsquo;i dışında herhangi bir branch&amp;rsquo;e website upload edememe, wercker üzerined bulunan hazır build/deploy scriptlerinin eski olması gibi sorunlar yaşadım. Bu sebepten dolayı wercker konfigrasyonumun küçük bir kısmını el ile düzenlemem gerekti.&lt;/p&gt;
-
-&lt;p&gt;Aynı zamanda sitemin birden fazla dili desteklemesini, ve seri şeklinde makaleler yazabilmeyi istiyordum. Bu aşamadada biraz &lt;code&gt;Hugo&lt;/code&gt; ve &lt;code&gt;go templates&lt;/code&gt; öğrenip, hazır olarak kullandığım &lt;a href=&#34;https://github.com/tmaiaroto/hugo-redlounge&#34;&gt;redlounge&lt;/a&gt; temasını el ile düzenlemem gerekti.&lt;/p&gt;
-
-&lt;p&gt;Benzer bir sistem kurmak isterseniz, sitemdeki bir hatayı düzeltmek isterseniz; &lt;a href=&#34;https://github.com/Yengas/personal-website&#34;&gt;personal-website&lt;/a&gt;, sitemin html/css/js halinin nasıl host edildiğini görmek isterseniz; &lt;a href=&#34;https://github.com/Yengas/yengas.github.io&#34;&gt;yengas.github.io&lt;/a&gt; projesini inceleyebilirsiniz. Hugo kullanmayı düşünüyorsanız, kullanmakta olduğum &lt;a href=&#34;https://github.com/Yengas/hugo-redlounge&#34;&gt;özelleştirilmiş hugo-redlounge&lt;/a&gt; temamada bakmanızı öneririm.&lt;/p&gt;
-</description>
+      <description>Github Actions yayınlandıktan sonra, bu projeyi wercker yerine Github Actions kullanacak şekilde değiştirdim. Blog yazıları ve Hugo konfigürasyonu Yengas/yengas.github.io projesinin source branch&amp;rsquo;inde yer alıyor. Bu branch&amp;rsquo;de yapılan her değişiklikte Github Actions html/css/js dosyalarını oluşturup, aynı projenin master branch&amp;rsquo;ine bu dosyaları gönderiyor.
+Web platformunu bırakıp, Android ve daha sonrada diğer platform ve teknolojiler ile ilgilenmeye başladığımdan beri, arayüzden çok, backend sistemler ile uğraşmaya başladım. Bu dönemde tamamladığım çoğu proje; ya tek sayfalık bir arayüze sahipti, yada direk olarak arkaplanda çalışıyordu.</description>
     </item>
     
   </channel>

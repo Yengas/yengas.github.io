@@ -14,7 +14,7 @@
 <meta name="description" content="">
 <meta name="keywords" content="">
 <meta name="author" content="">
-<meta name="generator" content="Hugo 0.17" />
+<meta name="generator" content="Hugo 0.117.0">
 
   <meta property="og:title" content="Statik Website Oluşturucuları nedir? Neden tercih edilir?" />
 <meta property="og:description" content="" />
@@ -131,21 +131,19 @@
 		    <div id="toc" class="pure-u-1 pure-u-md-1-4">
 				<small class="toc-label">İçerikler</small>
 		   	 	<nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#nedir">Nedir?</a></li>
-<li><a href="#avantajları">Avantajları</a>
-<ul>
-<li><a href="#performans">Performans</a></li>
-<li><a href="#güvenlik">Güvenlik</a></li>
-<li><a href="#sunucu-yönetimi">Sunucu Yönetimi</a></li>
-</ul></li>
-<li><a href="#teknolojiler">Teknolojiler</a></li>
-<li><a href="#barındırma-hosting">Barındırma (Hosting)</a></li>
-<li><a href="#yararlı-kaynaklar">Yararlı Kaynaklar</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#nedir">Nedir?</a></li>
+    <li><a href="#avantajları">Avantajları</a>
+      <ul>
+        <li><a href="#performans">Performans</a></li>
+        <li><a href="#güvenlik">Güvenlik</a></li>
+        <li><a href="#sunucu-yönetimi">Sunucu Yönetimi</a></li>
+      </ul>
+    </li>
+    <li><a href="#teknolojiler">Teknolojiler</a></li>
+    <li><a href="#barındırma-hosting">Barındırma (Hosting)</a></li>
+    <li><a href="#yararlı-kaynaklar">Yararlı Kaynaklar</a></li>
+  </ul>
 </nav>
 		    </div>
 		    
@@ -188,66 +186,35 @@
 
 			
 
-            
-
-<p>Web&rsquo;in ilk zamanlarında, tamamen statik olarak çalışan websiteleri, daha sonradan kullanıcılar için özelleştirilmiş deneyimler sunmak ve kullanıcı girdisine göre işlem yaparak çıktı verebilmek için dinamik bir hal aldı. Fakat tarayıcılarımız güçlendikce; bir çok şeyi <code>Javascript</code> kullanarak yapabilir hale geldik. Bu durum hem websitelerinin istemci kısmının daha çok yük üstlenebilmesini, hemde bir websitesinin bir masaüstü veya mobil uygulama gibi, uzak sunucusundan tamamen bağımsız çalışabilmesine olanak sağladı.</p>
-
+            <p>Web&rsquo;in ilk zamanlarında, tamamen statik olarak çalışan websiteleri, daha sonradan kullanıcılar için özelleştirilmiş deneyimler sunmak ve kullanıcı girdisine göre işlem yaparak çıktı verebilmek için dinamik bir hal aldı. Fakat tarayıcılarımız güçlendikce; bir çok şeyi <code>Javascript</code> kullanarak yapabilir hale geldik. Bu durum hem websitelerinin istemci kısmının daha çok yük üstlenebilmesini, hemde bir websitesinin bir masaüstü veya mobil uygulama gibi, uzak sunucusundan tamamen bağımsız çalışabilmesine olanak sağladı.</p>
 <p>Tarayıcı ve Sunucularda çalışan sistemlerin birbirinden bağımsız çalışabilmesi ve geliştirilebilmesi; Javascript kullanarak sitemize entegre edebileceğimiz 3. parti servislerin sayısınıda arttırdı. Bu dönemde bir çok basit içerikli siteyi, tamamen statik olarak çalıştırabiliyoruz ve sunucu ihtiyaçlarımız için 3. parti sistemler kullanabiliyoruz(yorum, arama, analatik ve raporlama).</p>
-
 <p>Bu yazımda statik wesitesi oluşturmak için çokca kullanılan statik websitesi oluşturma araçlarından ve faydalarından, kısaca bahsetmek istiyorum.</p>
-
 <h2 id="nedir">Nedir?</h2>
-
 <p>Statik websitesi oluşturucuları, verdiğimiz bir grup konfigürasyonu ve belirli formatlarda(örn. <code>markdown</code>) yazdığımız içerikleri, tamamen statik bir html/css/js yığınına dönüştürme görevini üstlenir.</p>
-
 <p>Belirli şablonlar kullanılarak hazırlanan websiteleri, değişken içerikten arındılır ve yeni bir içerik eklendiği zaman, bir araç çalıştırılarak, tüm site veya sadece değişen kısımları tekrardan oluşturulur. Böylelikle websitenizi her kullanıcı isteğinde dinamik olarak oluşturmak yerine, sitenizde değişiklik yaptığınız an, statik olarak oluşturmuş olursunuz. Sitenizin şablonuna ekleyeceğiniz Javascript dosyaları ilede, sitenizi olabildiğince çok iş yapabilecek hale getirebilirsiniz.</p>
-
 <p>Bunu bir blog örneği vermek için kullanırsak, makale sayfası için bir şablon hazırladıktan sonra, bir araç çalıştırarak, belirli bir klasöre koyduğunuz tüm .txt formatında yazılmış makaleler için, .html çıktılı sayfalar almak olarak düşünebilirsiniz. Bu aracın tek yaptığı şey, şablonun içinde belirttiğiniz yere, .txt içerisinde bulunan makale içeriğini yapıştırarak, yeni bir dosya oluşturmak olur.</p>
-
 <p>Çoğu statik website oluşturucusu, bu basit mantık üzerine, parçalı şablonlar, değişik içerik formatı desteği, değişkenler, kategori/etiket/seri yapıları, global ayarlar gibi sistemler bindirerek çalışır.</p>
-
 <p>Verdiğimiz blog örneği için sitenize koyacağınız javascript kodlar ile; <code>disqus</code> benzeri bir sistem kullanarak yorum ihtiyaçlarınızı, <code>google analytics</code> kullanarak ise hit takip ve raporlama işlerinizi halledebilirsiniz.</p>
-
 <h2 id="avantajları">Avantajları</h2>
-
 <p>Kişisel blog veya ürün/kişi/kurum tanıtımı gibi çok fazla değişiklik görmeyen veya ağırlıklı olarak istemci tarafında çalışan websiteleri için statik websitesi oluşturucusu kullanmak mantıklıdır.</p>
-
 <p>Bu araçların diğer avantajlarını kısaca sıralamak gerekirse;</p>
-
 <h3 id="performans">Performans</h3>
-
 <p>Dinamik websitesi geliştirmek ne kadar gelişmiş bir sektör olsada, tamamen statik olan içeriği kullanıcıza göndermekten daha performanslı bir şey olamaz. Statik Websitelerinde performans ile ilgili sorun yaratabilecek işlemler, Javascript ile kullanıcı tarafında yapacağınız işlemler olacaktır.</p>
-
 <p>Statik olarak sunduğunuz websitenizi barındıran sunucunuz, dinamik bir websiteye göre anlık olarak daha fazla kişiye içerik servis edebilir.</p>
-
 <h3 id="güvenlik">Güvenlik</h3>
-
 <p><code>En güvenli bilgisayar, fişi çekik bilgisayardır.</code> sözünü hepimiz duymuşuzdur. Statik Websiteleri hata yapma şansınızı azaltır. Eğer statik websiteniz, çok fazla sunucu iletişimi içeren bir webapp&rsquo;e dönüşmemişse, bir hackerın sitenizi ele geçirmek için yapabileceği tek şey; hosting bilgilerinizi çalmak veya bulmak olabilir.</p>
-
 <h3 id="sunucu-yönetimi">Sunucu Yönetimi</h3>
-
 <p>Statik bir websitenin sunucu maliyeti neredeyse yoktur. Hatta sadece 3. parti servisler kullanarak dinamik içerik gösteriyorsanız; sunucunuzun tek yapması gereken şey .html dosya servis etmekdir.</p>
-
 <p>Bu yüzden veritabanı, programlama dili versiyonu, gerekli kütüphaneler gibi şeylerle uğraşmak ve bunları güncel tutmak zorunda kalmazsınız.</p>
-
 <h2 id="teknolojiler">Teknolojiler</h2>
-
 <p>Statik olarak website oluşturmak için bir çok araç ve gereç bulabilirsiniz. Benim kendi websitemde kullandığım araç: <a href="https://gohugo.io">Hugo</a> adı verilen, şablonlama sistemi için <code>Golang Template</code> kullanan bir oluşturucu. Golang ile yazıldığı için, tek bir çalıştırılabilir dosya ile website oluşturmaya başlamanız mümkün.</p>
-
 <p>Sektörde en çok kullanılan statik website oluşturucusu ise <a href="https://jekyllrb.com/">Jekyll</a> olarak görünüyor.</p>
-
-<p>Bu konuda pek bir deneyimim olmadığı için daha fazla bir şey yazmak istemiyorum. <a href="#yararlı-kaynaklar">Yararlı Kaynaklar</a> bölmesinde, en çok kullanılan statik website oluşturucuları görebilirsiniz. Bir sonraki websitenizi yazmaya başlamadan önce, bu teknolojileri araştırıp, statik website oluşturmaya bir şans vermenizi tavsiye ederim.</p>
-
+<p>Bu konuda pek bir deneyimim olmadığı için daha fazla bir şey yazmak istemiyorum. <a href="#yararl%C4%B1-kaynaklar">Yararlı Kaynaklar</a> bölmesinde, en çok kullanılan statik website oluşturucuları görebilirsiniz. Bir sonraki websitenizi yazmaya başlamadan önce, bu teknolojileri araştırıp, statik website oluşturmaya bir şans vermenizi tavsiye ederim.</p>
 <h2 id="barındırma-hosting">Barındırma (Hosting)</h2>
-
 <p>Statik Website oluşturucularının en hoş kısımlarından biride, bu projeleri barındırmak için sahip olduğunuz seçeneklerdir. Temelde ihtiyacınız olan tek şey .html servis eden bir sunucu olduğu için; bir çok hosting firması ücretli/ücretsiz statik websiteler için hosting sağlamaktadır. Bunun en güzel örneği Github üzerinde tamamen ücretsiz olarak elde edebileceğiniz <code>.github.io</code> domaini ve ücretsiz hostingi. <code>Github Pages</code> adı verilen bu sistemde yapmanız gereken tek şey; adı <code>kullanıcıadınız.github.io</code> olacak şekilde bir git projesi oluşturmak, ve statik websitenizin html/css/js içeriğini buraya koymak. Bu işlemi el ile sitenizi her değiştirdiğinizdede yapabilir, 3. parti bir servis ile otomatiğede bağlayabilirsiniz. Böylece tamamen ücretsiz bir şekilde, websitenizi yayınlayabilirsiniz.</p>
-
 <p>Alternatif hosting yöntemleri için kişisel sunucunuza <code>Nginx</code> web sunucusu kurabilir, veya <code>Amazon Web Services</code> gibi cloud çözümleri inceleyebilirsiniz.</p>
-
 <p>Eğer <code>Hugo</code> ile <code>Github Pages</code> üzerine kurduğum, tamamen otomatik olarak çalışan bu blog&rsquo;u nasıl yaptığımı incelemek isterseniz, <a href="/tr/personal-website">Bu bloğu nasıl yaptım?</a> başlıklı makalemi okuyabilirsiniz.</p>
-
 <h2 id="yararlı-kaynaklar">Yararlı Kaynaklar</h2>
-
 <ul>
 <li><a href="https://github.com/aharris88/awesome-static-website-services">Statik websitelerinizde kullanabileceğiniz, servisler ve teknolojiler</a></li>
 <li><a href="https://www.staticgen.com/">En çok kullanılan statik website oluşturucuları</a></li>
@@ -290,14 +257,14 @@
 					
 					<div class="paging-newer">
 						<span class="dark-red">Yeni</span><span class="decorative-marker">//</span>
-						<a class="paging-link" href="/tr/personal-website/">Bu siteyi nasıl yaptım?</a>
+						<a class="paging-link" href="/tr/about/">Hakkımda</a>
 		            </div>
 		            
 
 					
 					<div class="paging-older">
 						<span class="dark-red">Eski</span><span class="decorative-marker">//</span>
-			            <a class="paging-link" href="/tr/about/">Hakkımda</a>
+			            <a class="paging-link" href="/tr/personal-website/">Bu siteyi nasıl yaptım?</a>
 		            </div>
 		            
 	            </div>

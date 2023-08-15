@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Tags on Yengas</title>
+    <link>https://blog.yigitcan.dev/tr/tags/</link>
+    <description>Recent content in Tags on Yengas</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>tr</language>
+    <lastBuildDate>Fri, 16 Aug 2019 12:00:00 +0300</lastBuildDate><atom:link href="https://blog.yigitcan.dev/tr/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>ipc</title>
+      <link>https://blog.yigitcan.dev/tr/tags/ipc/</link>
+      <pubDate>Fri, 16 Aug 2019 12:00:00 +0300</pubDate>
+      
+      <guid>https://blog.yigitcan.dev/tr/tags/ipc/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>node.js</title>
+      <link>https://blog.yigitcan.dev/tr/tags/node.js/</link>
+      <pubDate>Fri, 16 Aug 2019 12:00:00 +0300</pubDate>
+      
+      <guid>https://blog.yigitcan.dev/tr/tags/node.js/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>performance</title>
+      <link>https://blog.yigitcan.dev/tr/tags/performance/</link>
+      <pubDate>Fri, 16 Aug 2019 12:00:00 +0300</pubDate>
+      
+      <guid>https://blog.yigitcan.dev/tr/tags/performance/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>webassembly</title>
+      <link>https://blog.yigitcan.dev/tr/tags/webassembly/</link>
+      <pubDate>Fri, 16 Aug 2019 12:00:00 +0300</pubDate>
+      
+      <guid>https://blog.yigitcan.dev/tr/tags/webassembly/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>event loop</title>
+      <link>https://blog.yigitcan.dev/tr/tags/event-loop/</link>
+      <pubDate>Sat, 10 Mar 2018 03:28:00 +0300</pubDate>
+      
+      <guid>https://blog.yigitcan.dev/tr/tags/event-loop/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>promise</title>
+      <link>https://blog.yigitcan.dev/tr/tags/promise/</link>
+      <pubDate>Sat, 10 Mar 2018 03:28:00 +0300</pubDate>
+      
+      <guid>https://blog.yigitcan.dev/tr/tags/promise/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>rxjs</title>
+      <link>https://blog.yigitcan.dev/tr/tags/rxjs/</link>
+      <pubDate>Sat, 10 Mar 2018 03:28:00 +0300</pubDate>
+      
+      <guid>https://blog.yigitcan.dev/tr/tags/rxjs/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>ghpages</title>
+      <link>https://blog.yigitcan.dev/tr/tags/ghpages/</link>
+      <pubDate>Sun, 20 Nov 2016 16:30:00 +0300</pubDate>
+      
+      <guid>https://blog.yigitcan.dev/tr/tags/ghpages/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>github</title>
+      <link>https://blog.yigitcan.dev/tr/tags/github/</link>
+      <pubDate>Sun, 20 Nov 2016 16:30:00 +0300</pubDate>
+      
+      <guid>https://blog.yigitcan.dev/tr/tags/github/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>golang</title>
+      <link>https://blog.yigitcan.dev/tr/tags/golang/</link>
+      <pubDate>Sun, 20 Nov 2016 16:30:00 +0300</pubDate>
+      
+      <guid>https://blog.yigitcan.dev/tr/tags/golang/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>hugo</title>
+      <link>https://blog.yigitcan.dev/tr/tags/hugo/</link>
+      <pubDate>Sun, 20 Nov 2016 16:30:00 +0300</pubDate>
+      
+      <guid>https://blog.yigitcan.dev/tr/tags/hugo/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>markdown</title>
+      <link>https://blog.yigitcan.dev/tr/tags/markdown/</link>
+      <pubDate>Sun, 20 Nov 2016 16:30:00 +0300</pubDate>
+      
+      <guid>https://blog.yigitcan.dev/tr/tags/markdown/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>wercker</title>
+      <link>https://blog.yigitcan.dev/tr/tags/wercker/</link>
+      <pubDate>Sun, 20 Nov 2016 16:30:00 +0300</pubDate>
+      
+      <guid>https://blog.yigitcan.dev/tr/tags/wercker/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>aws</title>
+      <link>https://blog.yigitcan.dev/tr/tags/aws/</link>
+      <pubDate>Sun, 20 Nov 2016 15:00:00 +0300</pubDate>
+      
+      <guid>https://blog.yigitcan.dev/tr/tags/aws/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>jekyll</title>
+      <link>https://blog.yigitcan.dev/tr/tags/jekyll/</link>
+      <pubDate>Sun, 20 Nov 2016 15:00:00 +0300</pubDate>
+      
+      <guid>https://blog.yigitcan.dev/tr/tags/jekyll/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>statik website</title>
+      <link>https://blog.yigitcan.dev/tr/tags/statik-website/</link>
+      <pubDate>Sun, 20 Nov 2016 15:00:00 +0300</pubDate>
+      
+      <guid>https://blog.yigitcan.dev/tr/tags/statik-website/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>hakkında</title>
+      <link>https://blog.yigitcan.dev/tr/tags/hakk%C4%B1nda/</link>
+      <pubDate>Sat, 19 Nov 2016 00:00:00 +0300</pubDate>
+      
+      <guid>https://blog.yigitcan.dev/tr/tags/hakk%C4%B1nda/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>yengas</title>
+      <link>https://blog.yigitcan.dev/tr/tags/yengas/</link>
+      <pubDate>Sat, 19 Nov 2016 00:00:00 +0300</pubDate>
+      
+      <guid>https://blog.yigitcan.dev/tr/tags/yengas/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>async/await</title>
+      <link>https://blog.yigitcan.dev/tr/tags/async/await/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.yigitcan.dev/tr/tags/async/await/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,25 +1,20 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Yengas</title>
-    <link>https://blog.yigitcan.dev/tr/tags/hakk%C4%B1nda/index.xml</link>
-    <description>Recent content on Yengas</description>
+    <title>hakkında on Yengas</title>
+    <link>https://blog.yigitcan.dev/tr/tags/hakk%C4%B1nda/</link>
+    <description>Recent content in hakkında on Yengas</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language>
-    <atom:link href="https://blog.yigitcan.dev/tr/tags/hakk%C4%B1nda/index.xml" rel="self" type="application/rss+xml" />
-    
+    <language>tr</language>
+    <lastBuildDate>Sat, 19 Nov 2016 00:00:00 +0300</lastBuildDate><atom:link href="https://blog.yigitcan.dev/tr/tags/hakk%C4%B1nda/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Hakkımda</title>
       <link>https://blog.yigitcan.dev/tr/about/</link>
       <pubDate>Sat, 19 Nov 2016 00:00:00 +0300</pubDate>
       
       <guid>https://blog.yigitcan.dev/tr/about/</guid>
-      <description>&lt;p&gt;Merhaba, ben Yiğitcan! On yılı aşkın süredir yazılım ile uğraşıyorum. Hem kurumsal hem de startup şirketlerde çalışma fırsatı buldum ve web, mobil, masaüstü gibi farklı platformlarda geliştirme yaptım. Typescript, NodeJS, Golang ve Java, sıkça kullandığım teknolojilerden bazıları.&lt;/p&gt;
-
-&lt;p&gt;Bir takım olarak, anlamlı bir ürün geliştirip ortaya koymak en keyif aldığım şeylerden biri. İster backend mimarisi kurgulamak olsun, ister cloud-native teknolojiler ile çalışmak, ister yeni bir şeyler denemek olsun; birlikte öğrenmek ve sorunları çözmek, yazılım dünyasında beni en çok motive eden şey.&lt;/p&gt;
-
-&lt;p&gt;Projelerimi ve çalışmalarımı &lt;a href=&#34;https://github.com/Yengas&#34;&gt;Github&lt;/a&gt; üzerinden takip edebilir, yazılım hakkındaki görüş ve öğretici yazılarımı bu blog üzerinden okuyabilirsiniz. Eğer benimle iş birliği yapmak isterseniz, &lt;a href=&#34;https://www.linkedin.com/in/yigitcanucum/&#34;&gt;LinkedIn&lt;/a&gt; üzerinden iletişime geçebilirsiniz.&lt;/p&gt;
-</description>
+      <description>Merhaba, ben Yiğitcan! On yılı aşkın süredir yazılım ile uğraşıyorum. Hem kurumsal hem de startup şirketlerde çalışma fırsatı buldum ve web, mobil, masaüstü gibi farklı platformlarda geliştirme yaptım. Typescript, NodeJS, Golang ve Java, sıkça kullandığım teknolojilerden bazıları.
+Bir takım olarak, anlamlı bir ürün geliştirip ortaya koymak en keyif aldığım şeylerden biri. İster backend mimarisi kurgulamak olsun, ister cloud-native teknolojiler ile çalışmak, ister yeni bir şeyler denemek olsun; birlikte öğrenmek ve sorunları çözmek, yazılım dünyasında beni en çok motive eden şey.</description>
     </item>
     
   </channel>
