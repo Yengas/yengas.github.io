@@ -1,6 +1,7 @@
 +++
 title = "Hakkımda"
-date = "2023-08-15T15:30:00+03:00"
+date = "2016-11-19T00:00:00+03:00"
+lastmod = "2023-08-15T15:30:00+03:00"
 Categories = ["Kişisel"]
 Tags = ["hakkında", "yengas"]
 +++
