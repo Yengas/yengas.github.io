@@ -6,22 +6,8 @@
     <description>Recent content on Yengas</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 15 Aug 2023 15:30:00 +0300</lastBuildDate>
+    <lastBuildDate>Fri, 16 Aug 2019 12:00:00 +0300</lastBuildDate>
     <atom:link href="https://blog.yigitcan.dev/tr/index.xml" rel="self" type="application/rss+xml" />
-    
-    <item>
-      <title>Hakkımda</title>
-      <link>https://blog.yigitcan.dev/tr/about/</link>
-      <pubDate>Tue, 15 Aug 2023 15:30:00 +0300</pubDate>
-      
-      <guid>https://blog.yigitcan.dev/tr/about/</guid>
-      <description>&lt;p&gt;Merhaba, ben Yiğitcan! On yılı aşkın süredir yazılım ile uğraşıyorum. Hem kurumsal hem de startup şirketlerde çalışma fırsatı buldum ve web, mobil, masaüstü gibi farklı platformlarda geliştirme yaptım. Typescript, NodeJS, Golang ve Java, sıkça kullandığım teknolojilerden bazıları.&lt;/p&gt;
-
-&lt;p&gt;Bir takım olarak, anlamlı bir ürün geliştirip ortaya koymak en keyif aldığım şeylerden biri. İster backend mimarisi kurgulamak olsun, ister cloud-native teknolojiler ile çalışmak, ister yeni bir şeyler denemek olsun; birlikte öğrenmek ve sorunları çözmek, yazılım dünyasında beni en çok motive eden şey.&lt;/p&gt;
-
-&lt;p&gt;Projelerimi ve çalışmalarımı &lt;a href=&#34;https://github.com/Yengas&#34;&gt;Github&lt;/a&gt; üzerinden takip edebilir, yazılım hakkındaki görüş ve öğretici yazılarımı bu blog üzerinden okuyabilirsiniz. Eğer benimle iş birliği yapmak isterseniz, &lt;a href=&#34;https://www.linkedin.com/in/yigitcanucum/&#34;&gt;LinkedIn&lt;/a&gt; üzerinden iletişime geçebilirsiniz.&lt;/p&gt;
-</description>
-    </item>
     
     <item>
       <title>Bir Satranç Oyunu, Node.JS ile İşlemler Arası İletişim ve İş Dağıtımı</title>
@@ -1077,6 +1063,20 @@ async function main(){
 &lt;li&gt;&lt;a href=&#34;https://github.com/aharris88/awesome-static-website-services&#34;&gt;Statik websitelerinizde kullanabileceğiniz, servisler ve teknolojiler&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;https://www.staticgen.com/&#34;&gt;En çok kullanılan statik website oluşturucuları&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Hakkımda</title>
+      <link>https://blog.yigitcan.dev/tr/about/</link>
+      <pubDate>Sat, 19 Nov 2016 00:00:00 +0300</pubDate>
+      
+      <guid>https://blog.yigitcan.dev/tr/about/</guid>
+      <description>&lt;p&gt;Merhaba, ben Yiğitcan! On yılı aşkın süredir yazılım ile uğraşıyorum. Hem kurumsal hem de startup şirketlerde çalışma fırsatı buldum ve web, mobil, masaüstü gibi farklı platformlarda geliştirme yaptım. Typescript, NodeJS, Golang ve Java, sıkça kullandığım teknolojilerden bazıları.&lt;/p&gt;
+
+&lt;p&gt;Bir takım olarak, anlamlı bir ürün geliştirip ortaya koymak en keyif aldığım şeylerden biri. İster backend mimarisi kurgulamak olsun, ister cloud-native teknolojiler ile çalışmak, ister yeni bir şeyler denemek olsun; birlikte öğrenmek ve sorunları çözmek, yazılım dünyasında beni en çok motive eden şey.&lt;/p&gt;
+
+&lt;p&gt;Projelerimi ve çalışmalarımı &lt;a href=&#34;https://github.com/Yengas&#34;&gt;Github&lt;/a&gt; üzerinden takip edebilir, yazılım hakkındaki görüş ve öğretici yazılarımı bu blog üzerinden okuyabilirsiniz. Eğer benimle iş birliği yapmak isterseniz, &lt;a href=&#34;https://www.linkedin.com/in/yigitcanucum/&#34;&gt;LinkedIn&lt;/a&gt; üzerinden iletişime geçebilirsiniz.&lt;/p&gt;
 </description>
     </item>
     

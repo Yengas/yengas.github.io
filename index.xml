@@ -6,22 +6,8 @@
     <description>Recent content on Yengas</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 15 Aug 2023 15:30:00 +0300</lastBuildDate>
+    <lastBuildDate>Thu, 03 Aug 2017 16:10:00 +0300</lastBuildDate>
     <atom:link href="https://blog.yigitcan.dev/index.xml" rel="self" type="application/rss+xml" />
-    
-    <item>
-      <title>About</title>
-      <link>https://blog.yigitcan.dev/about/</link>
-      <pubDate>Tue, 15 Aug 2023 15:30:00 +0300</pubDate>
-      
-      <guid>https://blog.yigitcan.dev/about/</guid>
-      <description>&lt;p&gt;Hello, I&amp;rsquo;m Yiğitcan! For over a decade, I&amp;rsquo;ve been involved in software development, working with both corporate and startup companies, developing for different platforms like web, mobile, and desktop. Typescript, NodeJS, Golang, and Java are some of the technologies I frequently use.&lt;/p&gt;
-
-&lt;p&gt;Building meaningful products as a team is one of my favorite things to do. Whether it&amp;rsquo;s designing backend architecture, engaging with cloud-native technologies, or experimenting with something new, learning and solving problems together is what motivates me most in the software world.&lt;/p&gt;
-
-&lt;p&gt;You can follow my projects and work on &lt;a href=&#34;https://github.com/Yengas&#34;&gt;Github&lt;/a&gt;, or read my opinions and tutorials about various software topics on this blog. If you want to collaborate with me, feel free to reach out on &lt;a href=&#34;https://www.linkedin.com/in/yigitcanucum/&#34;&gt;LinkedIn&lt;/a&gt;.&lt;/p&gt;
-</description>
-    </item>
     
     <item>
       <title>KairosDB inner workings; how does it store data in Cassandra?</title>
@@ -433,6 +419,20 @@ services:
 &lt;p&gt;Also, the theme(&lt;a href=&#34;https://github.com/tmaiaroto/hugo-redlounge&#34;&gt;hugo-redlounge&lt;/a&gt;) i decided to use didn&amp;rsquo;t have a multilingual support, so i had to learn more about Hugo and customize the template to my needs. I added internationalization, a list of languages, and a feature to switch the post language if there is a translation.&lt;/p&gt;
 
 &lt;p&gt;If you would like to setup a similiar website, you could check out this website&amp;rsquo;s &lt;a href=&#34;https://github.com/Yengas/personal-website&#34;&gt;source code&lt;/a&gt; on Github. You could also checkout my fork of &lt;a href=&#34;https://github.com/Yengas/hugo-redlounge&#34;&gt;hugo-redlounge&lt;/a&gt; theme, which has some fixes and the multilingual support i was talking about.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>About</title>
+      <link>https://blog.yigitcan.dev/about/</link>
+      <pubDate>Sat, 19 Nov 2016 00:00:00 +0300</pubDate>
+      
+      <guid>https://blog.yigitcan.dev/about/</guid>
+      <description>&lt;p&gt;Hello, I&amp;rsquo;m Yiğitcan! For over a decade, I&amp;rsquo;ve been involved in software development, working with both corporate and startup companies, developing for different platforms like web, mobile, and desktop. Typescript, NodeJS, Golang, and Java are some of the technologies I frequently use.&lt;/p&gt;
+
+&lt;p&gt;Building meaningful products as a team is one of my favorite things to do. Whether it&amp;rsquo;s designing backend architecture, engaging with cloud-native technologies, or experimenting with something new, learning and solving problems together is what motivates me most in the software world.&lt;/p&gt;
+
+&lt;p&gt;You can follow my projects and work on &lt;a href=&#34;https://github.com/Yengas&#34;&gt;Github&lt;/a&gt;, or read my opinions and tutorials about various software topics on this blog. If you want to collaborate with me, feel free to reach out on &lt;a href=&#34;https://www.linkedin.com/in/yigitcanucum/&#34;&gt;LinkedIn&lt;/a&gt;.&lt;/p&gt;
 </description>
     </item>
     
