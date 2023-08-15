@@ -1,14 +1,12 @@
 +++
 title = "Hakkımda"
-date = "2016-11-19T00:00:00+03:00"
+date = "2023-08-15T15:30:00+03:00"
 Categories = ["Kişisel"]
 Tags = ["hakkında", "yengas"]
 +++
 
-Merhaba, ben Yiğitcan! Lise yıllarımdan beri yazılımla ilgileniyorum. Şuanda **Trakya Üniversitesi**'nde **Bilgisayar Teknolojisi ve Bilişim Sistemleri** okumaktayım.
+Merhaba, ben Yiğitcan! On yılı aşkın süredir yazılım ile uğraşıyorum. Hem kurumsal hem de startup şirketlerde çalışma fırsatı buldum ve web, mobil, masaüstü gibi farklı platformlarda geliştirme yaptım. Typescript, NodeJS, Golang ve Java, sıkça kullandığım teknolojilerden bazıları.
 
-Son 5 yılda, bir çok dil ve teknoloji ile haşır neşir oldum. Web, Mobil ve Masaüstü olmak üzere bir çok platformda yazılım yapma şansı yakaladım.
+Bir takım olarak, anlamlı bir ürün geliştirip ortaya koymak en keyif aldığım şeylerden biri. İster backend mimarisi kurgulamak olsun, ister cloud-native teknolojiler ile çalışmak, ister yeni bir şeyler denemek olsun; birlikte öğrenmek ve sorunları çözmek, yazılım dünyasında beni en çok motive eden şey.
 
-Son zamanlarda; karar vermekte ne kadar zorlanmış olsamda; `Scala` ve `NodeJS` dillerini kullanarak, `Microservice` mimarisinde ve `Container` teknolojilerinde kendimi geliştirme kararı aldım. Şuanda özellikle `DevOps` konuları ve `Backend` development ile ilgilenmekteyim.
-
-Projelerimi ve küçük çalışmalarımı [Github](https://github.com/Yengas) üzerinde takip edebilir, yazılım hakkındaki görüş ve öğretici yazılarımı bu blog üzerinden okuyabiliriniz!
+Projelerimi ve çalışmalarımı [Github](https://github.com/Yengas) üzerinden takip edebilir, yazılım hakkındaki görüş ve öğretici yazılarımı bu blog üzerinden okuyabilirsiniz. Eğer benimle iş birliği yapmak isterseniz, [LinkedIn](https://www.linkedin.com/in/yigitcanucum/) üzerinden iletişime geçebilirsiniz.
