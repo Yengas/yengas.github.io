@@ -36,7 +36,7 @@ taxonomies:
   series: "series"
 params:
   sidebartitle: "Yengas"
-  sidebartagline: "Making things work."
+  sidebartagline: "Building, scaling, learning"
   socialsharing: "true"
   languages:
     - { name: "en", href: "/" }
