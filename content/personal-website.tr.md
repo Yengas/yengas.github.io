@@ -2,6 +2,7 @@
 type = "posts"
 title = "Bu siteyi nasıl yaptım?"
 date = "2016-11-20T16:30:00+03:00"
+lastmod = "2023-08-16T17:30:00+03:00"
 Categories = ["Kişisel", "Proje", "Continous Integration"]
 Tags = ["wercker", "github", "markdown", "hugo", "golang", "ghpages"]
 +++

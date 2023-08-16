@@ -2,6 +2,7 @@
 type = "posts"
 title = "How I Made This Blog?"
 date = "2016-11-20T16:30:00+03:00"
+lastmod = "2023-08-16T17:30:00+03:00"
 Categories = ["Personal", "Project", "Continous Integration"]
 Tags = ["wercker", "github", "github actions", "markdown", "hugo", "golang", "ghpages"]
 +++
