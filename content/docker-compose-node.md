@@ -1,4 +1,5 @@
 +++
+type = "posts"
 title = "Using Docker and Docker-Compose to setup a local working environment, ready to be scaled."
 date = "2017-01-31T03:30:00+03:00"
 Categories = ["DevOps"]

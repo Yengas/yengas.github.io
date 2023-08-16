@@ -1,4 +1,5 @@
 +++
+type = "posts"
 title = "KairosDB inner workings; how does it store data in Cassandra?"
 date = "2017-08-03T16:10:00+03:00"
 Categories = ["Database", "Optimization", "Cassandra"]

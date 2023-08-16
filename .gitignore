@@ -2,3 +2,4 @@
 *.swp
 *~
 public
+.hugo_build.lock

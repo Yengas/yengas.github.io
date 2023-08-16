@@ -1,41 +1,50 @@
-DefaultContentLanguage: "en"
-
 baseurl: "https://blog.yigitcan.dev/"
+DefaultContentLanguage: "en"
 languageCode: "en-us"
-theme: "redlounge"
+title: "Yiğitcan UÇUM"
+theme: "anubis"
 
-social: &default_social
-  - { pre: '<i class="fa fa-github"></i>', url: "https://github.com/Yengas", identifier: "github" }
-  - { pre: '<i class="fa fa-linkedin"></i>', url: "https://linkedin.com/in/YigitcanUCUM", identifier: "linkedin" }
+author:
+  name: "Yiğitcan UÇUM"
 
-Languages:
-  en:
-    weight: 1
-    menu:
-      main:
-        - { name: "About", url: "/about" }
-      social: *default_social
-      footer:
-        - { name: "Blog'u Türkçe oku.", url: "/tr/"}
+params:
+  description: "Personal Blog of Yiğitcan UÇUM"
+  dateFormat: "2006-01-02"
+  style: auto
+  # enable toc for longer pages
+  toc: true
+  tocWordCount: 300
+  # 
+  mainSections: [ "posts" ]
+  readMore: true
+  locale: "en-us"
+  # social medias to show 
+  rssAsSocialIcon: true
+  social:
+    - { url: "https://github.com/Yengas", id: "github" }
+    - { url: "https://linkedin.com/in/YigitcanUCUM", id: "linkedin" }
+
+# supported languages and their menus
+languages:
   tr:
-    weight: 2
+    weight: 1
+    languageName: "Türkçe"
     menu:
       main:
-        - { name: "Hakkımda", url: "/tr/about" }
-      social: *default_social
-      footer:
-        - { name: "Read the blog in English.", url: "/"}
+        - { identifier: "home", name: "Ana Sayfa", url: "/tr/", weight: 1 }
+        - { identifier: "about", name: "Hakkımda", url: "/tr/about", weight: 2 }
+  en:
+    weight: 2
+    languageName: "English"
+    menu:
+      main:
+        - { identifier: "home", name: "Home", url: "/", weight: 1 }
+        - { identifier: "about", name: "About", url: "/about", weight: 2 }
 
-# Default variables.
-title: "Yengas"
 taxonomies:
   tag: "tags"
   category: "categories"
   series: "series"
-params:
-  sidebartitle: "Yengas"
-  sidebartagline: "Building, scaling, learning"
-  socialsharing: "true"
-  languages:
-    - { name: "en", href: "/" }
-    - { name: "tr", href: "/tr/" }
+  author: "authors"
+
+markup: { goldmark: { renderer: { unsafe: true } } }

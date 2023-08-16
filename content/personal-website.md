@@ -1,11 +1,14 @@
 +++
+type = "posts"
 title = "How I Made This Blog?"
 date = "2016-11-20T16:30:00+03:00"
 Categories = ["Personal", "Project", "Continous Integration"]
 Tags = ["wercker", "github", "github actions", "markdown", "hugo", "golang", "ghpages"]
 +++
 
-> After the release of [Github Actions](https://github.com/features/actions) i refactored this project to work with it instead of wercker. Blog posts and configuration for the Hugo is stored under the *source* branch of [Yengas/yengas.github.io](https://github.com/Yengas/yengas.github.io/tree/source), Github Actions builds and pushes html/css/js files on the *master* branch of the same repository.
+> [2023-08-16] I've switched to the [anubis theme](https://github.com/Mitrichius/hugo-theme-anubis) in favor of more minimal design, and light/dark mode support.
+
+> [2020-05-14] After the release of [Github Actions](https://github.com/features/actions) i refactored this project to work with it instead of wercker. Blog posts and configuration for the Hugo is stored under the *source* branch of [Yengas/yengas.github.io](https://github.com/Yengas/yengas.github.io/tree/source), Github Actions builds and pushes html/css/js files on the *master* branch of the same repository.
 
 I haven't been designing any GUI's since i switched from Web development to other platforms. Most of the projects i've worked on for the last few years were either single page designs, or they worked in the background.
 

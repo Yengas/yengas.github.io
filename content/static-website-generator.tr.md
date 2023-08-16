@@ -1,4 +1,5 @@
 +++
+type = "posts"
 title = "Statik Website Oluşturucuları nedir? Neden tercih edilir?"
 date = "2016-11-20T15:00:00+03:00"
 Categories = ["Araç"]

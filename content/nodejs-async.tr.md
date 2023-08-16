@@ -1,4 +1,5 @@
 +++
+type = "posts"
 title = "Node.JS Event Loop, Sync/Async, Promise, Async/Await ve RxJS üzerine..."
 date = "2018-03-10T03:28:00+03:00"
 Categories = ["Node.JS", "Programming Paradigms"]

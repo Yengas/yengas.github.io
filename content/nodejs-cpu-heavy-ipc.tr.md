@@ -1,4 +1,5 @@
 +++
+type = "posts"
 title = "Bir Satranç Oyunu, Node.JS ile İşlemler Arası İletişim ve İş Dağıtımı"
 date = "2019-08-16T12:00:00+03:00"
 Categories = ["Node.JS", "Architecture"]

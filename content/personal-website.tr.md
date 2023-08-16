@@ -1,11 +1,14 @@
 +++
+type = "posts"
 title = "Bu siteyi nasıl yaptım?"
 date = "2016-11-20T16:30:00+03:00"
 Categories = ["Kişisel", "Proje", "Continous Integration"]
 Tags = ["wercker", "github", "markdown", "hugo", "golang", "ghpages"]
 +++
 
-> [Github Actions](https://github.com/features/actions) yayınlandıktan sonra, bu projeyi wercker yerine Github Actions kullanacak şekilde değiştirdim. Blog yazıları ve Hugo konfigürasyonu [Yengas/yengas.github.io](https://github.com/Yengas/yengas.github.io/tree/source) projesinin *source* branch'inde yer alıyor. Bu branch'de yapılan her değişiklikte Github Actions html/css/js dosyalarını oluşturup, aynı projenin *master* branch'ine bu dosyaları gönderiyor.
+> [2023-08-16] Daha minimal bir design ve aydınlık/karanlık teması desteği sebebi ile, [anubis teması](https://github.com/Mitrichius/hugo-theme-anubis)'na geçiş yaptım.
+
+> [2020-05-14] [Github Actions](https://github.com/features/actions) yayınlandıktan sonra, bu projeyi wercker yerine Github Actions kullanacak şekilde değiştirdim. Blog yazıları ve Hugo konfigürasyonu [Yengas/yengas.github.io](https://github.com/Yengas/yengas.github.io/tree/source) projesinin *source* branch'inde yer alıyor. Bu branch'de yapılan her değişiklikte Github Actions html/css/js dosyalarını oluşturup, aynı projenin *master* branch'ine bu dosyaları gönderiyor.
 
 Web platformunu bırakıp, `Android` ve daha sonrada diğer platform ve teknolojiler ile ilgilenmeye başladığımdan beri, arayüzden çok, backend sistemler ile uğraşmaya başladım. Bu dönemde tamamladığım çoğu proje; ya tek sayfalık bir arayüze sahipti, yada direk olarak arkaplanda çalışıyordu.
 
