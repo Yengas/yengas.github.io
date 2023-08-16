@@ -1,136 +1,222 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+
+
+<html lang="en-us" data-theme="">
 <head>
-  <title>
-    KairosDB inner workings; how does it store data in Cassandra? // Yengas
-  </title>
+    
+        
+<meta charset="utf-8">
+<meta name="HandheldFriendly" content="True">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer-when-downgrade">
 
-  <link href="http://gmpg.org/xfn/11" rel="profile">
-<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<title>KairosDB inner workings; how does it store data in Cassandra? - Yiğitcan UÇUM</title>
 
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-
-<meta name="description" content="">
-<meta name="keywords" content="">
-<meta name="author" content="">
-<meta name="generator" content="Hugo 0.117.0">
-
-  <meta property="og:title" content="KairosDB inner workings; how does it store data in Cassandra?" />
-<meta property="og:description" content="" />
-<meta property="og:type" content="website" />
-<meta property="og:locale" content="en_US" />
-<meta property="og:url" content="https://blog.yigitcan.dev/kairosdb-inner-workings/" />
+<meta name="description" content="KairosDB is a timeseries database built on Cassandra. Even though it is coded in a way to support different database backends, it is known mostly by its usage of Cassandra as a scaleable and performant time series data storage. With KairosDB, you can store timeseries metric data in different types and then query them with aggregations over time units. In this article, we will look into the details of KairosDB and its two different Cassandra schema to understand how the insert, delete and read operations we do, work under the cover.">
 
 
-  
-  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.5.0/base-min.css">
-  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.5.0/pure-min.css">
-  
-  
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.5.0/grids-responsive-min.css">
-  
-  
 
-  <link rel="stylesheet" href="https://blog.yigitcan.dev//css/redlounge.css">
-  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet">
-  <link href='//fonts.googleapis.com/css?family=Raleway:400,200,100,700,300,500,600,800' rel='stylesheet' type='text/css'>
-  <link href='//fonts.googleapis.com/css?family=Libre+Baskerville:400,700,400italic' rel='stylesheet' type='text/css'>
 
-  
-  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/touch-icon-144-precomposed.png">
-  <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.png">
 
-  
-  <link href="" rel="alternate" type="application/rss+xml" title="Yengas" />
+<link rel="icon" type="image/x-icon" href="https://blog.yigitcan.dev/favicon.ico">
+<link rel="apple-touch-icon-precomposed" href="https://blog.yigitcan.dev/favicon.png">
+
+
+
 
     
-  
-  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.7/styles/tomorrow-night-bright.min.css">
-  
-  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.7/highlight.min.js"></script>
-  <script>hljs.initHighlightingOnLoad();</script>
 
 
-  
 
-  
+<style>
+  body {
+    visibility: hidden;
+    opacity: 0;
+  }
+</style>
 
-  
+<noscript>
+  <style>
+    body {
+      visibility: visible;
+      opacity: 1;
+    }
+  </style>
+</noscript>
 
-  
+
+
+
+    
+
+
+
+
+
+    
+    
+        
+    
+    
+
+    
+        <link rel="stylesheet" href="https://blog.yigitcan.dev/css/style.min.eaefe0f95d1fe64ef0a3932347fc8e07ff4e3de4515423d0ad22b33474042778.css" integrity="sha256-6u/g&#43;V0f5k7wo5MjR/yOB/9OPeRRVCPQrSKzNHQEJ3g=">
+    
+
+
+
+
+
+    
+
+    
+
+
+
+
+
+    
+    
+        
+    
+    
+
+    
+        <script src="https://blog.yigitcan.dev/js/script.min.74bf1a3fcf1af396efa4acf3e660e876b61a2153ab9cbe1893ac24ea6d4f94ee.js" type="text/javascript" charset="utf-8" integrity="sha256-dL8aP88a85bvpKzz5mDodrYaIVOrnL4Yk6wk6m1PlO4="></script>
+    
+
+
+
+
+
+
+
+<meta property="og:title" content="KairosDB inner workings; how does it store data in Cassandra?" />
+<meta property="og:description" content="KairosDB is a timeseries database built on Cassandra. Even though it is coded in a way to support different database backends, it is known mostly by its usage of Cassandra as a scaleable and performant time series data storage. With KairosDB, you can store timeseries metric data in different types and then query them with aggregations over time units. In this article, we will look into the details of KairosDB and its two different Cassandra schema to understand how the insert, delete and read operations we do, work under the cover." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://blog.yigitcan.dev/kairosdb-inner-workings/" /><meta property="article:section" content="" />
+<meta property="article:published_time" content="2017-08-03T16:10:00+03:00" />
+<meta property="article:modified_time" content="2017-08-03T16:10:00+03:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="KairosDB inner workings; how does it store data in Cassandra?"/>
+<meta name="twitter:description" content="KairosDB is a timeseries database built on Cassandra. Even though it is coded in a way to support different database backends, it is known mostly by its usage of Cassandra as a scaleable and performant time series data storage. With KairosDB, you can store timeseries metric data in different types and then query them with aggregations over time units. In this article, we will look into the details of KairosDB and its two different Cassandra schema to understand how the insert, delete and read operations we do, work under the cover."/>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
 </head>
-
 <body>
-	
+    <a class="skip-main" href="#main">Skip to main content</a>
+    <div class="container">
+        <header class="common-header"> 
+            
+                <div class="header-top">
+    <h1 class="site-title">
+    <a href="/">Yiğitcan UÇUM</a>
+</h1>
+    <ul class="social-icons">
 
-	<div id="layout" class="pure-g">
-    <div class="sidebar pure-u-1 pure-u-md-1-4">
-  <div class="header">
-    
-
-	
-
-    <h1 class="brand-title">Yengas</h1>
-    <h2 class="brand-tagline">Building, scaling, learning</h2>
-
-    <nav class="nav">
-      <ul class="nav-list" >
-        <li class="nav-item"><span class="nav-item-separator">//</span><a href="https://blog.yigitcan.dev/">Home</a></li>
-        
-          <li class="nav-item"><span class="nav-item-separator">//</span><a href="/about">About</a></li>
-        
-      </ul>
-    </nav>
-
-    <nav class="nav">
-      <ul class="nav-list">
-        
-          <li class="nav-item">
-              
-                <span>en</span>
-              
-          </li>
-        
-          <li class="nav-item">
-              
-                <a href="https://blog.yigitcan.dev/tr/">tr</a>
-              
-          </li>
-        
-      </ul>
-    </nav>
 
     
-    <div class="social-buttons">
-      
-        
-        <a href="https://github.com/Yengas" target="_blank"><i class="fa fa-github"></i></a>
-        
-      
-        
-        <a href="https://linkedin.com/in/YigitcanUCUM" target="_blank"><i class="fa fa-linkedin"></i></a>
-        
-      
-      
-    </div>
+        <li>
+            <a href="https://github.com/Yengas" title="Github" rel="me">
+            <span class="inline-svg" >
+
+
+
+
+    
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><path fill="currentColor" d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+
+</span>
+
+            </a>
+        </li>
     
 
-  </div>
+    
+        <li>
+            <a href="https://linkedin.com/in/YigitcanUCUM" title="Linkedin" rel="me">
+            <span class="inline-svg" >
+
+
+
+
+    
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3zM135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5zm282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9V416z"/></svg>
+
+</span>
+
+            </a>
+        </li>
+    
+
+
+
+    <li>
+            <a href="https://blog.yigitcan.dev/index.xml" title="RSS" rel="me">
+            <span class="inline-svg" >
+
+
+
+
+    
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M128.081 415.959c0 35.369-28.672 64.041-64.041 64.041S0 451.328 0 415.959s28.672-64.041 64.041-64.041 64.04 28.673 64.04 64.041zm175.66 47.25c-8.354-154.6-132.185-278.587-286.95-286.95C7.656 175.765 0 183.105 0 192.253v48.069c0 8.415 6.49 15.472 14.887 16.018 111.832 7.284 201.473 96.702 208.772 208.772.547 8.397 7.604 14.887 16.018 14.887h48.069c9.149.001 16.489-7.655 15.995-16.79zm144.249.288C439.596 229.677 251.465 40.445 16.503 32.01 7.473 31.686 0 38.981 0 48.016v48.068c0 8.625 6.835 15.645 15.453 15.999 191.179 7.839 344.627 161.316 352.465 352.465.353 8.618 7.373 15.453 15.999 15.453h48.068c9.034-.001 16.329-7.474 16.005-16.504z"/></svg>
+
+</span>
+
+            </a>
+        </li>
+    
+
+</ul>
 </div>
 
-	
-	
+    <nav>
+        
+        
+        <a class="" href="https://blog.yigitcan.dev/" title="">Home</a>
+        
+        <a class="" href="https://blog.yigitcan.dev/about" title="">About</a>
+        
+    </nav>
 
-    <div class="content pure-u-1 pure-u-md-3-4">
-		<a name="top"></a>
-		
 
-		
-			
-		    <div id="toc" class="pure-u-1 pure-u-md-1-4">
-				<small class="toc-label">Contents</small>
-		   	 	<nav id="TableOfContents">
+
+
+
+
+            
+        </header>
+        <main id="main" tabindex="-1"> 
+            
+    
+
+    <article class="post h-entry">
+        <div class="post-header">
+            <header>
+                <h1 class="p-name post-title">KairosDB inner workings; how does it store data in Cassandra?</h1>
+
+                
+            </header>
+        </div>
+        
+
+
+
+
+<nav id="TableOfContents">
   <ul>
     <li><a href="#old-cassandra-schema">Old Cassandra Schema</a>
       <ul>
@@ -153,110 +239,172 @@
     </li>
   </ul>
 </nav>
-		    </div>
-		    
-	    
-  		<section class="post">
-            <h1 class="post-title">
-              <a href="/kairosdb-inner-workings/">KairosDB inner workings; how does it store data in Cassandra?</a>
-            </h1>
-            <h3 class="post-subtitle">
-            	
-            </h3>
-            
-            	<span class="post-date">
-                	<span class="post-date-day"><sup>3</sup></span><span class="post-date-separator">/</span><span class="post-date-month">Aug</span> <span class="post-date-year">2017</span>
-            	</span>
-            	
-            
-            	
-            
 
-			
-
-			
-			
-				<div class="post-categories">
-				
-					<a class="post-category post-category-database" href="https://blog.yigitcan.dev/categories/database">Database</a>
-				
-					<a class="post-category post-category-optimization" href="https://blog.yigitcan.dev/categories/optimization">Optimization</a>
-				
-					<a class="post-category post-category-cassandra" href="https://blog.yigitcan.dev/categories/cassandra">Cassandra</a>
-				
-				</div>
-			
-
-			
-		    	<div class="social-sharing">
-	<a class="share-button-facebook" onClick="return popupShare(this.href);" href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.yigitcan.dev%2fkairosdb-inner-workings%2f" target="_blank"><i class="fa fa-facebook"><span>Like</span></i></a>
-	<a class="share-button-google-plus" onClick="return popupShare(this.href);" href="https://plus.google.com/share?url=https%3a%2f%2fblog.yigitcan.dev%2fkairosdb-inner-workings%2f" target="_blank"><i class="fa fa-google-plus"><span>Google +1</span></i></a>
-	<a class="share-button-linkedin" onClick="return popupShare(this.href);" href="http://www.linkedin.com/shareArticle?mini=true&url=https%3a%2f%2fblog.yigitcan.dev%2fkairosdb-inner-workings%2f&title=KairosDB%20inner%20workings%3b%20how%20does%20it%20store%20data%20in%20Cassandra%3f&summary=KairosDB%20is%20a%20timeseries%20database%20built%20on%20Cassandra.%20Even%20though%20it%20is%20coded%20in%20a%20way%20to%20support%20different%20database%20backends%2c%20it%20is%20known%20mostly%20by%20its%20usage%20of%20Cassandra%20as%20a%20scaleable%20and%20performant%20time%20series%20data%20storage.%20With%20KairosDB%2c%20you%20can%20store%20timeseries%20metric%20data%20in%20different%20types%20and%20then%20query%20them%20with%20aggregations%20over%20time%20units.%20In%20this%20article%2c%20we%20will%20look%20into%20the%20details%20of%20KairosDB%20and%20its%20two%20different%20Cassandra%20schema%20to%20understand%20how%20the%20insert%2c%20delete%20and%20read%20operations%20we%20do%2c%20work%20under%20the%20cover.}&source=Yengas" target="_blank"><i class="fa fa-linkedin"><span>Share on LinkedIn</span></i></a>
-	<a class="share-button-twitter" onClick="return popupShare(this.href);" href="http://twitter.com/share?text=KairosDB%20inner%20workings%3b%20how%20does%20it%20store%20data%20in%20Cassandra%3f&url=https%3a%2f%2fblog.yigitcan.dev%2fkairosdb-inner-workings%2f" target="_blank"><i class="fa fa-twitter"><span>Tweet</span></i></a>	
-</div>
-		    
-
-			
-
+        <div class="content e-content">
             <p>KairosDB is a timeseries database built on Cassandra. Even though it is coded in a way to support different database backends, it is known mostly by its usage of Cassandra as a scaleable and performant time series data storage. With KairosDB, you can store timeseries metric data in different types and then query them with aggregations over time units. In this article, we will look into the details of KairosDB and its two different Cassandra schema to understand how the insert, delete and read operations we do, work under the cover. Cassandra is a database that you need to model your data, regarding to your queries. That is why its important to know how your queries are made to the Cassandra according to your KairosDB data model!</p>
 <p>KairosDB has just released a new version that uses CQL and an improved Cassandra Schema this month. This version <a href="https://groups.google.com/d/msg/kairosdb-group/V8ViA6RXNZo/7svKXoKcAQAJ">reportedly</a> has some performance improvement over the old one. However to be compatible with the old schema, this new version still includes the schema of the old one. Queries are done on the both new and old tables to stay compatible.</p>
 <p>The first thing you need to know before inspecting the schemas, is that most of the data in the old schema has a <code>blob</code> type. Meaning if you were to query the Cassandra database directly, the returned data would be not human-readable. To get around this when inspecting the database with a GUI or by hand, you can run this Python code in an interpreter to see what the data is: <code>bytearray.fromhex('7461675f76616c756573').decode('utf8')</code>. The reason why the data is stored as blobs comes down to custom metric data types and the schema design. We will see this later.</p>
 <p>Let&rsquo;s start with dissecting the old Cassandra Schema and see how it works for our read/insert/delete operations.</p>
-<h2 id="old-cassandra-schema">Old Cassandra Schema</h2>
-<p>This Cassandra Schema is used prior to v1.2.0 for the versions of KairosDB that uses Thrift instead of CQL. Check <a href="https://gist.github.com/Yengas/541808c4ea65d957f052f179f52e6a07">this gist</a> to see the full schema as a gist file.</p>
-<h3 id="tables">Tables</h3>
-<p>This Schema has a single keyspace called <code>kairosdb</code> and 3 tables called <code>string_index</code>, <code>row_key_index</code> and <code>data_points</code>. Each of these tables are explained in detail below.</p>
+<h2 id="old-cassandra-schema" >Old Cassandra Schema
+<span>
+    <a href="#old-cassandra-schema">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h2><p>This Cassandra Schema is used prior to v1.2.0 for the versions of KairosDB that uses Thrift instead of CQL. Check <a href="https://gist.github.com/Yengas/541808c4ea65d957f052f179f52e6a07">this gist</a> to see the full schema as a gist file.</p>
+<h3 id="tables" >Tables
+<span>
+    <a href="#tables">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h3><p>This Schema has a single keyspace called <code>kairosdb</code> and 3 tables called <code>string_index</code>, <code>row_key_index</code> and <code>data_points</code>. Each of these tables are explained in detail below.</p>
 <p>Metric data for a specific metric and tags are hold in buckets of 3 weeks. This means a new row is created every three weeks to hold metric data for that period of time. The 3 weeks is  <a href="https://github.com/kairosdb/kairosdb/blob/271660f00c009e39e16c1bff536096ec7ed83409/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L92">hardcoded</a> into KairosDB and is a design choice. Finding out which buckets to query for a period of time, or which bucket a specific data point belongs to is done with the help of <a href="https://github.com/kairosdb/kairosdb/blob/271660f00c009e39e16c1bff536096ec7ed83409/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L684">a simple arithmetic calculation</a>.</p>
-<h4 id="string_index">string_index</h4>
-<p>This table has <a href="https://gist.github.com/Yengas/541808c4ea65d957f052f179f52e6a07#file-cassandra-old-cql-L75">3 fields</a> <code>key = blob</code>, <code>column = text</code> and <code>value = blob</code> however only the first two columns are used. KairosDB stores every string it sees on inserts into this table to speed up queries. There are 3 possible values for the <code>key</code> field, namely <strong>metric_names</strong>, <strong>tag_names</strong> and <strong>tag_values</strong>(stored as UTF-8 blobs). The other field which is used is the <code>column</code> field, which is used to store seen metric names, tag names and tag values. <del>This table is queried to make sure searching the other tables is not unnecessary for a specific metric/tag.</del> This table is queried only when <a href="https://groups.google.com/forum/?hl=en#!topic/kairosdb-group/MlwSRmZjhdU">populating the KairosDB UI</a>&rsquo;s metric name dropdown menu. <code>tag_names</code> and <code>tag_values</code> are not used and they aren&rsquo;t populated in the new version anymore.</p>
-<h4 id="data_points">data_points</h4>
-<p>This table has <a href="https://gist.github.com/Yengas/541808c4ea65d957f052f179f52e6a07#file-cassandra-old-cql-L9">3 fields</a> which are used to hold a metric data for a specific metric name and tags.</p>
+<h4 id="string_index" >string_index
+<span>
+    <a href="#string_index">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h4><p>This table has <a href="https://gist.github.com/Yengas/541808c4ea65d957f052f179f52e6a07#file-cassandra-old-cql-L75">3 fields</a> <code>key = blob</code>, <code>column = text</code> and <code>value = blob</code> however only the first two columns are used. KairosDB stores every string it sees on inserts into this table to speed up queries. There are 3 possible values for the <code>key</code> field, namely <strong>metric_names</strong>, <strong>tag_names</strong> and <strong>tag_values</strong>(stored as UTF-8 blobs). The other field which is used is the <code>column</code> field, which is used to store seen metric names, tag names and tag values. <del>This table is queried to make sure searching the other tables is not unnecessary for a specific metric/tag.</del> This table is queried only when <a href="https://groups.google.com/forum/?hl=en#!topic/kairosdb-group/MlwSRmZjhdU">populating the KairosDB UI</a>&rsquo;s metric name dropdown menu. <code>tag_names</code> and <code>tag_values</code> are not used and they aren&rsquo;t populated in the new version anymore.</p>
+<h4 id="data_points" >data_points
+<span>
+    <a href="#data_points">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h4><p>This table has <a href="https://gist.github.com/Yengas/541808c4ea65d957f052f179f52e6a07#file-cassandra-old-cql-L9">3 fields</a> which are used to hold a metric data for a specific metric name and tags.</p>
 <p>The fields for tables are <code>key = blob</code>, <code>column1 = blob</code> and <code>value = blob</code>. The <code>key</code> field is the concatenation of metric name, bucket start timestamp, the data type and the tags. <code>column1</code> is the offset of this data&rsquo;s time, relative to the bucket start time, and <code>value</code> is the serialized binary data for the value(this is how KairosDB can have custom data types) for your metric data. How this columns are utilized are explained below in Workflow section.</p>
 <p>The data in this rows are ordered by their offset time in ASC order, so you can have sequential access to your timeseries data when querying. Also another thing to keep in mind is, since the <code>key</code> field is used for partioning this data in your Cassandra cluster, each metric data for a specific metric/tags/bucket will be in the same Cassandra node.</p>
-<h4 id="row_key_index">row_key_index</h4>
-<p>This table is used to keep track of which buckets are available in the <code>data_points</code> table for a specific metric/tags. Lets say you have a time range and you want to do aggregates over a metric with a tag. You need a way of finding matching buckets of data(in <code>data_points</code>) for this query first. This tables helps you with this.</p>
+<h4 id="row_key_index" >row_key_index
+<span>
+    <a href="#row_key_index">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h4><p>This table is used to keep track of which buckets are available in the <code>data_points</code> table for a specific metric/tags. Lets say you have a time range and you want to do aggregates over a metric with a tag. You need a way of finding matching buckets of data(in <code>data_points</code>) for this query first. This tables helps you with this.</p>
 <p>It has <a href="https://gist.github.com/Yengas/541808c4ea65d957f052f179f52e6a07#file-cassandra-old-cql-L42">3 fields</a> <code>key = blob</code>, <code>column1 = blob</code>, <code>value = blob</code>. The <code>key</code> field is the metric name in utf-8 bytes. And the <code>column1</code> field is the same with the <code>data_points</code> table&rsquo;s <code>key</code> field. Meaning metric name + bucket start time + data type + tags concatenated together. The <code>value</code> field is not used. This table essentially is a way of saying(in plain English); for this metric name, we have these buckets of data with these tags.</p>
 <p>You can later use this information to make your queries. This is explained in detail below in Workflow section.</p>
 <p>This table&rsquo;s partition key is the <code>key</code> field which holds the metric name. Because of this, all of <code>row_key_index</code> entries for a single metric get stored in the same cassandra node. This is improved in the new schema.</p>
-<h3 id="workflow">Workflow</h3>
-<p>Below we try to explain how each insert/read and delete operation is done with this schema so you can better understand the inner workings of KairosDB.</p>
+<h3 id="workflow" >Workflow
+<span>
+    <a href="#workflow">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h3><p>Below we try to explain how each insert/read and delete operation is done with this schema so you can better understand the inner workings of KairosDB.</p>
 <p>As an example in this workflow, we will assume that we&rsquo;re holding temperature data for different cities. Lets model it so the metric name is <code>Temperature</code> and the city information is a tag.</p>
-<h4 id="insert">Insert</h4>
-<p>Let&rsquo;s say you have a metric data with <code>Temperature</code> metric name, and <code>city=Antalya</code> tag. For inserting a single metric to this set, we will use <code>33</code> for the value and <code>1501672887988</code> for the timestamp.</p>
+<h4 id="insert" >Insert
+<span>
+    <a href="#insert">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h4><p>Let&rsquo;s say you have a metric data with <code>Temperature</code> metric name, and <code>city=Antalya</code> tag. For inserting a single metric to this set, we will use <code>33</code> for the value and <code>1501672887988</code> for the timestamp.</p>
 <p>We first calculate(<a href="https://github.com/kairosdb/kairosdb/blob/9469daa937056d84de121ff112a93947e44f960e/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L287">CassandraDatastore.java Line 287</a>) which bucket this data belongs to. It&rsquo;s done using the formula <code>timestamp - (timestamp % row_width)</code> where <code>row_width</code> is the hardcoded value(<a href="https://github.com/kairosdb/kairosdb/blob/develop/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L92">Line 92</a>) in KairosDB. This then translates to: <code>1501672887988 - (1501672887988 % 1814400000) = 1500508800000</code>. In unix time, for a data dated <code>08/02/2017 @ 11:21am (UTC)</code> the bucket start time corresponds to <code>07/20/2017 @ 12:00am (UTC)</code>.</p>
 <p>We then create(<a href="https://github.com/kairosdb/kairosdb/blob/9469daa937056d84de121ff112a93947e44f960e/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L289">Line 289</a>) a <code>row_key</code> with this information. This <code>row_key</code> is the concatenation of Metric Name(<code>Temperature</code>), the bucket start time we calculated(<code>1500508800000</code>), the data type(<code>kairos_long</code>) and our tags(<code>city=Antalya</code>).</p>
 <p>Then we move on to making sure(<a href="https://github.com/kairosdb/kairosdb/blob/9469daa937056d84de121ff112a93947e44f960e/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L298">Line 298</a>) we have a <code>row_key_index</code> entry for the Metric Name(<code>Temperature</code>) and the <code>row_key</code> we calculated. And then we put the data in to the <code>data_points</code> table! We do this by calculating the offset relative to the bucket start time <code>data_time - row_time</code> in our case: <code>1501672887988 - 1500508800000 = 1164087988</code>. This all in all translates to an insert to <code>data_points</code> table with <code>key = row_key</code>, <code>column1 = offset we calculated</code> and the <code>value = our metric value = 33</code>.</p>
 <p>After the data is written, we write metric names, tag names to the <code>string_index</code> table.</p>
-<h4 id="read">Read</h4>
-<p>After getting familiar with insert, we don&rsquo;t need to go into details here. It&rsquo;s apparent that, for a time range and metric/tags query, before querying the <code>data_points</code> table, we need to take a look(<a href="https://github.com/kairosdb/kairosdb/blob/9469daa937056d84de121ff112a93947e44f960e/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L425">Line 425</a>) into <code>row_key_index</code> table. To do this we create a query into the <code>row_key_index</code> table with the start and end time of our query(<a href="https://github.com/kairosdb/kairosdb/blob/9469daa937056d84de121ff112a93947e44f960e/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L582">Line 582</a>). This results in a query with Metric Name(e.g. <code>Temperature</code>) and time range to the <code>row_key_index</code> table. For each returned result, we match them in-memory with our query(<a href="https://github.com/kairosdb/kairosdb/blob/9469daa937056d84de121ff112a93947e44f960e/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L712">Line 712</a> this requires parsing the binary <code>row_key</code> values aswell) and then we make queries(<a href="https://github.com/kairosdb/kairosdb/blob/9469daa937056d84de121ff112a93947e44f960e/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L457">Line 457</a>) to <code>data_points</code> table for each matched bucket.</p>
+<h4 id="read" >Read
+<span>
+    <a href="#read">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h4><p>After getting familiar with insert, we don&rsquo;t need to go into details here. It&rsquo;s apparent that, for a time range and metric/tags query, before querying the <code>data_points</code> table, we need to take a look(<a href="https://github.com/kairosdb/kairosdb/blob/9469daa937056d84de121ff112a93947e44f960e/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L425">Line 425</a>) into <code>row_key_index</code> table. To do this we create a query into the <code>row_key_index</code> table with the start and end time of our query(<a href="https://github.com/kairosdb/kairosdb/blob/9469daa937056d84de121ff112a93947e44f960e/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L582">Line 582</a>). This results in a query with Metric Name(e.g. <code>Temperature</code>) and time range to the <code>row_key_index</code> table. For each returned result, we match them in-memory with our query(<a href="https://github.com/kairosdb/kairosdb/blob/9469daa937056d84de121ff112a93947e44f960e/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L712">Line 712</a> this requires parsing the binary <code>row_key</code> values aswell) and then we make queries(<a href="https://github.com/kairosdb/kairosdb/blob/9469daa937056d84de121ff112a93947e44f960e/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L457">Line 457</a>) to <code>data_points</code> table for each matched bucket.</p>
 <p>This is why its <a href="https://github.com/kairosdb/kairosdb/wiki/Query-Performance">not recommended</a> to have a very populated <code>row_key_index</code> table with the old schema. Because that may result in too many in-memory comparisons and too many different queries to be made to <code>data_points</code> table.</p>
-<h4 id="delete">Delete</h4>
-<p>Deletes goes pretty much same with the read. However instead of doing read queries to the <code>data_points</code> table, we instead make delete queries. A good part to notice here(<a href="https://github.com/kairosdb/kairosdb/blob/9469daa937056d84de121ff112a93947e44f960e/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L522">Line 522</a>) that, if you happen to delete a whole row of data(meaning the time range you gave includes the start and end time of the bucket), its very performant. However if you do a partial deletes and keep querying that row, you may have performance issues because of <a href="https://opencredo.com/cassandra-tombstones-common-issues/">Cassandra tombstones</a>(may even result in your read queries to not respond!).</p>
-<h4 id="keep-in-mind">Keep in mind!</h4>
-<p>An important thing to keep in mind when doing reads/deletes is that; Lets say you have 3 metric names and 300.000 cities. To delete 1 week of data for these 3 metrics on Antalya, KairosDB needs to filter all of your <code>row_key_index</code> table in-memory and that may translate to millions of comparisons. See calculating <code>row_key_index</code> size in Optimization section!</p>
-<h2 id="new-cassandra-schema">New Cassandra Schema</h2>
-<p>The maintainer of the KairosDB database has been doing some work with CQL instead of using THRIFT. The beta version of KairosDB that uses CQL was released in <a href="https://github.com/kairosdb/kairosdb/releases/tag/v1.2.0-beta2">July 2017</a>.</p>
+<h4 id="delete" >Delete
+<span>
+    <a href="#delete">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h4><p>Deletes goes pretty much same with the read. However instead of doing read queries to the <code>data_points</code> table, we instead make delete queries. A good part to notice here(<a href="https://github.com/kairosdb/kairosdb/blob/9469daa937056d84de121ff112a93947e44f960e/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L522">Line 522</a>) that, if you happen to delete a whole row of data(meaning the time range you gave includes the start and end time of the bucket), its very performant. However if you do a partial deletes and keep querying that row, you may have performance issues because of <a href="https://opencredo.com/cassandra-tombstones-common-issues/">Cassandra tombstones</a>(may even result in your read queries to not respond!).</p>
+<h4 id="keep-in-mind" >Keep in mind!
+<span>
+    <a href="#keep-in-mind">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h4><p>An important thing to keep in mind when doing reads/deletes is that; Lets say you have 3 metric names and 300.000 cities. To delete 1 week of data for these 3 metrics on Antalya, KairosDB needs to filter all of your <code>row_key_index</code> table in-memory and that may translate to millions of comparisons. See calculating <code>row_key_index</code> size in Optimization section!</p>
+<h2 id="new-cassandra-schema" >New Cassandra Schema
+<span>
+    <a href="#new-cassandra-schema">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h2><p>The maintainer of the KairosDB database has been doing some work with CQL instead of using THRIFT. The beta version of KairosDB that uses CQL was released in <a href="https://github.com/kairosdb/kairosdb/releases/tag/v1.2.0-beta2">July 2017</a>.</p>
 <p>This version has some new tables in the Schema, however its still compatible with the old version of KairosDB, meaning it queries both tables for backwards compatibility. There is a small difference that you need to keep in mind, the new version of the Cassandra schema creates <code>string_index</code> table with the <code>column1</code> fields as blob. This field was text with the old schema. However these schemas are created only if the table doesn&rsquo;t already exists(<a href="https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/Schema.java#L50">Schema.java Line 50</a>). So it shouldn&rsquo;t cause any problem when upgrading KairosDB to the new version.</p>
 <p>The <code>data_points</code> and <code>string_index</code> are actively used for the same purpose they were used with the old version.</p>
-<h3 id="new-tables">New Tables</h3>
-<h4 id="row_key_time_index">row_key_time_index</h4>
-<p>This table has 3 fields <code>metric = text</code>, <code>row_time = timestamp</code> and an unused <code>value = text</code>. Essentially it&rsquo;s job is to hold what buckets we have for a specific metric. It&rsquo;s queried with the time range and the metric name, and the result is used to query the row_keys_index table.</p>
-<h4 id="row_keys_index">row_keys_index</h4>
-<p>This table holds the <code>row_key</code> we calculated in a CQL friendly way. It has 4 fields namely; <code>metric = text</code>, <code>row_time = timestamp</code>, <code>data_type = text</code> and <code>tags = frozen&lt;map&lt;text, text&gt;&gt;</code>. These are used to hold a <code>row_key</code> in Cassandra table, so they can be queried with their metric, timestamp and data type to be parsed and compared in memory with the query.</p>
-<h3 id="workflow-1">Workflow</h3>
-<h4 id="insert-1">Insert</h4>
-<p>Insert is pretty simple and almost the same as the old schema and addition is that the CQL commands are run batched. Bucket is calculated, then the <code>row_key</code> and it&rsquo;s made sure corresponding entries are created in <code>row_key_time</code>(<a href="https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/CQLBatch.java#L54">Line 54</a>) and <code>row_keys</code>(<a href="https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/CQLBatch.java#L65">Line 65</a>), after this the data is inserted into the <code>data_points</code>(<a href="https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/CQLBatch.java#L116">Line 116</a>) and only the metric names are inserted into the <code>string_index</code>.</p>
-<h4 id="read-1">Read</h4>
-<p>We still need a way to find which <code>data_points</code> buckets we need to query. To do this, KairosDB needs to query both old schema&rsquo;s <code>row_key_index</code> table and the new <code>row_key_time_index</code> and <code>row_keys</code> table.</p>
+<h3 id="new-tables" >New Tables
+<span>
+    <a href="#new-tables">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h3><h4 id="row_key_time_index" >row_key_time_index
+<span>
+    <a href="#row_key_time_index">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h4><p>This table has 3 fields <code>metric = text</code>, <code>row_time = timestamp</code> and an unused <code>value = text</code>. Essentially it&rsquo;s job is to hold what buckets we have for a specific metric. It&rsquo;s queried with the time range and the metric name, and the result is used to query the row_keys_index table.</p>
+<h4 id="row_keys_index" >row_keys_index
+<span>
+    <a href="#row_keys_index">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h4><p>This table holds the <code>row_key</code> we calculated in a CQL friendly way. It has 4 fields namely; <code>metric = text</code>, <code>row_time = timestamp</code>, <code>data_type = text</code> and <code>tags = frozen&lt;map&lt;text, text&gt;&gt;</code>. These are used to hold a <code>row_key</code> in Cassandra table, so they can be queried with their metric, timestamp and data type to be parsed and compared in memory with the query.</p>
+<h3 id="workflow-1" >Workflow
+<span>
+    <a href="#workflow-1">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h3><h4 id="insert-1" >Insert
+<span>
+    <a href="#insert-1">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h4><p>Insert is pretty simple and almost the same as the old schema and addition is that the CQL commands are run batched. Bucket is calculated, then the <code>row_key</code> and it&rsquo;s made sure corresponding entries are created in <code>row_key_time</code>(<a href="https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/CQLBatch.java#L54">Line 54</a>) and <code>row_keys</code>(<a href="https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/CQLBatch.java#L65">Line 65</a>), after this the data is inserted into the <code>data_points</code>(<a href="https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/CQLBatch.java#L116">Line 116</a>) and only the metric names are inserted into the <code>string_index</code>.</p>
+<h4 id="read-1" >Read
+<span>
+    <a href="#read-1">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h4><p>We still need a way to find which <code>data_points</code> buckets we need to query. To do this, KairosDB needs to query both old schema&rsquo;s <code>row_key_index</code> table and the new <code>row_key_time_index</code> and <code>row_keys</code> table.</p>
 <p>The old schema is queried like the old version of KairosDB but instead of using Thrift, CQL is used.</p>
 <p>For the new schema; <code>row_key_time_index</code> is queried with the metric name and the time range(<a href="https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L780">Line 780</a>) to get the buckets available, then multiple queries are made to the <code>row_keys</code> table(<a href="https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L788">Line 788</a>) and the returning entries are filtered in memory(<a href="https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L823">Line 823</a>) according to the query made.</p>
-<h4 id="delete-1">Delete</h4>
-<p>New version of cassandra <a href="https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L595">doesn&rsquo;t seem to delete</a> <code>row_key_time_index</code> and <code>row_keys</code> entries for the metric data. It just deletes the old schema&rsquo;s <code>row_key_index</code> entry, and the <code>data_points</code> entries(<a href="https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L595">Line 595</a> and <a href="https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L614">Line 614</a>). There are no delete queries for the new tables in <a href="https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/Schema.java">Schema.java</a>.</p>
-<h2 id="optimization-what-to-keep-in-mind">Optimization, what to keep in mind</h2>
-<h3 id="calculating-your-row_key_index-size">Calculating your row_key_index size</h3>
-<p>To do this calculation. Lets say you have 300.000 different cities, and you hold <code>Temperature</code>, <code>Humidity</code> and <code>Wind</code> metrics for these cities. And you decided to model your data in KairosDB so the metric names correspond to the <code>Temperature</code>, <code>Humidity</code> and <code>Wind</code>. And the cities are stored with the <code>city=XXX</code> tag. You will have <code>N = 300.000 * 3 = 900.000</code> entries in your <code>row_key_index</code>. And you get <code>N</code> more <code>row_key_index</code> entries each 3 week because KairosDB divides your data into buckets! You can see how this could slow your queries with the Read and Delete, because of in-memory comparisons. The situation is different with the new schema.</p>
-<h3 id="gotchas-not-many-performance-improvements-slow-deletes-reads">Gotchas, not many performance improvements&hellip; Slow deletes, reads.</h3>
-<p>KairosDB isn&rsquo;t the most optimized database when it comes to executing your queries on Cassandra. One of the most apparent feature it lacks, is that when you make a query with same metric name, but different tags, it queries the <code>row_key_index</code> table multiple times. And considering this metric name is populated, this may cause a lot of slow downs on your system. This can happen both with reads and deletes.</p>
+<h4 id="delete-1" >Delete
+<span>
+    <a href="#delete-1">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h4><p>New version of cassandra <a href="https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L595">doesn&rsquo;t seem to delete</a> <code>row_key_time_index</code> and <code>row_keys</code> entries for the metric data. It just deletes the old schema&rsquo;s <code>row_key_index</code> entry, and the <code>data_points</code> entries(<a href="https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L595">Line 595</a> and <a href="https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L614">Line 614</a>). There are no delete queries for the new tables in <a href="https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/Schema.java">Schema.java</a>.</p>
+<h2 id="optimization-what-to-keep-in-mind" >Optimization, what to keep in mind
+<span>
+    <a href="#optimization-what-to-keep-in-mind">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h2><h3 id="calculating-your-row_key_index-size" >Calculating your row_key_index size
+<span>
+    <a href="#calculating-your-row_key_index-size">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h3><p>To do this calculation. Lets say you have 300.000 different cities, and you hold <code>Temperature</code>, <code>Humidity</code> and <code>Wind</code> metrics for these cities. And you decided to model your data in KairosDB so the metric names correspond to the <code>Temperature</code>, <code>Humidity</code> and <code>Wind</code>. And the cities are stored with the <code>city=XXX</code> tag. You will have <code>N = 300.000 * 3 = 900.000</code> entries in your <code>row_key_index</code>. And you get <code>N</code> more <code>row_key_index</code> entries each 3 week because KairosDB divides your data into buckets! You can see how this could slow your queries with the Read and Delete, because of in-memory comparisons. The situation is different with the new schema.</p>
+<h3 id="gotchas-not-many-performance-improvements-slow-deletes-reads" >Gotchas, not many performance improvements&hellip; Slow deletes, reads.
+<span>
+    <a href="#gotchas-not-many-performance-improvements-slow-deletes-reads">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h3><p>KairosDB isn&rsquo;t the most optimized database when it comes to executing your queries on Cassandra. One of the most apparent feature it lacks, is that when you make a query with same metric name, but different tags, it queries the <code>row_key_index</code> table multiple times. And considering this metric name is populated, this may cause a lot of slow downs on your system. This can happen both with reads and deletes.</p>
 <p>Lets keep going with our example where we had 3 different metrics <code>Temperature</code>, <code>Humidity</code> and <code>Wind</code> and we had 1 tag named city, which holds the city name. If we were to run a delete query which deletes all of the metrics for 2 different cities <code>Antalya</code> and <code>Istanbul</code>, this will cause 2 scans on all of our <code>row_key_index</code>. Lets think a scenario where we run this kind of query for deleting a big number of cities&hellip; This could cause a serious slowdown with the current schema(s) if you were to make a naive query with multiple metrics. To make this query more performant and make it read the <code>row_key_index</code> table once, try using group by as mentioned by Brian Hawkins on <a href="https://groups.google.com/d/msg/kairosdb-group/MlwSRmZjhdU/WndUNMi1AwAJ">this kairosdb group post</a>. Example query:</p>
 <pre tabindex="0"><code>{
     &#34;start_absolute&#34;: ...,
@@ -272,76 +420,229 @@
         ]
     }]
 }
-</code></pre><h3 id="dont-have-too-many-tombstones">Don&rsquo;t have too many tombstones</h3>
-<p>Cassandra doesn&rsquo;t delete records when you execute a delete query. It just marks them as tombstones and deletes them in the next compaction. Until this compaction happens, every query you make to these sstables, will need to filter out tombstones records and this may cause problem such as your read queries not responding or getting slower. You should keep in mind KairosDB stores 3 weeks of metric data in a row for each specific metric/tag combinations. If you delete some data in the row you are actively using, you may get slow downs/halts/aborts. Please see this <a href="https://stackoverflow.com/questions/21755286/what-exactly-happens-when-tombstone-limit-is-reached">stackoverflow question</a>, regarding this problem.</p>
+</code></pre><h3 id="dont-have-too-many-tombstones" >Don&rsquo;t have too many tombstones
+<span>
+    <a href="#dont-have-too-many-tombstones">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h3><p>Cassandra doesn&rsquo;t delete records when you execute a delete query. It just marks them as tombstones and deletes them in the next compaction. Until this compaction happens, every query you make to these sstables, will need to filter out tombstones records and this may cause problem such as your read queries not responding or getting slower. You should keep in mind KairosDB stores 3 weeks of metric data in a row for each specific metric/tag combinations. If you delete some data in the row you are actively using, you may get slow downs/halts/aborts. Please see this <a href="https://stackoverflow.com/questions/21755286/what-exactly-happens-when-tombstone-limit-is-reached">stackoverflow question</a>, regarding this problem.</p>
 
-	
-			
-		    	<div class="social-sharing">
-	<a class="share-button-facebook" onClick="return popupShare(this.href);" href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.yigitcan.dev%2fkairosdb-inner-workings%2f" target="_blank"><i class="fa fa-facebook"><span>Like</span></i></a>
-	<a class="share-button-google-plus" onClick="return popupShare(this.href);" href="https://plus.google.com/share?url=https%3a%2f%2fblog.yigitcan.dev%2fkairosdb-inner-workings%2f" target="_blank"><i class="fa fa-google-plus"><span>Google +1</span></i></a>
-	<a class="share-button-linkedin" onClick="return popupShare(this.href);" href="http://www.linkedin.com/shareArticle?mini=true&url=https%3a%2f%2fblog.yigitcan.dev%2fkairosdb-inner-workings%2f&title=KairosDB%20inner%20workings%3b%20how%20does%20it%20store%20data%20in%20Cassandra%3f&summary=KairosDB%20is%20a%20timeseries%20database%20built%20on%20Cassandra.%20Even%20though%20it%20is%20coded%20in%20a%20way%20to%20support%20different%20database%20backends%2c%20it%20is%20known%20mostly%20by%20its%20usage%20of%20Cassandra%20as%20a%20scaleable%20and%20performant%20time%20series%20data%20storage.%20With%20KairosDB%2c%20you%20can%20store%20timeseries%20metric%20data%20in%20different%20types%20and%20then%20query%20them%20with%20aggregations%20over%20time%20units.%20In%20this%20article%2c%20we%20will%20look%20into%20the%20details%20of%20KairosDB%20and%20its%20two%20different%20Cassandra%20schema%20to%20understand%20how%20the%20insert%2c%20delete%20and%20read%20operations%20we%20do%2c%20work%20under%20the%20cover.}&source=Yengas" target="_blank"><i class="fa fa-linkedin"><span>Share on LinkedIn</span></i></a>
-	<a class="share-button-twitter" onClick="return popupShare(this.href);" href="http://twitter.com/share?text=KairosDB%20inner%20workings%3b%20how%20does%20it%20store%20data%20in%20Cassandra%3f&url=https%3a%2f%2fblog.yigitcan.dev%2fkairosdb-inner-workings%2f" target="_blank"><i class="fa fa-twitter"><span>Tweet</span></i></a>	
-</div>
-		    
-
-			
-				<div class="tags-list">
-					<span class="dark-red">Tags</span><span class="decorative-marker">//</span>
-					
-	                <a class="post-tag post-tag-kairosdb" href="https://blog.yigitcan.dev/tags/kairosdb">kairosdb</a>,
-	                
-	                <a class="post-tag post-tag-cassandra" href="https://blog.yigitcan.dev/tags/cassandra">cassandra</a>,
-	                
-	                <a class="post-tag post-tag-schema" href="https://blog.yigitcan.dev/tags/schema">schema</a>,
-	                
-	                <a class="post-tag post-tag-performance" href="https://blog.yigitcan.dev/tags/performance">performance</a>,
-	                
-	                <a class="post-tag post-tag-optimization" href="https://blog.yigitcan.dev/tags/optimization">optimization</a>,
-	                
-	                <a class="post-tag post-tag-tips" href="https://blog.yigitcan.dev/tags/tips">tips</a>,
-	                
-				</div>
-			
-
-			
-				<div class="paging">
-					<span class="paging-label">More Reading</span>
-					
-
-					
-					<div class="paging-newer">
-						<span class="dark-red">Newer</span><span class="decorative-marker">//</span>
-						<a class="paging-link" href="/docker-compose-node/">Using Docker and Docker-Compose to setup a local working environment, ready to be scaled.</a>
-		            </div>
-		            
-
-					
-	            </div>
-            
-          </section>
-          
-          	
-          
+        </div>
         
-      <div class="footer">
-	<hr class="thin" />
-	<div class="pure-menu pure-menu-horizontal pure-menu-open">
-		<ul class="footer-menu">
-		
-			<li><a href="/tr/">Blog&#39;u Türkçe oku.</a></li>
-		
-		</ul>
-	</div>
 
-	<p>&copy; 2023. All rights reserved.</p>
-</div>
+    
+
+
+
+<div class="post-info">
+    
+        <div class="post-date dt-published">
+            <a class="u-url" href="/kairosdb-inner-workings/"><time datetime="2017-08-03">2017-08-03</time></a>
+            
+        </div>
+    
+
+    <a class="post-hidden-url u-url" href="https://blog.yigitcan.dev/kairosdb-inner-workings/">https://blog.yigitcan.dev/kairosdb-inner-workings/</a>
+    <a href="https://blog.yigitcan.dev/" class="p-name p-author post-hidden-author h-card" rel="me"></a>
+
+
+    <div class="post-taxonomies">
+        
+            <ul class="post-categories">
+                
+                    
+                    <li><a href="https://blog.yigitcan.dev/categories/database/">Database</a></li>
+                
+                    
+                    <li><a href="https://blog.yigitcan.dev/categories/optimization/">Optimization</a></li>
+                
+                    
+                    <li><a href="https://blog.yigitcan.dev/categories/cassandra/">Cassandra</a></li>
+                
+            </ul>
+        
+        
+            <ul class="post-tags">
+                
+                    
+                    <li><a href="https://blog.yigitcan.dev/tags/kairosdb/">#kairosdb</a></li>
+                
+                    
+                    <li><a href="https://blog.yigitcan.dev/tags/cassandra/">#cassandra</a></li>
+                
+                    
+                    <li><a href="https://blog.yigitcan.dev/tags/schema/">#schema</a></li>
+                
+                    
+                    <li><a href="https://blog.yigitcan.dev/tags/performance/">#performance</a></li>
+                
+                    
+                    <li><a href="https://blog.yigitcan.dev/tags/optimization/">#optimization</a></li>
+                
+                    
+                    <li><a href="https://blog.yigitcan.dev/tags/tips/">#tips</a></li>
+                
+            </ul>
+        
+        
     </div>
-  </div>
-	
+</div>
 
-	
+    </article>
 
+    
+
+    
+
+    
+        
+
+
+
+
+
+
+
+    
+
+        </main>
+        
+            <footer class="common-footer">
+    
+    
+        <ul class="language-select">
+    
+    
+    
+        
+    
+
+    
+        
+            <li><a href="https://blog.yigitcan.dev/tr/">Türkçe</a></li>
+        
+    
+        
+            <li>English</li>
+        
+    
+</ul>
+
+    
+
+    <div class="common-footer-bottom">
+        
+        <div class="copyright">
+            <p>© 2023<br>
+            Powered by <a target="_blank" rel="noopener noreferrer" href="https://gohugo.io/">Hugo</a>, theme <a target="_blank" rel="noopener noreferrer" href="https://github.com/mitrichius/hugo-theme-anubis">Anubis</a>.<br>
+            
+            </p>  
+        </div> 
+
+        
+
+    
+
+
+
+
+    <button class="theme-switcher">
+        Dark theme
+    </button>
+
+
+<script>
+const STORAGE_KEY = 'user-color-scheme'
+const defaultTheme = "auto"
+
+let currentTheme
+let switchButton
+let autoDefinedScheme = window.matchMedia('(prefers-color-scheme: dark)')
+
+const autoChangeScheme = e => {
+    currentTheme = e.matches ? 'dark' : 'light'
+    document.documentElement.setAttribute('data-theme', currentTheme)
+    changeButtonText()
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    switchButton = document.querySelector('.theme-switcher')
+    currentTheme = detectCurrentScheme()
+    if (currentTheme == 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark')
+    }
+    if (currentTheme == 'auto') {
+        autoChangeScheme(autoDefinedScheme);
+        autoDefinedScheme.addListener(autoChangeScheme);
+    }
+
+    if (switchButton) {
+        changeButtonText()
+        switchButton.addEventListener('click', switchTheme, false)
+    }
   
+    showContent()
+})
+
+function detectCurrentScheme() {
+    if (localStorage !== null && localStorage.getItem(STORAGE_KEY)) {
+        return localStorage.getItem(STORAGE_KEY)
+    } 
+    if (defaultTheme) {
+        return defaultTheme
+    } 
+    if (!window.matchMedia) {
+        return 'light'
+    } 
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return 'dark'
+    }
+    return 'light'
+}
+
+function changeButtonText()
+{   
+    if (switchButton) {
+        switchButton.textContent = currentTheme == 'dark' ?  "Light theme" : "Dark theme"
+    }
+}
+
+function switchTheme(e) {
+    if (currentTheme == 'dark') {
+        if (localStorage !== null)
+            localStorage.setItem(STORAGE_KEY, 'light')
+        document.documentElement.setAttribute('data-theme', 'light')
+        currentTheme = 'light'
+    } else {
+        if (localStorage !== null)
+            localStorage.setItem(STORAGE_KEY, 'dark')
+        document.documentElement.setAttribute('data-theme', 'dark')
+        currentTheme = 'dark'
+    }
+    changeButtonText()
+}
+
+function showContent() {
+    document.body.style.visibility = 'visible';
+    document.body.style.opacity = 1;
+}
+</script>
+
+   
+    </div>
+
+    <p class="h-card vcard">
+
+    <a href=https://blog.yigitcan.dev/ class="p-name u-url url fn" rel="me"></a> 
+
+    
+
+    
+</p> 
+</footer>
+
+        
+    </div>
 </body>
 </html>

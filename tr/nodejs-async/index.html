@@ -1,136 +1,231 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+
+
+<html lang="en-us" data-theme="">
 <head>
-  <title>
-    Node.JS Event Loop, Sync/Async, Promise, Async/Await ve RxJS üzerine... // Yengas
-  </title>
+    
+        
+<meta charset="utf-8">
+<meta name="HandheldFriendly" content="True">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer-when-downgrade">
 
-  <link href="http://gmpg.org/xfn/11" rel="profile">
-<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<title>Node.JS Event Loop, Sync/Async, Promise, Async/Await ve RxJS üzerine&hellip; - Yiğitcan UÇUM</title>
 
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-
-<meta name="description" content="">
-<meta name="keywords" content="">
-<meta name="author" content="">
-<meta name="generator" content="Hugo 0.117.0">
-
-  <meta property="og:title" content="Node.JS Event Loop, Sync/Async, Promise, Async/Await ve RxJS üzerine..." />
-<meta property="og:description" content="" />
-<meta property="og:type" content="website" />
-<meta property="og:locale" content="en_US" />
-<meta property="og:url" content="https://blog.yigitcan.dev/tr/nodejs-async/" />
+<meta name="description" content="Bu makalede Event Loop, Sync/Async, Promise, Async/Await, RxJS kavramlarını anlatmaya ve tüm bu kavramları tek bir örnek üzerinde kodlayarak göstermeye çalışacağım. Kendi sisteminizde denemeler yapmak istiyorsanız Node versiyonunuzun 8&rsquo;in üzerinde olduğundan emin olun.
+Bu makalede yazılan tüm kodların, çalışır hallerine, yengas/async-blog-post@Github adresinden ulaşabilirsiniz.
+Problem İlk önce problemimiz ile başlayalım&hellip; Elimde daha önce izlemek için kaydettiğim Ghibli filmlerinin id&rsquo;leri var. Bu filmlerin hepsinin adını ve açıklamasını almak istiyorum.
+İlk önce elimdeki dosyanın formatına bakalım&hellip;">
 
 
-  
-  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.5.0/base-min.css">
-  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.5.0/pure-min.css">
-  
-  
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.5.0/grids-responsive-min.css">
-  
-  
 
-  <link rel="stylesheet" href="https://blog.yigitcan.dev//css/redlounge.css">
-  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet">
-  <link href='//fonts.googleapis.com/css?family=Raleway:400,200,100,700,300,500,600,800' rel='stylesheet' type='text/css'>
-  <link href='//fonts.googleapis.com/css?family=Libre+Baskerville:400,700,400italic' rel='stylesheet' type='text/css'>
 
-  
-  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/touch-icon-144-precomposed.png">
-  <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.png">
 
-  
-  <link href="" rel="alternate" type="application/rss+xml" title="Yengas" />
+<link rel="icon" type="image/x-icon" href="https://blog.yigitcan.dev/favicon.ico">
+<link rel="apple-touch-icon-precomposed" href="https://blog.yigitcan.dev/favicon.png">
+
+
+
 
     
-  
-  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.7/styles/tomorrow-night-bright.min.css">
-  
-  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.7/highlight.min.js"></script>
-  <script>hljs.initHighlightingOnLoad();</script>
 
 
-  
 
-  
+<style>
+  body {
+    visibility: hidden;
+    opacity: 0;
+  }
+</style>
 
-  
+<noscript>
+  <style>
+    body {
+      visibility: visible;
+      opacity: 1;
+    }
+  </style>
+</noscript>
 
-  
+
+
+
+    
+
+
+
+
+
+    
+    
+        
+    
+    
+
+    
+        <link rel="stylesheet" href="https://blog.yigitcan.dev/css/style.min.eaefe0f95d1fe64ef0a3932347fc8e07ff4e3de4515423d0ad22b33474042778.css" integrity="sha256-6u/g&#43;V0f5k7wo5MjR/yOB/9OPeRRVCPQrSKzNHQEJ3g=">
+    
+
+
+
+
+
+    
+
+    
+
+
+
+
+
+    
+    
+        
+    
+    
+
+    
+        <script src="https://blog.yigitcan.dev/js/script.min.74bf1a3fcf1af396efa4acf3e660e876b61a2153ab9cbe1893ac24ea6d4f94ee.js" type="text/javascript" charset="utf-8" integrity="sha256-dL8aP88a85bvpKzz5mDodrYaIVOrnL4Yk6wk6m1PlO4="></script>
+    
+
+
+
+
+
+
+
+<meta property="og:title" content="Node.JS Event Loop, Sync/Async, Promise, Async/Await ve RxJS üzerine..." />
+<meta property="og:description" content="Bu makalede Event Loop, Sync/Async, Promise, Async/Await, RxJS kavramlarını anlatmaya ve tüm bu kavramları tek bir örnek üzerinde kodlayarak göstermeye çalışacağım. Kendi sisteminizde denemeler yapmak istiyorsanız Node versiyonunuzun 8&rsquo;in üzerinde olduğundan emin olun.
+Bu makalede yazılan tüm kodların, çalışır hallerine, yengas/async-blog-post@Github adresinden ulaşabilirsiniz.
+Problem İlk önce problemimiz ile başlayalım&hellip; Elimde daha önce izlemek için kaydettiğim Ghibli filmlerinin id&rsquo;leri var. Bu filmlerin hepsinin adını ve açıklamasını almak istiyorum.
+İlk önce elimdeki dosyanın formatına bakalım&hellip;" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://blog.yigitcan.dev/tr/nodejs-async/" /><meta property="article:section" content="" />
+<meta property="article:published_time" content="2018-03-10T03:28:00+03:00" />
+<meta property="article:modified_time" content="2018-03-10T03:28:00+03:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Node.JS Event Loop, Sync/Async, Promise, Async/Await ve RxJS üzerine..."/>
+<meta name="twitter:description" content="Bu makalede Event Loop, Sync/Async, Promise, Async/Await, RxJS kavramlarını anlatmaya ve tüm bu kavramları tek bir örnek üzerinde kodlayarak göstermeye çalışacağım. Kendi sisteminizde denemeler yapmak istiyorsanız Node versiyonunuzun 8&rsquo;in üzerinde olduğundan emin olun.
+Bu makalede yazılan tüm kodların, çalışır hallerine, yengas/async-blog-post@Github adresinden ulaşabilirsiniz.
+Problem İlk önce problemimiz ile başlayalım&hellip; Elimde daha önce izlemek için kaydettiğim Ghibli filmlerinin id&rsquo;leri var. Bu filmlerin hepsinin adını ve açıklamasını almak istiyorum.
+İlk önce elimdeki dosyanın formatına bakalım&hellip;"/>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
 </head>
-
 <body>
-	
+    <a class="skip-main" href="#main">Skip to main content</a>
+    <div class="container">
+        <header class="common-header"> 
+            
+                <div class="header-top">
+    <h1 class="site-title">
+    <a href="/tr">Yiğitcan UÇUM</a>
+</h1>
+    <ul class="social-icons">
 
-	<div id="layout" class="pure-g">
-    <div class="sidebar pure-u-1 pure-u-md-1-4">
-  <div class="header">
-    
-
-	
-
-    <h1 class="brand-title">Yengas</h1>
-    <h2 class="brand-tagline">Building, scaling, learning</h2>
-
-    <nav class="nav">
-      <ul class="nav-list" >
-        <li class="nav-item"><span class="nav-item-separator">//</span><a href="https://blog.yigitcan.dev/tr/">Ana Sayfa</a></li>
-        
-          <li class="nav-item"><span class="nav-item-separator">//</span><a href="/tr/about">Hakkımda</a></li>
-        
-      </ul>
-    </nav>
-
-    <nav class="nav">
-      <ul class="nav-list">
-        
-          <li class="nav-item">
-              
-                <a href="https://blog.yigitcan.dev/">en</a>
-              
-          </li>
-        
-          <li class="nav-item">
-              
-                <span>tr</span>
-              
-          </li>
-        
-      </ul>
-    </nav>
 
     
-    <div class="social-buttons">
-      
-        
-        <a href="https://github.com/Yengas" target="_blank"><i class="fa fa-github"></i></a>
-        
-      
-        
-        <a href="https://linkedin.com/in/YigitcanUCUM" target="_blank"><i class="fa fa-linkedin"></i></a>
-        
-      
-      
-    </div>
+        <li>
+            <a href="https://github.com/Yengas" title="Github" rel="me">
+            <span class="inline-svg" >
+
+
+
+
+    
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><path fill="currentColor" d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+
+</span>
+
+            </a>
+        </li>
     
 
-  </div>
+    
+        <li>
+            <a href="https://linkedin.com/in/YigitcanUCUM" title="Linkedin" rel="me">
+            <span class="inline-svg" >
+
+
+
+
+    
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3zM135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5zm282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9V416z"/></svg>
+
+</span>
+
+            </a>
+        </li>
+    
+
+
+
+    <li>
+            <a href="https://blog.yigitcan.dev/tr/index.xml" title="RSS" rel="me">
+            <span class="inline-svg" >
+
+
+
+
+    
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M128.081 415.959c0 35.369-28.672 64.041-64.041 64.041S0 451.328 0 415.959s28.672-64.041 64.041-64.041 64.04 28.673 64.04 64.041zm175.66 47.25c-8.354-154.6-132.185-278.587-286.95-286.95C7.656 175.765 0 183.105 0 192.253v48.069c0 8.415 6.49 15.472 14.887 16.018 111.832 7.284 201.473 96.702 208.772 208.772.547 8.397 7.604 14.887 16.018 14.887h48.069c9.149.001 16.489-7.655 15.995-16.79zm144.249.288C439.596 229.677 251.465 40.445 16.503 32.01 7.473 31.686 0 38.981 0 48.016v48.068c0 8.625 6.835 15.645 15.453 15.999 191.179 7.839 344.627 161.316 352.465 352.465.353 8.618 7.373 15.453 15.999 15.453h48.068c9.034-.001 16.329-7.474 16.005-16.504z"/></svg>
+
+</span>
+
+            </a>
+        </li>
+    
+
+</ul>
 </div>
 
-	
-	
+    <nav>
+        
+        
+        <a class="" href="https://blog.yigitcan.dev/tr/" title="">Ana Sayfa</a>
+        
+        <a class="" href="https://blog.yigitcan.dev/tr/about" title="">Hakkımda</a>
+        
+    </nav>
 
-    <div class="content pure-u-1 pure-u-md-3-4">
-		<a name="top"></a>
-		
 
-		
-			
-		    <div id="toc" class="pure-u-1 pure-u-md-1-4">
-				<small class="toc-label">İçerikler</small>
-		   	 	<nav id="TableOfContents">
+
+
+
+
+            
+        </header>
+        <main id="main" tabindex="-1"> 
+            
+    
+
+    <article class="post h-entry">
+        <div class="post-header">
+            <header>
+                <h1 class="p-name post-title">Node.JS Event Loop, Sync/Async, Promise, Async/Await ve RxJS üzerine&hellip;</h1>
+
+                
+            </header>
+        </div>
+        
+
+
+
+
+<nav id="TableOfContents">
   <ul>
     <li><a href="#problem">Problem</a></li>
     <li><a href="#tek-bir-film-sync-olarak-işlem-yapmak">Tek bir film, sync olarak işlem yapmak.</a></li>
@@ -149,53 +244,17 @@
     <li><a href="#çıkarımlar">Çıkarımlar</a></li>
   </ul>
 </nav>
-		    </div>
-		    
-	    
-  		<section class="post">
-            <h1 class="post-title">
-              <a href="/tr/nodejs-async/">Node.JS Event Loop, Sync/Async, Promise, Async/Await ve RxJS üzerine...</a>
-            </h1>
-            <h3 class="post-subtitle">
-            	
-            </h3>
-            
-            	<span class="post-date">
-                	<span class="post-date-day"><sup>10</sup></span><span class="post-date-separator">/</span><span class="post-date-month">Mar</span> <span class="post-date-year">2018</span>
-            	</span>
-            	
-            
-            	
-            
 
-			
-
-			
-			
-				<div class="post-categories">
-				
-					<a class="post-category post-category-node.js" href="https://blog.yigitcan.dev/tr/categories/node.js">Node.JS</a>
-				
-					<a class="post-category post-category-programming-paradigms" href="https://blog.yigitcan.dev/tr/categories/programming-paradigms">Programming Paradigms</a>
-				
-				</div>
-			
-
-			
-		    	<div class="social-sharing">
-	<a class="share-button-facebook" onClick="return popupShare(this.href);" href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.yigitcan.dev%2ftr%2fnodejs-async%2f" target="_blank"><i class="fa fa-facebook"><span>Like</span></i></a>
-	<a class="share-button-google-plus" onClick="return popupShare(this.href);" href="https://plus.google.com/share?url=https%3a%2f%2fblog.yigitcan.dev%2ftr%2fnodejs-async%2f" target="_blank"><i class="fa fa-google-plus"><span>Google +1</span></i></a>
-	<a class="share-button-linkedin" onClick="return popupShare(this.href);" href="http://www.linkedin.com/shareArticle?mini=true&url=https%3a%2f%2fblog.yigitcan.dev%2ftr%2fnodejs-async%2f&title=Node.JS%20Event%20Loop%2c%20Sync%2fAsync%2c%20Promise%2c%20Async%2fAwait%20ve%20RxJS%20%c3%bczerine...&summary=Bu%20makalede%20Event%20Loop%2c%20Sync%2fAsync%2c%20Promise%2c%20Async%2fAwait%2c%20RxJS%20kavramlar%c4%b1n%c4%b1%20anlatmaya%20ve%20t%c3%bcm%20bu%20kavramlar%c4%b1%20tek%20bir%20%c3%b6rnek%20%c3%bczerinde%20kodlayarak%20g%c3%b6stermeye%20%c3%a7al%c4%b1%c5%9faca%c4%9f%c4%b1m.%20Kendi%20sisteminizde%20denemeler%20yapmak%20istiyorsan%c4%b1z%20Node%20versiyonunuzun%208%26rsquo%3bin%20%c3%bczerinde%20oldu%c4%9fundan%20emin%20olun.%0aBu%20makalede%20yaz%c4%b1lan%20t%c3%bcm%20kodlar%c4%b1n%2c%20%c3%a7al%c4%b1%c5%9f%c4%b1r%20hallerine%2c%20yengas%2fasync-blog-post%40Github%20adresinden%20ula%c5%9fabilirsiniz.%0aProblem%20%c4%b0lk%20%c3%b6nce%20problemimiz%20ile%20ba%c5%9flayal%c4%b1m%26hellip%3b%20Elimde%20daha%20%c3%b6nce%20izlemek%20i%c3%a7in%20kaydetti%c4%9fim%20Ghibli%20filmlerinin%20id%26rsquo%3bleri%20var.%20Bu%20filmlerin%20hepsinin%20ad%c4%b1n%c4%b1%20ve%20a%c3%a7%c4%b1klamas%c4%b1n%c4%b1%20almak%20istiyorum.%0a%c4%b0lk%20%c3%b6nce%20elimdeki%20dosyan%c4%b1n%20format%c4%b1na%20bakal%c4%b1m%26hellip%3b}&source=Yengas" target="_blank"><i class="fa fa-linkedin"><span>Share on LinkedIn</span></i></a>
-	<a class="share-button-twitter" onClick="return popupShare(this.href);" href="http://twitter.com/share?text=Node.JS%20Event%20Loop%2c%20Sync%2fAsync%2c%20Promise%2c%20Async%2fAwait%20ve%20RxJS%20%c3%bczerine...&url=https%3a%2f%2fblog.yigitcan.dev%2ftr%2fnodejs-async%2f" target="_blank"><i class="fa fa-twitter"><span>Tweet</span></i></a>	
-</div>
-		    
-
-			
-
+        <div class="content e-content">
             <p>Bu makalede Event Loop, Sync/Async, Promise, Async/Await, RxJS kavramlarını anlatmaya ve tüm bu kavramları tek bir örnek üzerinde kodlayarak göstermeye çalışacağım. Kendi sisteminizde denemeler yapmak istiyorsanız Node versiyonunuzun 8&rsquo;in üzerinde olduğundan emin olun.</p>
 <p>Bu makalede yazılan tüm kodların, çalışır hallerine, <a href="https://github.com/Yengas/async-blog-post">yengas/async-blog-post</a>@Github adresinden ulaşabilirsiniz.</p>
-<h2 id="problem">Problem</h2>
-<p>İlk önce problemimiz ile başlayalım&hellip; Elimde daha önce izlemek için kaydettiğim Ghibli filmlerinin id&rsquo;leri var. Bu filmlerin hepsinin adını ve açıklamasını almak istiyorum.</p>
+<h2 id="problem" >Problem
+<span>
+    <a href="#problem">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h2><p>İlk önce problemimiz ile başlayalım&hellip; Elimde daha önce izlemek için kaydettiğim Ghibli filmlerinin id&rsquo;leri var. Bu filmlerin hepsinin adını ve açıklamasını almak istiyorum.</p>
 <p>İlk önce elimdeki dosyanın formatına bakalım&hellip;</p>
 <pre tabindex="0"><code>2baf70d1-42bb-4437-b551-e5fed5a87abe
 12cfb892-aac0-4c5b-94af-521852e46d6a
@@ -218,8 +277,13 @@ cd3d059c-09f4-4ff3-8d63-bc765a5184fa
 578ae244-7750-4d9f-867b-f3cd3d6fecf4
 5fdfb320-2a02-49a7-94ff-5ca418cae602
 </code></pre><p>Her satır, açıklamasını ve başlığını almak istediğim filmin id&rsquo;sini ifade ediyor. Güzel&hellip; Yeni satır karakteri &lsquo;\n&rsquo; ile, satırları birbirinden ayırmam yetecek. Ama ilk önce tüm listeyi işlemeye başlamadan önce, tek bir id için başlık ve açıklama alabileceğimden emin olmam lazım.</p>
-<h2 id="tek-bir-film-sync-olarak-işlem-yapmak">Tek bir film, sync olarak işlem yapmak.</h2>
-<p>Algoritma basit. Bir değişkende, bilgilerini bulmak istediğim filmin id&rsquo;sini tutacağım, API&rsquo;ye bir istek göndereceğim, gelen cevabı JSON olarak işleyip, obje&rsquo;ye dönüştüreceğim, ve obje&rsquo;min içindeki başlık ve açıklama bilgisini ekrana yazdıracağım! Tamamen düz mantık.</p>
+<h2 id="tek-bir-film-sync-olarak-işlem-yapmak" >Tek bir film, sync olarak işlem yapmak.
+<span>
+    <a href="#tek-bir-film-sync-olarak-i%c5%9flem-yapmak">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h2><p>Algoritma basit. Bir değişkende, bilgilerini bulmak istediğim filmin id&rsquo;sini tutacağım, API&rsquo;ye bir istek göndereceğim, gelen cevabı JSON olarak işleyip, obje&rsquo;ye dönüştüreceğim, ve obje&rsquo;min içindeki başlık ve açıklama bilgisini ekrana yazdıracağım! Tamamen düz mantık.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#75715e">// Sync olarak request yapmamızı sağlayacak, kütüphane.
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">request</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;sync-request&#39;</span>);
 </span></span><span style="display:flex;"><span><span style="color:#75715e">// bilgilerini almak istediğimiz filmin id&#39;si.
@@ -239,8 +303,13 @@ cd3d059c-09f4-4ff3-8d63-bc765a5184fa
 <pre tabindex="0"><code>Film Adı: Castle in the Sky
 Filmin açıklaması: The orphan Sheeta inherited a mysterious crystal that links her to the mythical sky-kingdom of Laputa. With the help of resourceful Pazu and a rollicking band of sky pirates, she makes her way to the ruins of the once-great civilization. Sheeta and Pazu must outwit the evil Muska, who plans to use Laputa&#39;s science to make himself ruler of the world.
 </code></pre><p>görüyorum. Tamda istediğimiz şey! Tek bir film id için, filmin başlığını ve açıklamasını aldık. Artık bir sonraki adıma geçip, tüm id&rsquo;ler için bu işlemi yapabiliriz!</p>
-<h2 id="birden-fazla-film-sync-olarak-işlem-yapmak">Birden fazla film, sync olarak işlem yapmak.</h2>
-<p>Düz mantık devam ettiğim zaman, kodumda pek bir şey değişmemesi lazım. Tek yapmam gereken; tek bir film yerine, dosyamda bulunan her bir film için aynı kodu çalıştırmak. Kodumu düzenleyip, baktığımda, durum gerçektende böyle. Tek yapmamız gereken koda 2 şey eklemek oldu.</p>
+<h2 id="birden-fazla-film-sync-olarak-işlem-yapmak" >Birden fazla film, sync olarak işlem yapmak.
+<span>
+    <a href="#birden-fazla-film-sync-olarak-i%c5%9flem-yapmak">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h2><p>Düz mantık devam ettiğim zaman, kodumda pek bir şey değişmemesi lazım. Tek yapmam gereken; tek bir film yerine, dosyamda bulunan her bir film için aynı kodu çalıştırmak. Kodumu düzenleyip, baktığımda, durum gerçektende böyle. Tek yapmamız gereken koda 2 şey eklemek oldu.</p>
 <p>Sabit bir film id&rsquo;si yerine, tüm dosyayı okuyup, her satırı diziye atamak:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#75715e">// Tüm film id&#39;lerini, dosyamızı okuyarak ve &#39;\n&#39; karakterinden split yaparak, bir diziye atıyalım.
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">movieIDs</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">fs</span>.<span style="color:#a6e22e">readFileSync</span>(<span style="color:#e6db74">&#39;../data/ghibli_movies.txt&#39;</span>).<span style="color:#a6e22e">toString</span>().<span style="color:#a6e22e">split</span>(<span style="color:#e6db74">&#39;\n&#39;</span>);
@@ -269,16 +338,26 @@ Filmin açıklaması: The orphan Sheeta inherited a mysterious crystal that link
 </span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`Filmin açıklaması: </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">description</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>Sonuç olarak, artık kodumuz tüm film id&rsquo;leri için başlık ve açıklamaları aldı ve bize gösterdi. Sorunumuz artık çözüldü. Bu problem için daha fazla kod yazmak gereksiz bile. Ama bir şeyi çok yanlış yapıyoruz. Bunu anlamak için, bir Node.js işleminin çalışma mantığına ve Event Loop&rsquo;a değinelim.</p>
-<h2 id="nodejs-işlemi-ve-async">Node.js işlemi ve Async</h2>
-<p>Yazdığımız Javascript kodunun, bir şekilde bilgisayarın anlayabileceği makine koduna dönüşmesi ve çalışması lazım. Tarayıcı&rsquo;da bunu bizim için tarayıcının kendisi yaparken, Node.js kullanırken, <code>node &lt;script_dosyamiz&gt;.js</code> komutunu kullanarak bu işlemi başlatıyoruz. Bu komut çalıştırıldığında, işletim sistemimiz&rsquo;de, bizim Javascript kodumuzu çalıştıran bir işlem oluşuyor. Ve Node.js&rsquo;in yardımları sayesinde, işletim sistemimizi kullanarak; dosya okuyabiliyoruz ve ağ üzerinden istekler gönderebiliyoruz.</p>
+<h2 id="nodejs-işlemi-ve-async" >Node.js işlemi ve Async
+<span>
+    <a href="#nodejs-i%c5%9flemi-ve-async">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h2><p>Yazdığımız Javascript kodunun, bir şekilde bilgisayarın anlayabileceği makine koduna dönüşmesi ve çalışması lazım. Tarayıcı&rsquo;da bunu bizim için tarayıcının kendisi yaparken, Node.js kullanırken, <code>node &lt;script_dosyamiz&gt;.js</code> komutunu kullanarak bu işlemi başlatıyoruz. Bu komut çalıştırıldığında, işletim sistemimiz&rsquo;de, bizim Javascript kodumuzu çalıştıran bir işlem oluşuyor. Ve Node.js&rsquo;in yardımları sayesinde, işletim sistemimizi kullanarak; dosya okuyabiliyoruz ve ağ üzerinden istekler gönderebiliyoruz.</p>
 <p>Buraya kadar olan kısım, şuana kadar yazdığımız kodu açıklıyor. Fakat burada daha optimize bir kod yazmamız için düşünmemiz gereken şey şu; bizim dosya okuma işlemimiz Harddisk veya SSD tarafından, ağ üzerinden yaptığımız istekler ise, ağ donanımımız üzerinden yapılıyor. Aslında sadece; dosyadan okuduğumuz değerleri diziye dönüştürmek, her bir dizi elemanı için yapılan istekleri <code>JSON.parse</code> ile obje&rsquo;ye dönüştürmek ve içerisindeki değerleri bu objeden çıkarıp, değişkene atamak için CPU&rsquo;muzu kullanıyoruz.</p>
 <p>Ama kodumuzdaki düz mantığa geri döndüğümüzde, her bir isteğin gönderilmeden önce, bir önceki isteğin bitmesini ve ekrana yazdırılmasını beklediğimizi görüyoruz. Bu durumdan kurtulmak, şu anki problemimize baktığımızda; bütün programlama yöntemlerimizi değiştirmemize değmeyecek gibi görünsede, ideal bir dünyada yapmak istediğimiz şey; tüm bilgisayar donanımlarımızı optimal şekilde kullanmaktır.</p>
 <p>Yani, bir kullanıcınıza ağ üzerinden veri gönderirken, diğerinin sadece CPU kullanacak işlemini bekletmek istemezsiniz. Burada bizi kurtaracak olan terim Async. Async işlem yapmak demek, birden fazla iş parçacağının birbiri ile kesişen zamanlarda çalışabilmesi demektir. Node.JS için bu, &ldquo;aynı anda&rdquo; çalışmak anlamına gelmez.</p>
 <p>Şöyle örnek vermek gerekirse; biz ağ donanımımız işlem yaparken, CPU ile işlem yapabiliriz ama, CPU&rsquo;muz birden fazla çekirdeğe sahip olsa bile, aynı anda 2 tane CPU gerektiren işlemi çalıştıramayız. Çünkü Node.JS bunu aynı işlem içinde desteklememektedir. Bu tek bir Node.js işleminin maksimum performans sınırını düşürmektedir. Fakat beraberinde birden fazla çekirdek kullanmanın getirebileceği sorunları çözmekte, ve bir çok async işleme kavramını kolaylaştırmaktadır. Sektörde Node.JS&rsquo;in bu sorunu çözmek için ortaya attığı tek çekirdekli Async yapı dışında, birden fazla çekirdek ile ve async çalışmayı kolaylaştıran yazılım paradigmaları bulunmaktadır(örn. green threading, channels, functional programming).</p>
 <p>Çoğu basit seviyede uygulama, CPU&rsquo;dan çok, diğer donanımları beklerken zaman harcamaktadır. Kaldı ki, bir Node.JS uygulamasında, sıkıntınız CPU olduğu zaman, birden fazla Node.JS işlemi çalıştırarak, birden fazla CPU kullanabilirsiniz. Burada dikkate alınması gereken durumlar tabiki olacaktır ama, bu bölümü kısa tutmak için, load balancing, state yönetimi gibi konulara girmek istemiyorum.</p>
 <p>Özet olarak, elimizdeki uygulamanın performansını iyileştirmek için, bir ağ isteği bitmeden, bir başkasını başlatabilir, ve ilk hangisi sonuçlanırsa onu işleyebiliriz. Ve bu işlem, Node.JS&rsquo;in tek çekirdek kullanan yapısında, oldukca basit olacaktır.</p>
-<h2 id="event-loop">Event Loop</h2>
-<p>Bir farklı detayına girmek istemediğim, ve basitleştirme yaparak anlatmak istediğim konu ise, Event Loop. Node.JS çalışmak isteyen tüm fonksiyonları, kendi içinde bir sıraya koyar. Uygulamanızı ilk başlattığınız kod sayfanız, ilk çalışan fonksiyonunuz olarak düşünülür. Daha sonra, bu ana fonksiyonunuz içinde yaptığınız her &ldquo;bloklayıcı(sync)&rdquo; fonksiyon çağrısı, bitmesi beklenecek şekilde çalıştırılır. Eğer async olarak çalışacak olan bir fonksiyon çağrılırsa, bu async işlem bittiğinde çalışması için başka bir fonksiyon daha verebilirsiniz. Node.JS arkaplanda bu fonksiyonu sıraya koyarak, çalıştırmakta olduğu fonksiyona devam edecek, daha sonra çalışmakta olan fonksiyon ve async işlem bittikten sonra çalışması için verdiğiniz fonksiyonu çağırıcaktır.</p>
+<h2 id="event-loop" >Event Loop
+<span>
+    <a href="#event-loop">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h2><p>Bir farklı detayına girmek istemediğim, ve basitleştirme yaparak anlatmak istediğim konu ise, Event Loop. Node.JS çalışmak isteyen tüm fonksiyonları, kendi içinde bir sıraya koyar. Uygulamanızı ilk başlattığınız kod sayfanız, ilk çalışan fonksiyonunuz olarak düşünülür. Daha sonra, bu ana fonksiyonunuz içinde yaptığınız her &ldquo;bloklayıcı(sync)&rdquo; fonksiyon çağrısı, bitmesi beklenecek şekilde çalıştırılır. Eğer async olarak çalışacak olan bir fonksiyon çağrılırsa, bu async işlem bittiğinde çalışması için başka bir fonksiyon daha verebilirsiniz. Node.JS arkaplanda bu fonksiyonu sıraya koyarak, çalıştırmakta olduğu fonksiyona devam edecek, daha sonra çalışmakta olan fonksiyon ve async işlem bittikten sonra çalışması için verdiğiniz fonksiyonu çağırıcaktır.</p>
 <p>Bunu daha iyi anlayabilmek için basit bir örnek yapalım, daha sonra async programlama kısmına geçiş yapalım.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#a6e22e">setTimeout</span>(<span style="color:#66d9ef">function</span> <span style="color:#a6e22e">yuzMilisaniyeSonra</span>(){ <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#39;1&#39;</span>); }, <span style="color:#ae81ff">100</span>);
 </span></span><span style="display:flex;"><span><span style="color:#a6e22e">setImmediate</span>(<span style="color:#66d9ef">function</span> <span style="color:#a6e22e">birSonrakiFonksiyon</span>(){ <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#39;2&#39;</span>); });
@@ -292,8 +371,13 @@ Filmin açıklaması: The orphan Sheeta inherited a mysterious crystal that link
 </code></pre><p>olacaktır. Tüm scriptimizi tek bir fonksiyon olarak kabul edelim. İlk önce 1. satır, <code>setTimeout</code> fonksiyonu ile 100 milisaniye sonra çalışması için bir fonksiyonu sıraya koyuyoruz, <code>setImmediate</code> ile event loop&rsquo;a direk olarak 2 fonksiyonu arka arkaya ekliyoruz. Bu fonksiyonlar sadece Event Loop&rsquo;a eklendi, ve daha çalışmadı. <code>setTimeout</code> ve <code>setImmediate</code> fonksiyonları sonlandıktan sonra, ana fonksiyonumuza hep geri dönüyoruz. Ve en son satırımızdaki <code>console.log</code> fonksiyonu çağrılıp, ekrana <code>start!</code> yazdırıldıktan sonra, sırasıyla Event Loop&rsquo;daki fonksiyonlar çalışmaya başlıyor.</p>
 <p><code>setTimeout</code> ile sıraya koyduğumuz fonksiyonumuz, 100 ms saniye geçmeden çalışamıyacağı için, sırasıyla event loop&rsquo;a giren 2 yazdırma, 4 yazdırma fonksiyonları yazdırılıyor. Ve 100 ms geçtikten sonra ekrana 1 yazdırılıyor ve programımız sonlanıyor.</p>
 <p>İlk kodumuza döndüğümüz zaman, <code>fs.readFileSync('../data/ghibli_movieis.txt')</code> satırımızı görebiliriz. Burada bu fonksiyon, dosya okuma işlemi bitene kadar, event loop&rsquo;daki diğer fonksiyonların çalışmasını engellemiş oluyor. Hoş, bizim örneğimizde, event loopda başka bir fonksiyon olmadığı, ve programın çalışmaya devam etmesi için bu dosyayı okumamız gerektiği için bir önemi yok ama; <code>fs.readFile('../data/ghibli_movies.txt', function(err, data){ console.log(err, data); })</code> yaparak; dosya okuma işlemini başlatıp, işlem bittikten sonra çağrılmak üzere bir fonksiyonu event loop&rsquo;a ekleyebiliriz. Böylece dosya okuma işlemi, işletim sistemi tarafından, donanıma iletilir ve yapılırken, CPU ve Event Loop üzerinde başka fonksiyonlar çağırabiliriz. Alternatif olarak kısaca <code>fs.readFile('../data/ghibli_movies.txt', console.log);</code>&lsquo;da yapabiliriz. <code>console.log</code>&lsquo;da bir fonksiyon olduğu için, yazdığımız isimsiz fonksiyon gibi, dosya okuma işlemi bittikten sonra, sonuç parametreleri ile birlikte çağrılacaktır.</p>
-<h2 id="promiseler-ve-asyncawait">Promiseler ve Async/Await</h2>
-<p>Şimdi geldik, esas ilginç bölüme. Async değerler ile çalışmak için, Event Loop&rsquo;a fonksiyon koymamız gerektiğini söyledik. Ama bunu eski, error first Node.js yöntemi ile yapmak zorunda değiliz. Çünkü bu yöntem, bizi; kod seviyesinde, Node.JS&rsquo;in uydurduğu bir yapıya uymaya ve tüm async fonksiyonlara, standart tipte (hata, sonuç) tipinde parametreler kabul eden, fonksiyonlar vermeye zorluyor. Halbüki, sync çalışıyormuş gibi fonksiyonlar yazıp, sadece gerektiği yerde, async kavramları işin içine karıştırmamızı sağlayan bir yapı bulunmaktadır. Buna Promise denir.</p>
+<h2 id="promiseler-ve-asyncawait" >Promiseler ve Async/Await
+<span>
+    <a href="#promiseler-ve-asyncawait">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h2><p>Şimdi geldik, esas ilginç bölüme. Async değerler ile çalışmak için, Event Loop&rsquo;a fonksiyon koymamız gerektiğini söyledik. Ama bunu eski, error first Node.js yöntemi ile yapmak zorunda değiliz. Çünkü bu yöntem, bizi; kod seviyesinde, Node.JS&rsquo;in uydurduğu bir yapıya uymaya ve tüm async fonksiyonlara, standart tipte (hata, sonuç) tipinde parametreler kabul eden, fonksiyonlar vermeye zorluyor. Halbüki, sync çalışıyormuş gibi fonksiyonlar yazıp, sadece gerektiği yerde, async kavramları işin içine karıştırmamızı sağlayan bir yapı bulunmaktadır. Buna Promise denir.</p>
 <p>Örnek vermek gerekirse:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#75715e">// Bu fonksiyonun tek bildiği, Buffer tipiinde bir parametre aldığı ve her satırdan bir dizi oluşturması
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">idListesineCevir</span>(<span style="color:#a6e22e">dosyaIcerigiBuffer</span>){
@@ -366,8 +450,13 @@ Filmin açıklaması: The orphan Sheeta inherited a mysterious crystal that link
 </span></span><span style="display:flex;"><span><span style="color:#75715e">// Main bir async fonksiyon, yani Promise olduğu için, .then ve .catch kullanabiliriz.
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">main</span>().<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>).<span style="color:#66d9ef">catch</span>(<span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>)
 </span></span></code></pre></div><p>Bu kodun, ilk yazdığımız Sync örneğe ne kadar benzediğini kolayca görebilirsiniz. Async faydalarının hepsini Promise yapısını kullanarak, yine elde ediyoruz. Fakat, async/await kullanarak sync kod&rsquo;a oldukca benzeyen bir yapıya sahip oluyoruz! Oldukca güzel bir özellik!</p>
-<h2 id="async-olarak-tek-bir-film-ile-işlem-yapmak">Async olarak, tek bir film ile işlem yapmak.</h2>
-<p>Şimdi problemimize geri dönelim. Yaptığımız işlemlerin sync olduğunu, ve async kullanmamız gerektiğini söylemiştik. Şimdi async/await kullanarak kodumuz tekrar yazalım.</p>
+<h2 id="async-olarak-tek-bir-film-ile-işlem-yapmak" >Async olarak, tek bir film ile işlem yapmak.
+<span>
+    <a href="#async-olarak-tek-bir-film-ile-i%c5%9flem-yapmak">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h2><p>Şimdi problemimize geri dönelim. Yaptığımız işlemlerin sync olduğunu, ve async kullanmamız gerektiğini söylemiştik. Şimdi async/await kullanarak kodumuz tekrar yazalım.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#75715e">// promise döndürecek şekilde async istek yapmamızı sağlayacak olan kütüphane.
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">request</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;request-promise-native&#39;</span>);
 </span></span><span style="display:flex;"><span>
@@ -398,8 +487,13 @@ Filmin açıklaması: The orphan Sheeta inherited a mysterious crystal that link
 undefined
 </code></pre><p>Burada görüldüğü üzere, <code>Main fonksiyonu çağrıldı!</code> yazısı, main fonksiyonu çağrıldıktan sonra yazılmış olsa bile, main fonksiyonu bloklamadığı için, ilk önce bu yazıyı görüyoruz. Daha sonra ağ isteğimiz sonuçlanıyor, film bilgileri yazdırılıyor ve main fonksiyonumuzun döndürdüğü Promise sonlanıyor. Main fonksiyonundan herhangi bir değer döndürmediğimiz için, sonuç undefined oluyor ve <code>.then</code> fonksiyonunda bu undefined değeri ekrana yazdırılıyor.</p>
 <p>İlk sync versiyonumuza çok benzer bir şekilde, ağ işlemi; async olan bir kod yazmış olduk.</p>
-<h2 id="async-olarak-birden-fazla-film-ile-işlem-yapmak">Async olarak, birden fazla film ile işlem yapmak</h2>
-<p>İşlerin biraz kafa karıştırıcı hal aldığı durum burası. Aync/await kodun sync&rsquo;e benzerliği sayesinde, kolayca birden fazla filmi async olarak işleyebiliriz.</p>
+<h2 id="async-olarak-birden-fazla-film-ile-işlem-yapmak" >Async olarak, birden fazla film ile işlem yapmak
+<span>
+    <a href="#async-olarak-birden-fazla-film-ile-i%c5%9flem-yapmak">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h2><p>İşlerin biraz kafa karıştırıcı hal aldığı durum burası. Aync/await kodun sync&rsquo;e benzerliği sayesinde, kolayca birden fazla filmi async olarak işleyebiliriz.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#75715e">// Dosya okumak için node.js kütüphanemizi alalım.
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">fs</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;fs&#39;</span>);
 </span></span><span style="display:flex;"><span><span style="color:#75715e">// node.js error-first callbackleri Promise&#39;e çevirmemize yardımcı olan fonksiyon
@@ -442,8 +536,13 @@ undefined
 <p>Diyelim ki, her gönderdiğimiz istek 300 milisaniye alıyor, ve gelen cevabın işlenip ekrana yazdırılması ise 10 ms sürüyor. 300 milisaniyelik ağ isteği async olduğu için, nodejs işlemimiz bu ağ isteği gönderildikten sonra, çalışmasına devam edebilir, başka bir yerde, CPU harcayan bir kodunuz varsa(şuan bizim scriptimizde yok) onu çalıştırabilir. Ama ağ isteğinden cevap geldikten ve sıra işleme/yazdırma kodumuza geldiğinde 10 ms boyunca CPU&rsquo;yu bu fonksiyonumuz bloklayacak. Daha sonra 300 milisaniye süren, yeni bir ağ isteği başlatılacak, ve yine CPU kullanmak isteyen farklı bir kod parçacağı varsa o çağrılabilecek. Yani biz aslında bu kod ile, her film id&rsquo;si için sadece 10 milisaniye bloklamış oluyoruz. Ve toplam CPU bloklama süremiz, <code>10 * film id sayısı</code> milisaniye oluyor. Fakat algoritmamız: <code>ağ isteği gönder, cevabın gelmesini bekle, işle ve yazdır, ağ isteği gönder...</code> şeklinde olduğu için, toplam işlem süremiz:  <code>(300 + 10) * film id sayısı</code> milisaniye oluyor.</p>
 <p>Bu durumu, algoritmamımızı: <code>bir filmid için; ağ isteği başlatıp, sonucu işleyen ve yazdıran bir promise zinciri oluştur, tüm film id için bu promise zincirlerini aynı anda başlat</code> şeklinde değiştirirsek, bloklama süremiz yine değişmeyecek. Her işlemi işlemesi ve yazdırması 10 milisaniye süreceği için, gene <code>10 * film id sayısı</code> milisaniye CPU bloklamış olacağız. Fakat ağ istekleri aynı anda başlatıldığı için, hepsi farklı sürede bitecek, ve en uzun süren isteğin 500 ms olduğunu varsayarsak, <code>500 + (10 * film id sayısı)</code> milisaniye sonra, programımız sonlanmış olacak. Bu da script&rsquo;in çalışma süresinde çok büyük bir düşüşe sebep olmuş olacak. Hatta kendi bilgisayarımdan ve internet bağlantımdan örnek vermem gerekirse; şuanki kod 25 saniyede çalışırken, optimize edilmiş şekilde yazdığım kod, 1.5 saniye sürüyor. 20 tane film id&rsquo;si olduğunu varsayarsak, demek ki tek bir isteğin sonuçlanması ortalama 1.25 saniye sürüyor, ve tüm ağ isteklerini aynı anda başlattığımda, en uzun süren işlem 1.5 saniye tutuyor. Burada unutmamamız gereken, bloklama süresinin iki örnek içinde aynı olduğu. Yani eğer ağ istekleri 10 milisaniye tutsaydı, ve CPU işlemleri 1.5 saniye tutsaydı, iki örnekte benzer sürede bitecekti.</p>
 <p>Bu işlemin, daha hızlı biten versiyonunu yazabilmek için async/await fonksiyonları ile Promise bilgilerimizi birbiri ile birleştirip, ortaya bir karışım çıkarmamız gerkiyor. Bundan önce, uygulamamızı fonksiyonlara ayrıştırıp, kodumuzu daha düzenli hale getirelim. Ve son olarak, promise ile daha performanslı olarak yazmaya çalışalım.</p>
-<h3 id="fonksiyonlara-ayrıştırmak">Fonksiyonlara ayrıştırmak</h3>
-<p>Sync veya Async nasıl kodlarsak kodlayalım, uygulamamızın bazı kısımları tamamen saf, sync olarak çalışacak mantıklar içermektedir. Örnek vermek gerekirse, dosya okuma işlememiz sync/async olabilir ama, sonuç olarak elimizde olan değer string olduğu için, dosyayı dizi listesine çevirme işlemimiz hep aynı sync kod ile yapılıyor.</p>
+<h3 id="fonksiyonlara-ayrıştırmak" >Fonksiyonlara ayrıştırmak
+<span>
+    <a href="#fonksiyonlara-ayr%c4%b1%c5%9ft%c4%b1rmak">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h3><p>Sync veya Async nasıl kodlarsak kodlayalım, uygulamamızın bazı kısımları tamamen saf, sync olarak çalışacak mantıklar içermektedir. Örnek vermek gerekirse, dosya okuma işlememiz sync/async olabilir ama, sonuç olarak elimizde olan değer string olduğu için, dosyayı dizi listesine çevirme işlemimiz hep aynı sync kod ile yapılıyor.</p>
 <p>Aynı şekilde network isteğimiz sync/async olabilir ama gelen string cevabı hep JSON&rsquo;a parselayıp, içindeki title ve description bilgisini aynı şekilde alıyoruz. Ve ekrana yazma fonksiyonumuzda aynı şekilde hep aynı kalıyor.</p>
 <p>Bu fonksiyonları ayırıp, bir önceki async/await kodumuzu tekrar yazdığımızda böyle bir şey elde ediyoruz:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#75715e">// Dosya okumak için node.js kütüphanemizi alalım.
@@ -496,8 +595,13 @@ undefined
 </span></span><span style="display:flex;"><span><span style="color:#75715e">// main fonksiyonunun bloklamadığını kanıtlamak için, ekrana yazı yazalım.
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#39;Main fonksiyonu çağrıldı!&#39;</span>);
 </span></span></code></pre></div><p>Uygulamamızın sabit mantığını fonksiyonlara taşıyarak, async içerisindeki kodu oldukca azalttık. Artık sync veya farklı bir şekilde kod yazsak bile, async kısma bulaşmayan kodumuz aynı çalışacak.</p>
-<h3 id="promise-kullanarak-çoklu-işlemde-performansı-arttırmak">Promise kullanarak çoklu işlemde performansı arttırmak</h3>
-<p>Bir Promise zinciri oluşturmak yerine, Promise oluşturma işlemini async await&rsquo;e bırakmak yerine, kendimiz belirleyerek, daha performanslı bir kod elde edebiliriz.</p>
+<h3 id="promise-kullanarak-çoklu-işlemde-performansı-arttırmak" >Promise kullanarak çoklu işlemde performansı arttırmak
+<span>
+    <a href="#promise-kullanarak-%c3%a7oklu-i%c5%9flemde-performans%c4%b1-artt%c4%b1rmak">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h3><p>Bir Promise zinciri oluşturmak yerine, Promise oluşturma işlemini async await&rsquo;e bırakmak yerine, kendimiz belirleyerek, daha performanslı bir kod elde edebiliriz.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#75715e">// sync benzeri kod yazabilmek için, async (promise döndüren) bir fonksiyon yazalım.
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">main</span>(){
 </span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Dosya okuyan async kodu başlatalım, sonuctaki her bir satırı, dizi elemanı olarak alalım.
@@ -521,8 +625,13 @@ undefined
 </span></span></code></pre></div><p>Main fonksiyonumuzu bu şekilde değiştirdikten sonra, film çekilme işleminin hızlandığını ve çıktıların sıralarının her çalıştırmada değiştiğini görüyoruz. Artık tüm network istekleri eş zamanlı olarak çalıştırılıyor ve ilk biten istek için işleme ve ekrana yazdırma işlemi yapılıyor.</p>
 <p>Özet olarak; async/await&rsquo;in okunulabilirlik açısından sağladığı faydaların, Promise kullanımı bilmeden, performansı kötü etkileyici bir faktör olabildiğini, ve Promise primitivelerini kullanarak uygulamamızı hızlandırabileceğimizi gördük.</p>
 <p>Fakat şöyle bir sıkıntı var. Bu tarz bir yapıda, eş zamanlı olarak kaç işlem başlatabileceğimizin, işlemlerin iptal edilebilmesinin kontrolü bizde değil. Ne kadar Promise&rsquo;ler ile çalışırken yardımcı kütüphaneler ile bu konularda biraz çözüm bulabilsekte, Promise&rsquo;ler tek bir async veri ile çalışmak üzere geliştirildiği için bu konularda eksiklik çekiyoruz. Burada devreye; kurtarıcımız, RxJS giriyor.</p>
-<h3 id="rxjs-ile-async-birden-fazla-film-işlemenin-yeniden-yazılması">RxJs ile async, birden fazla film işlemenin yeniden yazılması</h3>
-<p>Promise&rsquo;ler Async ve Tek veriler ile kullanıma uygun olduğu gibi, RxJS ise, async veri akışı ile çalışmak istediğimiz zamanda kullanılıyor. Promise&rsquo;ler, error first callbackler için nasıl güzel bir alternatif ise, RxJs&rsquo;de Node.JS streamleri için o kadar güzel bir alternatif. Promise&rsquo;ler gelecekte başarılı veya başarısız olabilecek tekil verileri ifade ederkeen, RxJs oberservable pattern kullanarak, zaman bağlı olarak bir veri akışını ifade ediyor. RxJs&rsquo;de Stream üzerindeki verileri tek tek işlemek için bir fonksiyon, hata olması durumunda başka bir fonksiyon ve Stream&rsquo;in sonuçlanmasında farklı bir fonksiyon tanımlayabiliyorsunuz.</p>
+<h3 id="rxjs-ile-async-birden-fazla-film-işlemenin-yeniden-yazılması" >RxJs ile async, birden fazla film işlemenin yeniden yazılması
+<span>
+    <a href="#rxjs-ile-async-birden-fazla-film-i%c5%9flemenin-yeniden-yaz%c4%b1lmas%c4%b1">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h3><p>Promise&rsquo;ler Async ve Tek veriler ile kullanıma uygun olduğu gibi, RxJS ise, async veri akışı ile çalışmak istediğimiz zamanda kullanılıyor. Promise&rsquo;ler, error first callbackler için nasıl güzel bir alternatif ise, RxJs&rsquo;de Node.JS streamleri için o kadar güzel bir alternatif. Promise&rsquo;ler gelecekte başarılı veya başarısız olabilecek tekil verileri ifade ederkeen, RxJs oberservable pattern kullanarak, zaman bağlı olarak bir veri akışını ifade ediyor. RxJs&rsquo;de Stream üzerindeki verileri tek tek işlemek için bir fonksiyon, hata olması durumunda başka bir fonksiyon ve Stream&rsquo;in sonuçlanmasında farklı bir fonksiyon tanımlayabiliyorsunuz.</p>
 <p>RxJs Streamleri, Promise&rsquo;ler gibi zincirlenme özelliklerine sahip, ve aynı zamanda kendi methodları içerisinde Promise&rsquo;leride destekliyor. RxJs&rsquo;in bir güzel özelliği ise, zamana bağlı işlemler için <a href="http://reactivex.io/documentation/operators.html">operator</a> adını verdiği methodlar içermesi. Bu methodlar ile el ile implemente etmesi zor olan bir çok veri akışı işleme özelliğini bedavaya alıyorsunuz.</p>
 <p>Az önceki kodumuza, eş zamanlı olarak maksimum 5 istek çağırmayı ve eğer toplam işlem süresi 2 saniyeyi geçerse tüm istekleri durdurmayı ekliyelim:</p>
 <p>İlk önce rxjs&rsquo;i projemize ekliyoruz.</p>
@@ -557,8 +666,13 @@ undefined
 </span></span></code></pre></div><p>bunun sonucunda elde ettiğimiz scriptin, 2 saniyeden fazla çalışması durumunda kendini sonlandırdığını, ve anlık olarak en fazla 5 istek gönderdiğini görebiliriz. Umarım RxJs&rsquo;in operatörleri sayesinde kafanızdaki fikirleri, sonlu/sonsuz bir veri akışı üzerinde gerçekleştirmenin ne kadar kolay olduğunu anlayabilmişsinizdir.</p>
 <p>Bu kullanım, JS dünyasında Thread olmadığı için, diğer dillere göre daha bir kolay ve eğlencelidir.</p>
 <p>Son oluşturduğumuz script&rsquo;de küçük bir hata&rsquo;da bulunmaktadır! Yaptığımız istekleri Promise olarak yaptığımız için, stream timeout sebebi ile sonlanması, Promise&rsquo;ler cancel edilebilir olmadığı için, istekleri durduramamaktadır. Bunuda <a href="https://github.com/Reactive-Extensions/RxJS-DOM/blob/master/doc/operators/ajax.md">RxJs.DOM.Ajax</a> kullanarak çözebiliriz.</p>
-<h2 id="çıkarımlar">Çıkarımlar</h2>
-<ul>
+<h2 id="çıkarımlar" >Çıkarımlar
+<span>
+    <a href="#%c3%a7%c4%b1kar%c4%b1mlar">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h2><ul>
 <li>Bilgisayar donanımımızı ve kaynaklarımızı en optimize şekilde kullanmak için async işlem yapmaya ihtiyacımız vardır.</li>
 <li>Node.JS&rsquo;in tek çekirdekli yapısı, dili parallelikten yoksun bırakırken, async olarak çalışmayı kolaylaştırmaktadır.</li>
 <li>Node.JS scriptleri birden fazla işlem olarak çalıştırılarak paralellik elde edilebilir.</li>
@@ -570,78 +684,218 @@ undefined
 <li>RxJS operatörleri, zamana bağlı veri akışları ile çalışmayı kolaylaştırmaktadır. Ve Promiseler ile uyumlu bir şekilde çalışabilir.</li>
 </ul>
 
-	
-			
-		    	<div class="social-sharing">
-	<a class="share-button-facebook" onClick="return popupShare(this.href);" href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.yigitcan.dev%2ftr%2fnodejs-async%2f" target="_blank"><i class="fa fa-facebook"><span>Like</span></i></a>
-	<a class="share-button-google-plus" onClick="return popupShare(this.href);" href="https://plus.google.com/share?url=https%3a%2f%2fblog.yigitcan.dev%2ftr%2fnodejs-async%2f" target="_blank"><i class="fa fa-google-plus"><span>Google +1</span></i></a>
-	<a class="share-button-linkedin" onClick="return popupShare(this.href);" href="http://www.linkedin.com/shareArticle?mini=true&url=https%3a%2f%2fblog.yigitcan.dev%2ftr%2fnodejs-async%2f&title=Node.JS%20Event%20Loop%2c%20Sync%2fAsync%2c%20Promise%2c%20Async%2fAwait%20ve%20RxJS%20%c3%bczerine...&summary=Bu%20makalede%20Event%20Loop%2c%20Sync%2fAsync%2c%20Promise%2c%20Async%2fAwait%2c%20RxJS%20kavramlar%c4%b1n%c4%b1%20anlatmaya%20ve%20t%c3%bcm%20bu%20kavramlar%c4%b1%20tek%20bir%20%c3%b6rnek%20%c3%bczerinde%20kodlayarak%20g%c3%b6stermeye%20%c3%a7al%c4%b1%c5%9faca%c4%9f%c4%b1m.%20Kendi%20sisteminizde%20denemeler%20yapmak%20istiyorsan%c4%b1z%20Node%20versiyonunuzun%208%26rsquo%3bin%20%c3%bczerinde%20oldu%c4%9fundan%20emin%20olun.%0aBu%20makalede%20yaz%c4%b1lan%20t%c3%bcm%20kodlar%c4%b1n%2c%20%c3%a7al%c4%b1%c5%9f%c4%b1r%20hallerine%2c%20yengas%2fasync-blog-post%40Github%20adresinden%20ula%c5%9fabilirsiniz.%0aProblem%20%c4%b0lk%20%c3%b6nce%20problemimiz%20ile%20ba%c5%9flayal%c4%b1m%26hellip%3b%20Elimde%20daha%20%c3%b6nce%20izlemek%20i%c3%a7in%20kaydetti%c4%9fim%20Ghibli%20filmlerinin%20id%26rsquo%3bleri%20var.%20Bu%20filmlerin%20hepsinin%20ad%c4%b1n%c4%b1%20ve%20a%c3%a7%c4%b1klamas%c4%b1n%c4%b1%20almak%20istiyorum.%0a%c4%b0lk%20%c3%b6nce%20elimdeki%20dosyan%c4%b1n%20format%c4%b1na%20bakal%c4%b1m%26hellip%3b}&source=Yengas" target="_blank"><i class="fa fa-linkedin"><span>Share on LinkedIn</span></i></a>
-	<a class="share-button-twitter" onClick="return popupShare(this.href);" href="http://twitter.com/share?text=Node.JS%20Event%20Loop%2c%20Sync%2fAsync%2c%20Promise%2c%20Async%2fAwait%20ve%20RxJS%20%c3%bczerine...&url=https%3a%2f%2fblog.yigitcan.dev%2ftr%2fnodejs-async%2f" target="_blank"><i class="fa fa-twitter"><span>Tweet</span></i></a>	
-</div>
-		    
-
-			
-				<div class="tags-list">
-					<span class="dark-red">Etiketler</span><span class="decorative-marker">//</span>
-					
-	                <a class="post-tag post-tag-node.js" href="https://blog.yigitcan.dev/tr/tags/node.js">node.js</a>,
-	                
-	                <a class="post-tag post-tag-promise" href="https://blog.yigitcan.dev/tr/tags/promise">promise</a>,
-	                
-	                <a class="post-tag post-tag-async/await" href="https://blog.yigitcan.dev/tr/tags/async/await">async/await</a>,
-	                
-	                <a class="post-tag post-tag-event-loop" href="https://blog.yigitcan.dev/tr/tags/event-loop">event loop</a>,
-	                
-	                <a class="post-tag post-tag-performance" href="https://blog.yigitcan.dev/tr/tags/performance">performance</a>,
-	                
-	                <a class="post-tag post-tag-rxjs" href="https://blog.yigitcan.dev/tr/tags/rxjs">rxjs</a>,
-	                
-				</div>
-			
-
-			
-				<div class="paging">
-					<span class="paging-label">Daha Fazla</span>
-					
-
-					
-					<div class="paging-newer">
-						<span class="dark-red">Yeni</span><span class="decorative-marker">//</span>
-						<a class="paging-link" href="/tr/personal-website/">Bu siteyi nasıl yaptım?</a>
-		            </div>
-		            
-
-					
-					<div class="paging-older">
-						<span class="dark-red">Eski</span><span class="decorative-marker">//</span>
-			            <a class="paging-link" href="/tr/nodejs-cpu-heavy-ipc/">Bir Satranç Oyunu, Node.JS ile İşlemler Arası İletişim ve İş Dağıtımı</a>
-		            </div>
-		            
-	            </div>
-            
-          </section>
-          
-          	
-          
+        </div>
         
-      <div class="footer">
-	<hr class="thin" />
-	<div class="pure-menu pure-menu-horizontal pure-menu-open">
-		<ul class="footer-menu">
-		
-			<li><a href="/">Read the blog in English.</a></li>
-		
-		</ul>
-	</div>
 
-	<p>&copy; 2023. Tüm hakları saklıdır.</p>
-</div>
+    
+
+
+
+<div class="post-info">
+    
+        <div class="post-date dt-published">
+            <a class="u-url" href="/tr/nodejs-async/"><time datetime="2018-03-10">2018-03-10</time></a>
+            
+        </div>
+    
+
+    <a class="post-hidden-url u-url" href="https://blog.yigitcan.dev/tr/nodejs-async/">https://blog.yigitcan.dev/tr/nodejs-async/</a>
+    <a href="https://blog.yigitcan.dev/" class="p-name p-author post-hidden-author h-card" rel="me"></a>
+
+
+    <div class="post-taxonomies">
+        
+            <ul class="post-categories">
+                
+                    
+                    <li><a href="https://blog.yigitcan.dev/tr/categories/node.js/">Node.JS</a></li>
+                
+                    
+                    <li><a href="https://blog.yigitcan.dev/tr/categories/programming-paradigms/">Programming Paradigms</a></li>
+                
+            </ul>
+        
+        
+            <ul class="post-tags">
+                
+                    
+                    <li><a href="https://blog.yigitcan.dev/tr/tags/node.js/">#node.js</a></li>
+                
+                    
+                    <li><a href="https://blog.yigitcan.dev/tr/tags/promise/">#promise</a></li>
+                
+                    
+                    <li><a href="https://blog.yigitcan.dev/tr/tags/async/await/">#async/await</a></li>
+                
+                    
+                    <li><a href="https://blog.yigitcan.dev/tr/tags/event-loop/">#event loop</a></li>
+                
+                    
+                    <li><a href="https://blog.yigitcan.dev/tr/tags/performance/">#performance</a></li>
+                
+                    
+                    <li><a href="https://blog.yigitcan.dev/tr/tags/rxjs/">#rxjs</a></li>
+                
+            </ul>
+        
+        
     </div>
-  </div>
-	
+</div>
 
-	
+    </article>
 
+    
+
+    
+
+    
+        
+
+
+
+
+
+
+
+    
+
+        </main>
+        
+            <footer class="common-footer">
+    
+    
+        <ul class="language-select">
+    
+    
+    
+        
+    
+
+    
+        
+            <li>Türkçe</li>
+        
+    
+        
+            <li><a href="https://blog.yigitcan.dev/">English</a></li>
+        
+    
+</ul>
+
+    
+
+    <div class="common-footer-bottom">
+        
+        <div class="copyright">
+            <p>© 2023<br>
+            Powered by <a target="_blank" rel="noopener noreferrer" href="https://gohugo.io/">Hugo</a>, theme <a target="_blank" rel="noopener noreferrer" href="https://github.com/mitrichius/hugo-theme-anubis">Anubis</a>.<br>
+            
+            </p>  
+        </div> 
+
+        
+
+    
+
+
+
+
+    <button class="theme-switcher">
+        Dark theme
+    </button>
+
+
+<script>
+const STORAGE_KEY = 'user-color-scheme'
+const defaultTheme = "auto"
+
+let currentTheme
+let switchButton
+let autoDefinedScheme = window.matchMedia('(prefers-color-scheme: dark)')
+
+const autoChangeScheme = e => {
+    currentTheme = e.matches ? 'dark' : 'light'
+    document.documentElement.setAttribute('data-theme', currentTheme)
+    changeButtonText()
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    switchButton = document.querySelector('.theme-switcher')
+    currentTheme = detectCurrentScheme()
+    if (currentTheme == 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark')
+    }
+    if (currentTheme == 'auto') {
+        autoChangeScheme(autoDefinedScheme);
+        autoDefinedScheme.addListener(autoChangeScheme);
+    }
+
+    if (switchButton) {
+        changeButtonText()
+        switchButton.addEventListener('click', switchTheme, false)
+    }
   
+    showContent()
+})
+
+function detectCurrentScheme() {
+    if (localStorage !== null && localStorage.getItem(STORAGE_KEY)) {
+        return localStorage.getItem(STORAGE_KEY)
+    } 
+    if (defaultTheme) {
+        return defaultTheme
+    } 
+    if (!window.matchMedia) {
+        return 'light'
+    } 
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return 'dark'
+    }
+    return 'light'
+}
+
+function changeButtonText()
+{   
+    if (switchButton) {
+        switchButton.textContent = currentTheme == 'dark' ?  "Light theme" : "Dark theme"
+    }
+}
+
+function switchTheme(e) {
+    if (currentTheme == 'dark') {
+        if (localStorage !== null)
+            localStorage.setItem(STORAGE_KEY, 'light')
+        document.documentElement.setAttribute('data-theme', 'light')
+        currentTheme = 'light'
+    } else {
+        if (localStorage !== null)
+            localStorage.setItem(STORAGE_KEY, 'dark')
+        document.documentElement.setAttribute('data-theme', 'dark')
+        currentTheme = 'dark'
+    }
+    changeButtonText()
+}
+
+function showContent() {
+    document.body.style.visibility = 'visible';
+    document.body.style.opacity = 1;
+}
+</script>
+
+   
+    </div>
+
+    <p class="h-card vcard">
+
+    <a href=https://blog.yigitcan.dev/ class="p-name u-url url fn" rel="me"></a> 
+
+    
+
+    
+</p> 
+</footer>
+
+        
+    </div>
 </body>
 </html>

@@ -1,74 +1,15 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Categories on Yengas</title>
+    <title>Categories on Yiğitcan UÇUM</title>
     <link>https://blog.yigitcan.dev/tr/categories/</link>
-    <description>Recent content in Categories on Yengas</description>
+    <description>Yiğitcan UÇUM (Categories)</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>tr</language>
-    <lastBuildDate>Fri, 16 Aug 2019 12:00:00 +0300</lastBuildDate><atom:link href="https://blog.yigitcan.dev/tr/categories/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>Architecture</title>
-      <link>https://blog.yigitcan.dev/tr/categories/architecture/</link>
-      <pubDate>Fri, 16 Aug 2019 12:00:00 +0300</pubDate>
-      
-      <guid>https://blog.yigitcan.dev/tr/categories/architecture/</guid>
-      <description></description>
-    </item>
+    <lastBuildDate>Fri, 16 Aug 2019 12:00:00 +0300</lastBuildDate>
     
-    <item>
-      <title>Node.JS</title>
-      <link>https://blog.yigitcan.dev/tr/categories/node.js/</link>
-      <pubDate>Fri, 16 Aug 2019 12:00:00 +0300</pubDate>
-      
-      <guid>https://blog.yigitcan.dev/tr/categories/node.js/</guid>
-      <description></description>
-    </item>
+    <atom:link href="https://blog.yigitcan.dev/tr/categories/index.xml" rel="self" type="application/rss+xml" />
     
-    <item>
-      <title>Programming Paradigms</title>
-      <link>https://blog.yigitcan.dev/tr/categories/programming-paradigms/</link>
-      <pubDate>Sat, 10 Mar 2018 03:28:00 +0300</pubDate>
-      
-      <guid>https://blog.yigitcan.dev/tr/categories/programming-paradigms/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Continous Integration</title>
-      <link>https://blog.yigitcan.dev/tr/categories/continous-integration/</link>
-      <pubDate>Sun, 20 Nov 2016 16:30:00 +0300</pubDate>
-      
-      <guid>https://blog.yigitcan.dev/tr/categories/continous-integration/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Kişisel</title>
-      <link>https://blog.yigitcan.dev/tr/categories/ki%C5%9Fisel/</link>
-      <pubDate>Sun, 20 Nov 2016 16:30:00 +0300</pubDate>
-      
-      <guid>https://blog.yigitcan.dev/tr/categories/ki%C5%9Fisel/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Proje</title>
-      <link>https://blog.yigitcan.dev/tr/categories/proje/</link>
-      <pubDate>Sun, 20 Nov 2016 16:30:00 +0300</pubDate>
-      
-      <guid>https://blog.yigitcan.dev/tr/categories/proje/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Araç</title>
-      <link>https://blog.yigitcan.dev/tr/categories/ara%C3%A7/</link>
-      <pubDate>Sun, 20 Nov 2016 15:00:00 +0300</pubDate>
-      
-      <guid>https://blog.yigitcan.dev/tr/categories/ara%C3%A7/</guid>
-      <description></description>
-    </item>
     
   </channel>
 </rss>

@@ -1,19 +1,209 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>optimization on Yengas</title>
+    <title>optimization on Yiğitcan UÇUM</title>
     <link>https://blog.yigitcan.dev/tags/optimization/</link>
-    <description>Recent content in optimization on Yengas</description>
+    <description>Yiğitcan UÇUM (optimization)</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 03 Aug 2017 16:10:00 +0300</lastBuildDate><atom:link href="https://blog.yigitcan.dev/tags/optimization/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 03 Aug 2017 16:10:00 +0300</lastBuildDate>
+    
+    <atom:link href="https://blog.yigitcan.dev/tags/optimization/index.xml" rel="self" type="application/rss+xml" />
+    
+    
     <item>
       <title>KairosDB inner workings; how does it store data in Cassandra?</title>
       <link>https://blog.yigitcan.dev/kairosdb-inner-workings/</link>
       <pubDate>Thu, 03 Aug 2017 16:10:00 +0300</pubDate>
       
       <guid>https://blog.yigitcan.dev/kairosdb-inner-workings/</guid>
-      <description>KairosDB is a timeseries database built on Cassandra. Even though it is coded in a way to support different database backends, it is known mostly by its usage of Cassandra as a scaleable and performant time series data storage. With KairosDB, you can store timeseries metric data in different types and then query them with aggregations over time units. In this article, we will look into the details of KairosDB and its two different Cassandra schema to understand how the insert, delete and read operations we do, work under the cover.</description>
+      <description>&lt;p&gt;KairosDB is a timeseries database built on Cassandra. Even though it is coded in a way to support different database backends, it is known mostly by its usage of Cassandra as a scaleable and performant time series data storage. With KairosDB, you can store timeseries metric data in different types and then query them with aggregations over time units. In this article, we will look into the details of KairosDB and its two different Cassandra schema to understand how the insert, delete and read operations we do, work under the cover. Cassandra is a database that you need to model your data, regarding to your queries. That is why its important to know how your queries are made to the Cassandra according to your KairosDB data model!&lt;/p&gt;
+&lt;p&gt;KairosDB has just released a new version that uses CQL and an improved Cassandra Schema this month. This version &lt;a href=&#34;https://groups.google.com/d/msg/kairosdb-group/V8ViA6RXNZo/7svKXoKcAQAJ&#34;&gt;reportedly&lt;/a&gt; has some performance improvement over the old one. However to be compatible with the old schema, this new version still includes the schema of the old one. Queries are done on the both new and old tables to stay compatible.&lt;/p&gt;
+&lt;p&gt;The first thing you need to know before inspecting the schemas, is that most of the data in the old schema has a &lt;code&gt;blob&lt;/code&gt; type. Meaning if you were to query the Cassandra database directly, the returned data would be not human-readable. To get around this when inspecting the database with a GUI or by hand, you can run this Python code in an interpreter to see what the data is: &lt;code&gt;bytearray.fromhex(&#39;7461675f76616c756573&#39;).decode(&#39;utf8&#39;)&lt;/code&gt;. The reason why the data is stored as blobs comes down to custom metric data types and the schema design. We will see this later.&lt;/p&gt;
+&lt;p&gt;Let&amp;rsquo;s start with dissecting the old Cassandra Schema and see how it works for our read/insert/delete operations.&lt;/p&gt;
+&lt;h2 id=&#34;old-cassandra-schema&#34; &gt;Old Cassandra Schema
+&lt;span&gt;
+    &lt;a href=&#34;#old-cassandra-schema&#34;&gt;
+        &lt;svg viewBox=&#34;0 0 28 23&#34; height=&#34;100%&#34; width=&#34;19&#34; xmlns=&#34;http://www.w3.org/2000/svg&#34;&gt;&lt;path d=&#34;M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;path d=&#34;M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;/svg&gt;
+    &lt;/a&gt;
+&lt;/span&gt;
+&lt;/h2&gt;&lt;p&gt;This Cassandra Schema is used prior to v1.2.0 for the versions of KairosDB that uses Thrift instead of CQL. Check &lt;a href=&#34;https://gist.github.com/Yengas/541808c4ea65d957f052f179f52e6a07&#34;&gt;this gist&lt;/a&gt; to see the full schema as a gist file.&lt;/p&gt;
+&lt;h3 id=&#34;tables&#34; &gt;Tables
+&lt;span&gt;
+    &lt;a href=&#34;#tables&#34;&gt;
+        &lt;svg viewBox=&#34;0 0 28 23&#34; height=&#34;100%&#34; width=&#34;19&#34; xmlns=&#34;http://www.w3.org/2000/svg&#34;&gt;&lt;path d=&#34;M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;path d=&#34;M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;/svg&gt;
+    &lt;/a&gt;
+&lt;/span&gt;
+&lt;/h3&gt;&lt;p&gt;This Schema has a single keyspace called &lt;code&gt;kairosdb&lt;/code&gt; and 3 tables called &lt;code&gt;string_index&lt;/code&gt;, &lt;code&gt;row_key_index&lt;/code&gt; and &lt;code&gt;data_points&lt;/code&gt;. Each of these tables are explained in detail below.&lt;/p&gt;
+&lt;p&gt;Metric data for a specific metric and tags are hold in buckets of 3 weeks. This means a new row is created every three weeks to hold metric data for that period of time. The 3 weeks is  &lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/271660f00c009e39e16c1bff536096ec7ed83409/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L92&#34;&gt;hardcoded&lt;/a&gt; into KairosDB and is a design choice. Finding out which buckets to query for a period of time, or which bucket a specific data point belongs to is done with the help of &lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/271660f00c009e39e16c1bff536096ec7ed83409/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L684&#34;&gt;a simple arithmetic calculation&lt;/a&gt;.&lt;/p&gt;
+&lt;h4 id=&#34;string_index&#34; &gt;string_index
+&lt;span&gt;
+    &lt;a href=&#34;#string_index&#34;&gt;
+        &lt;svg viewBox=&#34;0 0 28 23&#34; height=&#34;100%&#34; width=&#34;19&#34; xmlns=&#34;http://www.w3.org/2000/svg&#34;&gt;&lt;path d=&#34;M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;path d=&#34;M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;/svg&gt;
+    &lt;/a&gt;
+&lt;/span&gt;
+&lt;/h4&gt;&lt;p&gt;This table has &lt;a href=&#34;https://gist.github.com/Yengas/541808c4ea65d957f052f179f52e6a07#file-cassandra-old-cql-L75&#34;&gt;3 fields&lt;/a&gt; &lt;code&gt;key = blob&lt;/code&gt;, &lt;code&gt;column = text&lt;/code&gt; and &lt;code&gt;value = blob&lt;/code&gt; however only the first two columns are used. KairosDB stores every string it sees on inserts into this table to speed up queries. There are 3 possible values for the &lt;code&gt;key&lt;/code&gt; field, namely &lt;strong&gt;metric_names&lt;/strong&gt;, &lt;strong&gt;tag_names&lt;/strong&gt; and &lt;strong&gt;tag_values&lt;/strong&gt;(stored as UTF-8 blobs). The other field which is used is the &lt;code&gt;column&lt;/code&gt; field, which is used to store seen metric names, tag names and tag values. &lt;del&gt;This table is queried to make sure searching the other tables is not unnecessary for a specific metric/tag.&lt;/del&gt; This table is queried only when &lt;a href=&#34;https://groups.google.com/forum/?hl=en#!topic/kairosdb-group/MlwSRmZjhdU&#34;&gt;populating the KairosDB UI&lt;/a&gt;&amp;rsquo;s metric name dropdown menu. &lt;code&gt;tag_names&lt;/code&gt; and &lt;code&gt;tag_values&lt;/code&gt; are not used and they aren&amp;rsquo;t populated in the new version anymore.&lt;/p&gt;
+&lt;h4 id=&#34;data_points&#34; &gt;data_points
+&lt;span&gt;
+    &lt;a href=&#34;#data_points&#34;&gt;
+        &lt;svg viewBox=&#34;0 0 28 23&#34; height=&#34;100%&#34; width=&#34;19&#34; xmlns=&#34;http://www.w3.org/2000/svg&#34;&gt;&lt;path d=&#34;M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;path d=&#34;M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;/svg&gt;
+    &lt;/a&gt;
+&lt;/span&gt;
+&lt;/h4&gt;&lt;p&gt;This table has &lt;a href=&#34;https://gist.github.com/Yengas/541808c4ea65d957f052f179f52e6a07#file-cassandra-old-cql-L9&#34;&gt;3 fields&lt;/a&gt; which are used to hold a metric data for a specific metric name and tags.&lt;/p&gt;
+&lt;p&gt;The fields for tables are &lt;code&gt;key = blob&lt;/code&gt;, &lt;code&gt;column1 = blob&lt;/code&gt; and &lt;code&gt;value = blob&lt;/code&gt;. The &lt;code&gt;key&lt;/code&gt; field is the concatenation of metric name, bucket start timestamp, the data type and the tags. &lt;code&gt;column1&lt;/code&gt; is the offset of this data&amp;rsquo;s time, relative to the bucket start time, and &lt;code&gt;value&lt;/code&gt; is the serialized binary data for the value(this is how KairosDB can have custom data types) for your metric data. How this columns are utilized are explained below in Workflow section.&lt;/p&gt;
+&lt;p&gt;The data in this rows are ordered by their offset time in ASC order, so you can have sequential access to your timeseries data when querying. Also another thing to keep in mind is, since the &lt;code&gt;key&lt;/code&gt; field is used for partioning this data in your Cassandra cluster, each metric data for a specific metric/tags/bucket will be in the same Cassandra node.&lt;/p&gt;
+&lt;h4 id=&#34;row_key_index&#34; &gt;row_key_index
+&lt;span&gt;
+    &lt;a href=&#34;#row_key_index&#34;&gt;
+        &lt;svg viewBox=&#34;0 0 28 23&#34; height=&#34;100%&#34; width=&#34;19&#34; xmlns=&#34;http://www.w3.org/2000/svg&#34;&gt;&lt;path d=&#34;M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;path d=&#34;M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;/svg&gt;
+    &lt;/a&gt;
+&lt;/span&gt;
+&lt;/h4&gt;&lt;p&gt;This table is used to keep track of which buckets are available in the &lt;code&gt;data_points&lt;/code&gt; table for a specific metric/tags. Lets say you have a time range and you want to do aggregates over a metric with a tag. You need a way of finding matching buckets of data(in &lt;code&gt;data_points&lt;/code&gt;) for this query first. This tables helps you with this.&lt;/p&gt;
+&lt;p&gt;It has &lt;a href=&#34;https://gist.github.com/Yengas/541808c4ea65d957f052f179f52e6a07#file-cassandra-old-cql-L42&#34;&gt;3 fields&lt;/a&gt; &lt;code&gt;key = blob&lt;/code&gt;, &lt;code&gt;column1 = blob&lt;/code&gt;, &lt;code&gt;value = blob&lt;/code&gt;. The &lt;code&gt;key&lt;/code&gt; field is the metric name in utf-8 bytes. And the &lt;code&gt;column1&lt;/code&gt; field is the same with the &lt;code&gt;data_points&lt;/code&gt; table&amp;rsquo;s &lt;code&gt;key&lt;/code&gt; field. Meaning metric name + bucket start time + data type + tags concatenated together. The &lt;code&gt;value&lt;/code&gt; field is not used. This table essentially is a way of saying(in plain English); for this metric name, we have these buckets of data with these tags.&lt;/p&gt;
+&lt;p&gt;You can later use this information to make your queries. This is explained in detail below in Workflow section.&lt;/p&gt;
+&lt;p&gt;This table&amp;rsquo;s partition key is the &lt;code&gt;key&lt;/code&gt; field which holds the metric name. Because of this, all of &lt;code&gt;row_key_index&lt;/code&gt; entries for a single metric get stored in the same cassandra node. This is improved in the new schema.&lt;/p&gt;
+&lt;h3 id=&#34;workflow&#34; &gt;Workflow
+&lt;span&gt;
+    &lt;a href=&#34;#workflow&#34;&gt;
+        &lt;svg viewBox=&#34;0 0 28 23&#34; height=&#34;100%&#34; width=&#34;19&#34; xmlns=&#34;http://www.w3.org/2000/svg&#34;&gt;&lt;path d=&#34;M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;path d=&#34;M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;/svg&gt;
+    &lt;/a&gt;
+&lt;/span&gt;
+&lt;/h3&gt;&lt;p&gt;Below we try to explain how each insert/read and delete operation is done with this schema so you can better understand the inner workings of KairosDB.&lt;/p&gt;
+&lt;p&gt;As an example in this workflow, we will assume that we&amp;rsquo;re holding temperature data for different cities. Lets model it so the metric name is &lt;code&gt;Temperature&lt;/code&gt; and the city information is a tag.&lt;/p&gt;
+&lt;h4 id=&#34;insert&#34; &gt;Insert
+&lt;span&gt;
+    &lt;a href=&#34;#insert&#34;&gt;
+        &lt;svg viewBox=&#34;0 0 28 23&#34; height=&#34;100%&#34; width=&#34;19&#34; xmlns=&#34;http://www.w3.org/2000/svg&#34;&gt;&lt;path d=&#34;M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;path d=&#34;M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;/svg&gt;
+    &lt;/a&gt;
+&lt;/span&gt;
+&lt;/h4&gt;&lt;p&gt;Let&amp;rsquo;s say you have a metric data with &lt;code&gt;Temperature&lt;/code&gt; metric name, and &lt;code&gt;city=Antalya&lt;/code&gt; tag. For inserting a single metric to this set, we will use &lt;code&gt;33&lt;/code&gt; for the value and &lt;code&gt;1501672887988&lt;/code&gt; for the timestamp.&lt;/p&gt;
+&lt;p&gt;We first calculate(&lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/9469daa937056d84de121ff112a93947e44f960e/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L287&#34;&gt;CassandraDatastore.java Line 287&lt;/a&gt;) which bucket this data belongs to. It&amp;rsquo;s done using the formula &lt;code&gt;timestamp - (timestamp % row_width)&lt;/code&gt; where &lt;code&gt;row_width&lt;/code&gt; is the hardcoded value(&lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/develop/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L92&#34;&gt;Line 92&lt;/a&gt;) in KairosDB. This then translates to: &lt;code&gt;1501672887988 - (1501672887988 % 1814400000) = 1500508800000&lt;/code&gt;. In unix time, for a data dated &lt;code&gt;08/02/2017 @ 11:21am (UTC)&lt;/code&gt; the bucket start time corresponds to &lt;code&gt;07/20/2017 @ 12:00am (UTC)&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;We then create(&lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/9469daa937056d84de121ff112a93947e44f960e/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L289&#34;&gt;Line 289&lt;/a&gt;) a &lt;code&gt;row_key&lt;/code&gt; with this information. This &lt;code&gt;row_key&lt;/code&gt; is the concatenation of Metric Name(&lt;code&gt;Temperature&lt;/code&gt;), the bucket start time we calculated(&lt;code&gt;1500508800000&lt;/code&gt;), the data type(&lt;code&gt;kairos_long&lt;/code&gt;) and our tags(&lt;code&gt;city=Antalya&lt;/code&gt;).&lt;/p&gt;
+&lt;p&gt;Then we move on to making sure(&lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/9469daa937056d84de121ff112a93947e44f960e/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L298&#34;&gt;Line 298&lt;/a&gt;) we have a &lt;code&gt;row_key_index&lt;/code&gt; entry for the Metric Name(&lt;code&gt;Temperature&lt;/code&gt;) and the &lt;code&gt;row_key&lt;/code&gt; we calculated. And then we put the data in to the &lt;code&gt;data_points&lt;/code&gt; table! We do this by calculating the offset relative to the bucket start time &lt;code&gt;data_time - row_time&lt;/code&gt; in our case: &lt;code&gt;1501672887988 - 1500508800000 = 1164087988&lt;/code&gt;. This all in all translates to an insert to &lt;code&gt;data_points&lt;/code&gt; table with &lt;code&gt;key = row_key&lt;/code&gt;, &lt;code&gt;column1 = offset we calculated&lt;/code&gt; and the &lt;code&gt;value = our metric value = 33&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;After the data is written, we write metric names, tag names to the &lt;code&gt;string_index&lt;/code&gt; table.&lt;/p&gt;
+&lt;h4 id=&#34;read&#34; &gt;Read
+&lt;span&gt;
+    &lt;a href=&#34;#read&#34;&gt;
+        &lt;svg viewBox=&#34;0 0 28 23&#34; height=&#34;100%&#34; width=&#34;19&#34; xmlns=&#34;http://www.w3.org/2000/svg&#34;&gt;&lt;path d=&#34;M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;path d=&#34;M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;/svg&gt;
+    &lt;/a&gt;
+&lt;/span&gt;
+&lt;/h4&gt;&lt;p&gt;After getting familiar with insert, we don&amp;rsquo;t need to go into details here. It&amp;rsquo;s apparent that, for a time range and metric/tags query, before querying the &lt;code&gt;data_points&lt;/code&gt; table, we need to take a look(&lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/9469daa937056d84de121ff112a93947e44f960e/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L425&#34;&gt;Line 425&lt;/a&gt;) into &lt;code&gt;row_key_index&lt;/code&gt; table. To do this we create a query into the &lt;code&gt;row_key_index&lt;/code&gt; table with the start and end time of our query(&lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/9469daa937056d84de121ff112a93947e44f960e/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L582&#34;&gt;Line 582&lt;/a&gt;). This results in a query with Metric Name(e.g. &lt;code&gt;Temperature&lt;/code&gt;) and time range to the &lt;code&gt;row_key_index&lt;/code&gt; table. For each returned result, we match them in-memory with our query(&lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/9469daa937056d84de121ff112a93947e44f960e/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L712&#34;&gt;Line 712&lt;/a&gt; this requires parsing the binary &lt;code&gt;row_key&lt;/code&gt; values aswell) and then we make queries(&lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/9469daa937056d84de121ff112a93947e44f960e/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L457&#34;&gt;Line 457&lt;/a&gt;) to &lt;code&gt;data_points&lt;/code&gt; table for each matched bucket.&lt;/p&gt;
+&lt;p&gt;This is why its &lt;a href=&#34;https://github.com/kairosdb/kairosdb/wiki/Query-Performance&#34;&gt;not recommended&lt;/a&gt; to have a very populated &lt;code&gt;row_key_index&lt;/code&gt; table with the old schema. Because that may result in too many in-memory comparisons and too many different queries to be made to &lt;code&gt;data_points&lt;/code&gt; table.&lt;/p&gt;
+&lt;h4 id=&#34;delete&#34; &gt;Delete
+&lt;span&gt;
+    &lt;a href=&#34;#delete&#34;&gt;
+        &lt;svg viewBox=&#34;0 0 28 23&#34; height=&#34;100%&#34; width=&#34;19&#34; xmlns=&#34;http://www.w3.org/2000/svg&#34;&gt;&lt;path d=&#34;M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;path d=&#34;M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;/svg&gt;
+    &lt;/a&gt;
+&lt;/span&gt;
+&lt;/h4&gt;&lt;p&gt;Deletes goes pretty much same with the read. However instead of doing read queries to the &lt;code&gt;data_points&lt;/code&gt; table, we instead make delete queries. A good part to notice here(&lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/9469daa937056d84de121ff112a93947e44f960e/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L522&#34;&gt;Line 522&lt;/a&gt;) that, if you happen to delete a whole row of data(meaning the time range you gave includes the start and end time of the bucket), its very performant. However if you do a partial deletes and keep querying that row, you may have performance issues because of &lt;a href=&#34;https://opencredo.com/cassandra-tombstones-common-issues/&#34;&gt;Cassandra tombstones&lt;/a&gt;(may even result in your read queries to not respond!).&lt;/p&gt;
+&lt;h4 id=&#34;keep-in-mind&#34; &gt;Keep in mind!
+&lt;span&gt;
+    &lt;a href=&#34;#keep-in-mind&#34;&gt;
+        &lt;svg viewBox=&#34;0 0 28 23&#34; height=&#34;100%&#34; width=&#34;19&#34; xmlns=&#34;http://www.w3.org/2000/svg&#34;&gt;&lt;path d=&#34;M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;path d=&#34;M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;/svg&gt;
+    &lt;/a&gt;
+&lt;/span&gt;
+&lt;/h4&gt;&lt;p&gt;An important thing to keep in mind when doing reads/deletes is that; Lets say you have 3 metric names and 300.000 cities. To delete 1 week of data for these 3 metrics on Antalya, KairosDB needs to filter all of your &lt;code&gt;row_key_index&lt;/code&gt; table in-memory and that may translate to millions of comparisons. See calculating &lt;code&gt;row_key_index&lt;/code&gt; size in Optimization section!&lt;/p&gt;
+&lt;h2 id=&#34;new-cassandra-schema&#34; &gt;New Cassandra Schema
+&lt;span&gt;
+    &lt;a href=&#34;#new-cassandra-schema&#34;&gt;
+        &lt;svg viewBox=&#34;0 0 28 23&#34; height=&#34;100%&#34; width=&#34;19&#34; xmlns=&#34;http://www.w3.org/2000/svg&#34;&gt;&lt;path d=&#34;M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;path d=&#34;M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;/svg&gt;
+    &lt;/a&gt;
+&lt;/span&gt;
+&lt;/h2&gt;&lt;p&gt;The maintainer of the KairosDB database has been doing some work with CQL instead of using THRIFT. The beta version of KairosDB that uses CQL was released in &lt;a href=&#34;https://github.com/kairosdb/kairosdb/releases/tag/v1.2.0-beta2&#34;&gt;July 2017&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;This version has some new tables in the Schema, however its still compatible with the old version of KairosDB, meaning it queries both tables for backwards compatibility. There is a small difference that you need to keep in mind, the new version of the Cassandra schema creates &lt;code&gt;string_index&lt;/code&gt; table with the &lt;code&gt;column1&lt;/code&gt; fields as blob. This field was text with the old schema. However these schemas are created only if the table doesn&amp;rsquo;t already exists(&lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/Schema.java#L50&#34;&gt;Schema.java Line 50&lt;/a&gt;). So it shouldn&amp;rsquo;t cause any problem when upgrading KairosDB to the new version.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;data_points&lt;/code&gt; and &lt;code&gt;string_index&lt;/code&gt; are actively used for the same purpose they were used with the old version.&lt;/p&gt;
+&lt;h3 id=&#34;new-tables&#34; &gt;New Tables
+&lt;span&gt;
+    &lt;a href=&#34;#new-tables&#34;&gt;
+        &lt;svg viewBox=&#34;0 0 28 23&#34; height=&#34;100%&#34; width=&#34;19&#34; xmlns=&#34;http://www.w3.org/2000/svg&#34;&gt;&lt;path d=&#34;M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;path d=&#34;M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;/svg&gt;
+    &lt;/a&gt;
+&lt;/span&gt;
+&lt;/h3&gt;&lt;h4 id=&#34;row_key_time_index&#34; &gt;row_key_time_index
+&lt;span&gt;
+    &lt;a href=&#34;#row_key_time_index&#34;&gt;
+        &lt;svg viewBox=&#34;0 0 28 23&#34; height=&#34;100%&#34; width=&#34;19&#34; xmlns=&#34;http://www.w3.org/2000/svg&#34;&gt;&lt;path d=&#34;M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;path d=&#34;M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;/svg&gt;
+    &lt;/a&gt;
+&lt;/span&gt;
+&lt;/h4&gt;&lt;p&gt;This table has 3 fields &lt;code&gt;metric = text&lt;/code&gt;, &lt;code&gt;row_time = timestamp&lt;/code&gt; and an unused &lt;code&gt;value = text&lt;/code&gt;. Essentially it&amp;rsquo;s job is to hold what buckets we have for a specific metric. It&amp;rsquo;s queried with the time range and the metric name, and the result is used to query the row_keys_index table.&lt;/p&gt;
+&lt;h4 id=&#34;row_keys_index&#34; &gt;row_keys_index
+&lt;span&gt;
+    &lt;a href=&#34;#row_keys_index&#34;&gt;
+        &lt;svg viewBox=&#34;0 0 28 23&#34; height=&#34;100%&#34; width=&#34;19&#34; xmlns=&#34;http://www.w3.org/2000/svg&#34;&gt;&lt;path d=&#34;M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;path d=&#34;M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;/svg&gt;
+    &lt;/a&gt;
+&lt;/span&gt;
+&lt;/h4&gt;&lt;p&gt;This table holds the &lt;code&gt;row_key&lt;/code&gt; we calculated in a CQL friendly way. It has 4 fields namely; &lt;code&gt;metric = text&lt;/code&gt;, &lt;code&gt;row_time = timestamp&lt;/code&gt;, &lt;code&gt;data_type = text&lt;/code&gt; and &lt;code&gt;tags = frozen&amp;lt;map&amp;lt;text, text&amp;gt;&amp;gt;&lt;/code&gt;. These are used to hold a &lt;code&gt;row_key&lt;/code&gt; in Cassandra table, so they can be queried with their metric, timestamp and data type to be parsed and compared in memory with the query.&lt;/p&gt;
+&lt;h3 id=&#34;workflow-1&#34; &gt;Workflow
+&lt;span&gt;
+    &lt;a href=&#34;#workflow-1&#34;&gt;
+        &lt;svg viewBox=&#34;0 0 28 23&#34; height=&#34;100%&#34; width=&#34;19&#34; xmlns=&#34;http://www.w3.org/2000/svg&#34;&gt;&lt;path d=&#34;M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;path d=&#34;M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;/svg&gt;
+    &lt;/a&gt;
+&lt;/span&gt;
+&lt;/h3&gt;&lt;h4 id=&#34;insert-1&#34; &gt;Insert
+&lt;span&gt;
+    &lt;a href=&#34;#insert-1&#34;&gt;
+        &lt;svg viewBox=&#34;0 0 28 23&#34; height=&#34;100%&#34; width=&#34;19&#34; xmlns=&#34;http://www.w3.org/2000/svg&#34;&gt;&lt;path d=&#34;M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;path d=&#34;M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;/svg&gt;
+    &lt;/a&gt;
+&lt;/span&gt;
+&lt;/h4&gt;&lt;p&gt;Insert is pretty simple and almost the same as the old schema and addition is that the CQL commands are run batched. Bucket is calculated, then the &lt;code&gt;row_key&lt;/code&gt; and it&amp;rsquo;s made sure corresponding entries are created in &lt;code&gt;row_key_time&lt;/code&gt;(&lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/CQLBatch.java#L54&#34;&gt;Line 54&lt;/a&gt;) and &lt;code&gt;row_keys&lt;/code&gt;(&lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/CQLBatch.java#L65&#34;&gt;Line 65&lt;/a&gt;), after this the data is inserted into the &lt;code&gt;data_points&lt;/code&gt;(&lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/CQLBatch.java#L116&#34;&gt;Line 116&lt;/a&gt;) and only the metric names are inserted into the &lt;code&gt;string_index&lt;/code&gt;.&lt;/p&gt;
+&lt;h4 id=&#34;read-1&#34; &gt;Read
+&lt;span&gt;
+    &lt;a href=&#34;#read-1&#34;&gt;
+        &lt;svg viewBox=&#34;0 0 28 23&#34; height=&#34;100%&#34; width=&#34;19&#34; xmlns=&#34;http://www.w3.org/2000/svg&#34;&gt;&lt;path d=&#34;M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;path d=&#34;M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;/svg&gt;
+    &lt;/a&gt;
+&lt;/span&gt;
+&lt;/h4&gt;&lt;p&gt;We still need a way to find which &lt;code&gt;data_points&lt;/code&gt; buckets we need to query. To do this, KairosDB needs to query both old schema&amp;rsquo;s &lt;code&gt;row_key_index&lt;/code&gt; table and the new &lt;code&gt;row_key_time_index&lt;/code&gt; and &lt;code&gt;row_keys&lt;/code&gt; table.&lt;/p&gt;
+&lt;p&gt;The old schema is queried like the old version of KairosDB but instead of using Thrift, CQL is used.&lt;/p&gt;
+&lt;p&gt;For the new schema; &lt;code&gt;row_key_time_index&lt;/code&gt; is queried with the metric name and the time range(&lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L780&#34;&gt;Line 780&lt;/a&gt;) to get the buckets available, then multiple queries are made to the &lt;code&gt;row_keys&lt;/code&gt; table(&lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L788&#34;&gt;Line 788&lt;/a&gt;) and the returning entries are filtered in memory(&lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L823&#34;&gt;Line 823&lt;/a&gt;) according to the query made.&lt;/p&gt;
+&lt;h4 id=&#34;delete-1&#34; &gt;Delete
+&lt;span&gt;
+    &lt;a href=&#34;#delete-1&#34;&gt;
+        &lt;svg viewBox=&#34;0 0 28 23&#34; height=&#34;100%&#34; width=&#34;19&#34; xmlns=&#34;http://www.w3.org/2000/svg&#34;&gt;&lt;path d=&#34;M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;path d=&#34;M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;/svg&gt;
+    &lt;/a&gt;
+&lt;/span&gt;
+&lt;/h4&gt;&lt;p&gt;New version of cassandra &lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L595&#34;&gt;doesn&amp;rsquo;t seem to delete&lt;/a&gt; &lt;code&gt;row_key_time_index&lt;/code&gt; and &lt;code&gt;row_keys&lt;/code&gt; entries for the metric data. It just deletes the old schema&amp;rsquo;s &lt;code&gt;row_key_index&lt;/code&gt; entry, and the &lt;code&gt;data_points&lt;/code&gt; entries(&lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L595&#34;&gt;Line 595&lt;/a&gt; and &lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/CassandraDatastore.java#L614&#34;&gt;Line 614&lt;/a&gt;). There are no delete queries for the new tables in &lt;a href=&#34;https://github.com/kairosdb/kairosdb/blob/842eb20d258377b3bea156919b6275dfb85f4f04/src/main/java/org/kairosdb/datastore/cassandra/Schema.java&#34;&gt;Schema.java&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;optimization-what-to-keep-in-mind&#34; &gt;Optimization, what to keep in mind
+&lt;span&gt;
+    &lt;a href=&#34;#optimization-what-to-keep-in-mind&#34;&gt;
+        &lt;svg viewBox=&#34;0 0 28 23&#34; height=&#34;100%&#34; width=&#34;19&#34; xmlns=&#34;http://www.w3.org/2000/svg&#34;&gt;&lt;path d=&#34;M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;path d=&#34;M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;/svg&gt;
+    &lt;/a&gt;
+&lt;/span&gt;
+&lt;/h2&gt;&lt;h3 id=&#34;calculating-your-row_key_index-size&#34; &gt;Calculating your row_key_index size
+&lt;span&gt;
+    &lt;a href=&#34;#calculating-your-row_key_index-size&#34;&gt;
+        &lt;svg viewBox=&#34;0 0 28 23&#34; height=&#34;100%&#34; width=&#34;19&#34; xmlns=&#34;http://www.w3.org/2000/svg&#34;&gt;&lt;path d=&#34;M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;path d=&#34;M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;/svg&gt;
+    &lt;/a&gt;
+&lt;/span&gt;
+&lt;/h3&gt;&lt;p&gt;To do this calculation. Lets say you have 300.000 different cities, and you hold &lt;code&gt;Temperature&lt;/code&gt;, &lt;code&gt;Humidity&lt;/code&gt; and &lt;code&gt;Wind&lt;/code&gt; metrics for these cities. And you decided to model your data in KairosDB so the metric names correspond to the &lt;code&gt;Temperature&lt;/code&gt;, &lt;code&gt;Humidity&lt;/code&gt; and &lt;code&gt;Wind&lt;/code&gt;. And the cities are stored with the &lt;code&gt;city=XXX&lt;/code&gt; tag. You will have &lt;code&gt;N = 300.000 * 3 = 900.000&lt;/code&gt; entries in your &lt;code&gt;row_key_index&lt;/code&gt;. And you get &lt;code&gt;N&lt;/code&gt; more &lt;code&gt;row_key_index&lt;/code&gt; entries each 3 week because KairosDB divides your data into buckets! You can see how this could slow your queries with the Read and Delete, because of in-memory comparisons. The situation is different with the new schema.&lt;/p&gt;
+&lt;h3 id=&#34;gotchas-not-many-performance-improvements-slow-deletes-reads&#34; &gt;Gotchas, not many performance improvements&amp;hellip; Slow deletes, reads.
+&lt;span&gt;
+    &lt;a href=&#34;#gotchas-not-many-performance-improvements-slow-deletes-reads&#34;&gt;
+        &lt;svg viewBox=&#34;0 0 28 23&#34; height=&#34;100%&#34; width=&#34;19&#34; xmlns=&#34;http://www.w3.org/2000/svg&#34;&gt;&lt;path d=&#34;M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;path d=&#34;M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;/svg&gt;
+    &lt;/a&gt;
+&lt;/span&gt;
+&lt;/h3&gt;&lt;p&gt;KairosDB isn&amp;rsquo;t the most optimized database when it comes to executing your queries on Cassandra. One of the most apparent feature it lacks, is that when you make a query with same metric name, but different tags, it queries the &lt;code&gt;row_key_index&lt;/code&gt; table multiple times. And considering this metric name is populated, this may cause a lot of slow downs on your system. This can happen both with reads and deletes.&lt;/p&gt;
+&lt;p&gt;Lets keep going with our example where we had 3 different metrics &lt;code&gt;Temperature&lt;/code&gt;, &lt;code&gt;Humidity&lt;/code&gt; and &lt;code&gt;Wind&lt;/code&gt; and we had 1 tag named city, which holds the city name. If we were to run a delete query which deletes all of the metrics for 2 different cities &lt;code&gt;Antalya&lt;/code&gt; and &lt;code&gt;Istanbul&lt;/code&gt;, this will cause 2 scans on all of our &lt;code&gt;row_key_index&lt;/code&gt;. Lets think a scenario where we run this kind of query for deleting a big number of cities&amp;hellip; This could cause a serious slowdown with the current schema(s) if you were to make a naive query with multiple metrics. To make this query more performant and make it read the &lt;code&gt;row_key_index&lt;/code&gt; table once, try using group by as mentioned by Brian Hawkins on &lt;a href=&#34;https://groups.google.com/d/msg/kairosdb-group/MlwSRmZjhdU/WndUNMi1AwAJ&#34;&gt;this kairosdb group post&lt;/a&gt;. Example query:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;{
+    &amp;#34;start_absolute&amp;#34;: ...,
+    &amp;#34;end_absolute&amp;#34;: ...,
+    &amp;#34;metrics&amp;#34;: [{ 
+        &amp;#34;name&amp;#34;: &amp;#34;Temperature&amp;#34;,
+        &amp;#34;tags&amp;#34;: { &amp;#34;city&amp;#34;: [&amp;#34;Antalya&amp;#34;, &amp;#34;Istanbul&amp;#34;] }, 
+        &amp;#34;group_by&amp;#34;: [
+            {
+              &amp;#34;name&amp;#34;: &amp;#34;tag&amp;#34;,
+              &amp;#34;tags&amp;#34;: [ &amp;#34;city&amp;#34; ]
+            }
+        ]
+    }]
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;dont-have-too-many-tombstones&#34; &gt;Don&amp;rsquo;t have too many tombstones
+&lt;span&gt;
+    &lt;a href=&#34;#dont-have-too-many-tombstones&#34;&gt;
+        &lt;svg viewBox=&#34;0 0 28 23&#34; height=&#34;100%&#34; width=&#34;19&#34; xmlns=&#34;http://www.w3.org/2000/svg&#34;&gt;&lt;path d=&#34;M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;path d=&#34;M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71&#34; fill=&#34;none&#34; stroke-linecap=&#34;round&#34; stroke-miterlimit=&#34;10&#34; stroke-width=&#34;2&#34;/&gt;&lt;/svg&gt;
+    &lt;/a&gt;
+&lt;/span&gt;
+&lt;/h3&gt;&lt;p&gt;Cassandra doesn&amp;rsquo;t delete records when you execute a delete query. It just marks them as tombstones and deletes them in the next compaction. Until this compaction happens, every query you make to these sstables, will need to filter out tombstones records and this may cause problem such as your read queries not responding or getting slower. You should keep in mind KairosDB stores 3 weeks of metric data in a row for each specific metric/tag combinations. If you delete some data in the row you are actively using, you may get slow downs/halts/aborts. Please see this &lt;a href=&#34;https://stackoverflow.com/questions/21755286/what-exactly-happens-when-tombstone-limit-is-reached&#34;&gt;stackoverflow question&lt;/a&gt;, regarding this problem.&lt;/p&gt;
+</description>
     </item>
     
   </channel>

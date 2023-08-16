@@ -1,20 +1,26 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>yengas on Yengas</title>
+    <title>yengas on Yiğitcan UÇUM</title>
     <link>https://blog.yigitcan.dev/tags/yengas/</link>
-    <description>Recent content in yengas on Yengas</description>
+    <description>Yiğitcan UÇUM (yengas)</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Sat, 19 Nov 2016 00:00:00 +0300</lastBuildDate><atom:link href="https://blog.yigitcan.dev/tags/yengas/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 19 Nov 2016 00:00:00 +0300</lastBuildDate>
+    
+    <atom:link href="https://blog.yigitcan.dev/tags/yengas/index.xml" rel="self" type="application/rss+xml" />
+    
+    
     <item>
       <title>About</title>
       <link>https://blog.yigitcan.dev/about/</link>
       <pubDate>Sat, 19 Nov 2016 00:00:00 +0300</pubDate>
       
       <guid>https://blog.yigitcan.dev/about/</guid>
-      <description>Hello, I&amp;rsquo;m Yiğitcan! For over a decade, I&amp;rsquo;ve been involved in software development, working with both corporate and startup companies, developing for different platforms like web, mobile, and desktop. Typescript, NodeJS, Golang, and Java are some of the technologies I frequently use.
-Building meaningful products as a team is one of my favorite things to do. Whether it&amp;rsquo;s designing backend architecture, engaging with cloud-native technologies, or experimenting with something new, learning and solving problems together is what motivates me most in the software world.</description>
+      <description>&lt;p&gt;Hello, I&amp;rsquo;m Yiğitcan! For over a decade, I&amp;rsquo;ve been involved in software development, working with both corporate and startup companies, developing for different platforms like web, mobile, and desktop. Typescript, NodeJS, Golang, and Java are some of the technologies I frequently use.&lt;/p&gt;
+&lt;p&gt;Building meaningful products as a team is one of my favorite things to do. Whether it&amp;rsquo;s designing backend architecture, engaging with cloud-native technologies, or experimenting with something new, learning and solving problems together is what motivates me most in the software world.&lt;/p&gt;
+&lt;p&gt;You can follow my projects and work on &lt;a href=&#34;https://github.com/Yengas&#34;&gt;Github&lt;/a&gt;, or read my opinions and tutorials about various software topics on this blog. If you want to collaborate with me, feel free to reach out on &lt;a href=&#34;https://www.linkedin.com/in/yigitcanucum/&#34;&gt;LinkedIn&lt;/a&gt;.&lt;/p&gt;
+</description>
     </item>
     
   </channel>

@@ -247,6 +247,18 @@
                 href="https://blog.yigitcan.dev/tags/yengas/"
                 />
   </url><url>
+    <loc>https://blog.yigitcan.dev/authors/</loc>
+    <xhtml:link
+                rel="alternate"
+                hreflang="tr"
+                href="https://blog.yigitcan.dev/tr/authors/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="https://blog.yigitcan.dev/authors/"
+                />
+  </url><url>
     <loc>https://blog.yigitcan.dev/series/</loc>
     <xhtml:link
                 rel="alternate"

@@ -1,74 +1,15 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Categories on Yengas</title>
+    <title>Categories on Yiğitcan UÇUM</title>
     <link>https://blog.yigitcan.dev/categories/</link>
-    <description>Recent content in Categories on Yengas</description>
+    <description>Yiğitcan UÇUM (Categories)</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 03 Aug 2017 16:10:00 +0300</lastBuildDate><atom:link href="https://blog.yigitcan.dev/categories/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>Cassandra</title>
-      <link>https://blog.yigitcan.dev/categories/cassandra/</link>
-      <pubDate>Thu, 03 Aug 2017 16:10:00 +0300</pubDate>
-      
-      <guid>https://blog.yigitcan.dev/categories/cassandra/</guid>
-      <description></description>
-    </item>
+    <lastBuildDate>Thu, 03 Aug 2017 16:10:00 +0300</lastBuildDate>
     
-    <item>
-      <title>Database</title>
-      <link>https://blog.yigitcan.dev/categories/database/</link>
-      <pubDate>Thu, 03 Aug 2017 16:10:00 +0300</pubDate>
-      
-      <guid>https://blog.yigitcan.dev/categories/database/</guid>
-      <description></description>
-    </item>
+    <atom:link href="https://blog.yigitcan.dev/categories/index.xml" rel="self" type="application/rss+xml" />
     
-    <item>
-      <title>Optimization</title>
-      <link>https://blog.yigitcan.dev/categories/optimization/</link>
-      <pubDate>Thu, 03 Aug 2017 16:10:00 +0300</pubDate>
-      
-      <guid>https://blog.yigitcan.dev/categories/optimization/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>DevOps</title>
-      <link>https://blog.yigitcan.dev/categories/devops/</link>
-      <pubDate>Tue, 31 Jan 2017 03:30:00 +0300</pubDate>
-      
-      <guid>https://blog.yigitcan.dev/categories/devops/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Continous Integration</title>
-      <link>https://blog.yigitcan.dev/categories/continous-integration/</link>
-      <pubDate>Sun, 20 Nov 2016 16:30:00 +0300</pubDate>
-      
-      <guid>https://blog.yigitcan.dev/categories/continous-integration/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Personal</title>
-      <link>https://blog.yigitcan.dev/categories/personal/</link>
-      <pubDate>Sun, 20 Nov 2016 16:30:00 +0300</pubDate>
-      
-      <guid>https://blog.yigitcan.dev/categories/personal/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Project</title>
-      <link>https://blog.yigitcan.dev/categories/project/</link>
-      <pubDate>Sun, 20 Nov 2016 16:30:00 +0300</pubDate>
-      
-      <guid>https://blog.yigitcan.dev/categories/project/</guid>
-      <description></description>
-    </item>
     
   </channel>
 </rss>

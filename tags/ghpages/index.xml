@@ -1,20 +1,37 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>ghpages on Yengas</title>
+    <title>ghpages on Yiğitcan UÇUM</title>
     <link>https://blog.yigitcan.dev/tags/ghpages/</link>
-    <description>Recent content in ghpages on Yengas</description>
+    <description>Yiğitcan UÇUM (ghpages)</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Sun, 20 Nov 2016 16:30:00 +0300</lastBuildDate><atom:link href="https://blog.yigitcan.dev/tags/ghpages/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 20 Nov 2016 16:30:00 +0300</lastBuildDate>
+    
+    <atom:link href="https://blog.yigitcan.dev/tags/ghpages/index.xml" rel="self" type="application/rss+xml" />
+    
+    
     <item>
       <title>How I Made This Blog?</title>
       <link>https://blog.yigitcan.dev/personal-website/</link>
       <pubDate>Sun, 20 Nov 2016 16:30:00 +0300</pubDate>
       
       <guid>https://blog.yigitcan.dev/personal-website/</guid>
-      <description>After the release of Github Actions i refactored this project to work with it instead of wercker. Blog posts and configuration for the Hugo is stored under the source branch of Yengas/yengas.github.io, Github Actions builds and pushes html/css/js files on the master branch of the same repository.
-I haven&amp;rsquo;t been designing any GUI&amp;rsquo;s since i switched from Web development to other platforms. Most of the projects i&amp;rsquo;ve worked on for the last few years were either single page designs, or they worked in the background.</description>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;[2023-08-16] I&amp;rsquo;ve switched to the &lt;a href=&#34;https://github.com/Mitrichius/hugo-theme-anubis&#34;&gt;anubis theme&lt;/a&gt; in favor of more minimal design, and light/dark mode support.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;[2020-05-14] After the release of &lt;a href=&#34;https://github.com/features/actions&#34;&gt;Github Actions&lt;/a&gt; i refactored this project to work with it instead of wercker. Blog posts and configuration for the Hugo is stored under the &lt;em&gt;source&lt;/em&gt; branch of &lt;a href=&#34;https://github.com/Yengas/yengas.github.io/tree/source&#34;&gt;Yengas/yengas.github.io&lt;/a&gt;, Github Actions builds and pushes html/css/js files on the &lt;em&gt;master&lt;/em&gt; branch of the same repository.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;I haven&amp;rsquo;t been designing any GUI&amp;rsquo;s since i switched from Web development to other platforms. Most of the projects i&amp;rsquo;ve worked on for the last few years were either single page designs, or they worked in the background.&lt;/p&gt;
+&lt;p&gt;Even though i&amp;rsquo;m not very up-to-date with web technologies(except trying out &lt;code&gt;React&lt;/code&gt;&amp;amp;&lt;code&gt;Redux&lt;/code&gt; for a few weeks), i always wanted to experiment with Static Website Generators. After investigating a little bit, i decided to make this blog using &lt;code&gt;Hugo&lt;/code&gt; and &lt;code&gt;Github Pages&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;I created 2 projects called &lt;code&gt;personal-website&lt;/code&gt; and &lt;code&gt;yengas.github.io&lt;/code&gt;. &lt;code&gt;personal-website&lt;/code&gt; included my Hugo configurations, blog posts and static assets, and the &lt;code&gt;yengas.github.io&lt;/code&gt; was for hosting the output of my Hugo builds. I wanted to automate this process so i could post from anywhere(specially mobile) and my blog would automatically update.&lt;/p&gt;
+&lt;p&gt;At first, i thought about creating a &lt;code&gt;continous integration&lt;/code&gt; pipeline via &lt;code&gt;Jenkins&lt;/code&gt; on my &lt;code&gt;DigitalOcean&lt;/code&gt; hosted VPS. But after reading more about Hugo, i found out there was a third party service called &lt;a href=&#34;http://www.wercker.com/&#34;&gt;wercker&lt;/a&gt; that could make this process easier, and require no setup. The only downside is that it requires full access to your Github account. I don&amp;rsquo;t have any critical code on my Github account, so i decided to use wercker.&lt;/p&gt;
+&lt;p&gt;This way, i would have completely free and automated personal blog whose performance and security depends on Github Pages and my Github Account credentials.&lt;/p&gt;
+&lt;p&gt;I only had few struggles while i was trying to set this up. First of all, there isn&amp;rsquo;t an up-to-date wercker script that pushes a git project to master branch of a repository. So i had to create a bash script inside of my wercker config to publish my project to gh-pages.&lt;/p&gt;
+&lt;p&gt;Also, the theme(&lt;a href=&#34;https://github.com/tmaiaroto/hugo-redlounge&#34;&gt;hugo-redlounge&lt;/a&gt;) i decided to use didn&amp;rsquo;t have a multilingual support, so i had to learn more about Hugo and customize the template to my needs. I added internationalization, a list of languages, and a feature to switch the post language if there is a translation.&lt;/p&gt;
+&lt;p&gt;If you would like to setup a similiar website, you could check out this website&amp;rsquo;s &lt;a href=&#34;https://github.com/Yengas/personal-website&#34;&gt;source code&lt;/a&gt; on Github. You could also checkout my fork of &lt;a href=&#34;https://github.com/Yengas/hugo-redlounge&#34;&gt;hugo-redlounge&lt;/a&gt; theme, which has some fixes and the multilingual support i was talking about.&lt;/p&gt;
+</description>
     </item>
     
   </channel>

@@ -1,136 +1,225 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+
+
+<html lang="en-us" data-theme="">
 <head>
-  <title>
-    Using Docker and Docker-Compose to setup a local working environment, ready to be scaled. // Yengas
-  </title>
+    
+        
+<meta charset="utf-8">
+<meta name="HandheldFriendly" content="True">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer-when-downgrade">
 
-  <link href="http://gmpg.org/xfn/11" rel="profile">
-<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<title>Using Docker and Docker-Compose to setup a local working environment, ready to be scaled. - Yiğitcan UÇUM</title>
 
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-
-<meta name="description" content="">
-<meta name="keywords" content="">
-<meta name="author" content="">
-<meta name="generator" content="Hugo 0.117.0">
-
-  <meta property="og:title" content="Using Docker and Docker-Compose to setup a local working environment, ready to be scaled." />
-<meta property="og:description" content="" />
-<meta property="og:type" content="website" />
-<meta property="og:locale" content="en_US" />
-<meta property="og:url" content="https://blog.yigitcan.dev/docker-compose-node/" />
+<meta name="description" content="Let&rsquo;s talk about running your Node.js applications, in a way that makes it easier to migrate to continuous integration and deployment pipelines later on the road. There are too many things that you can do in DevOps layer that will make your code more readable and easier to maintain. For example:
+You can assume that every configuration is retrieved through a single file, then make a spec in your Kubernetes cluster to dynamically create this file through ConfigMaps, which would solve your problem of moving/managing configuration files on multiple servers.">
 
 
-  
-  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.5.0/base-min.css">
-  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.5.0/pure-min.css">
-  
-  
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.5.0/grids-responsive-min.css">
-  
-  
 
-  <link rel="stylesheet" href="https://blog.yigitcan.dev//css/redlounge.css">
-  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet">
-  <link href='//fonts.googleapis.com/css?family=Raleway:400,200,100,700,300,500,600,800' rel='stylesheet' type='text/css'>
-  <link href='//fonts.googleapis.com/css?family=Libre+Baskerville:400,700,400italic' rel='stylesheet' type='text/css'>
 
-  
-  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/touch-icon-144-precomposed.png">
-  <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.png">
 
-  
-  <link href="" rel="alternate" type="application/rss+xml" title="Yengas" />
+<link rel="icon" type="image/x-icon" href="https://blog.yigitcan.dev/favicon.ico">
+<link rel="apple-touch-icon-precomposed" href="https://blog.yigitcan.dev/favicon.png">
+
+
+
 
     
-  
-  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.7/styles/tomorrow-night-bright.min.css">
-  
-  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.7/highlight.min.js"></script>
-  <script>hljs.initHighlightingOnLoad();</script>
 
 
-  
 
-  
+<style>
+  body {
+    visibility: hidden;
+    opacity: 0;
+  }
+</style>
 
-  
+<noscript>
+  <style>
+    body {
+      visibility: visible;
+      opacity: 1;
+    }
+  </style>
+</noscript>
 
-  
+
+
+
+    
+
+
+
+
+
+    
+    
+        
+    
+    
+
+    
+        <link rel="stylesheet" href="https://blog.yigitcan.dev/css/style.min.eaefe0f95d1fe64ef0a3932347fc8e07ff4e3de4515423d0ad22b33474042778.css" integrity="sha256-6u/g&#43;V0f5k7wo5MjR/yOB/9OPeRRVCPQrSKzNHQEJ3g=">
+    
+
+
+
+
+
+    
+
+    
+
+
+
+
+
+    
+    
+        
+    
+    
+
+    
+        <script src="https://blog.yigitcan.dev/js/script.min.74bf1a3fcf1af396efa4acf3e660e876b61a2153ab9cbe1893ac24ea6d4f94ee.js" type="text/javascript" charset="utf-8" integrity="sha256-dL8aP88a85bvpKzz5mDodrYaIVOrnL4Yk6wk6m1PlO4="></script>
+    
+
+
+
+
+
+
+
+<meta property="og:title" content="Using Docker and Docker-Compose to setup a local working environment, ready to be scaled." />
+<meta property="og:description" content="Let&rsquo;s talk about running your Node.js applications, in a way that makes it easier to migrate to continuous integration and deployment pipelines later on the road. There are too many things that you can do in DevOps layer that will make your code more readable and easier to maintain. For example:
+You can assume that every configuration is retrieved through a single file, then make a spec in your Kubernetes cluster to dynamically create this file through ConfigMaps, which would solve your problem of moving/managing configuration files on multiple servers." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://blog.yigitcan.dev/docker-compose-node/" /><meta property="article:section" content="" />
+<meta property="article:published_time" content="2017-01-31T03:30:00+03:00" />
+<meta property="article:modified_time" content="2017-01-31T03:30:00+03:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Using Docker and Docker-Compose to setup a local working environment, ready to be scaled."/>
+<meta name="twitter:description" content="Let&rsquo;s talk about running your Node.js applications, in a way that makes it easier to migrate to continuous integration and deployment pipelines later on the road. There are too many things that you can do in DevOps layer that will make your code more readable and easier to maintain. For example:
+You can assume that every configuration is retrieved through a single file, then make a spec in your Kubernetes cluster to dynamically create this file through ConfigMaps, which would solve your problem of moving/managing configuration files on multiple servers."/>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
 </head>
-
 <body>
-	
+    <a class="skip-main" href="#main">Skip to main content</a>
+    <div class="container">
+        <header class="common-header"> 
+            
+                <div class="header-top">
+    <h1 class="site-title">
+    <a href="/">Yiğitcan UÇUM</a>
+</h1>
+    <ul class="social-icons">
 
-	<div id="layout" class="pure-g">
-    <div class="sidebar pure-u-1 pure-u-md-1-4">
-  <div class="header">
-    
-
-	
-
-    <h1 class="brand-title">Yengas</h1>
-    <h2 class="brand-tagline">Building, scaling, learning</h2>
-
-    <nav class="nav">
-      <ul class="nav-list" >
-        <li class="nav-item"><span class="nav-item-separator">//</span><a href="https://blog.yigitcan.dev/">Home</a></li>
-        
-          <li class="nav-item"><span class="nav-item-separator">//</span><a href="/about">About</a></li>
-        
-      </ul>
-    </nav>
-
-    <nav class="nav">
-      <ul class="nav-list">
-        
-          <li class="nav-item">
-              
-                <span>en</span>
-              
-          </li>
-        
-          <li class="nav-item">
-              
-                <a href="https://blog.yigitcan.dev/tr/">tr</a>
-              
-          </li>
-        
-      </ul>
-    </nav>
 
     
-    <div class="social-buttons">
-      
-        
-        <a href="https://github.com/Yengas" target="_blank"><i class="fa fa-github"></i></a>
-        
-      
-        
-        <a href="https://linkedin.com/in/YigitcanUCUM" target="_blank"><i class="fa fa-linkedin"></i></a>
-        
-      
-      
-    </div>
+        <li>
+            <a href="https://github.com/Yengas" title="Github" rel="me">
+            <span class="inline-svg" >
+
+
+
+
+    
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><path fill="currentColor" d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+
+</span>
+
+            </a>
+        </li>
     
 
-  </div>
+    
+        <li>
+            <a href="https://linkedin.com/in/YigitcanUCUM" title="Linkedin" rel="me">
+            <span class="inline-svg" >
+
+
+
+
+    
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3zM135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5zm282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9V416z"/></svg>
+
+</span>
+
+            </a>
+        </li>
+    
+
+
+
+    <li>
+            <a href="https://blog.yigitcan.dev/index.xml" title="RSS" rel="me">
+            <span class="inline-svg" >
+
+
+
+
+    
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M128.081 415.959c0 35.369-28.672 64.041-64.041 64.041S0 451.328 0 415.959s28.672-64.041 64.041-64.041 64.04 28.673 64.04 64.041zm175.66 47.25c-8.354-154.6-132.185-278.587-286.95-286.95C7.656 175.765 0 183.105 0 192.253v48.069c0 8.415 6.49 15.472 14.887 16.018 111.832 7.284 201.473 96.702 208.772 208.772.547 8.397 7.604 14.887 16.018 14.887h48.069c9.149.001 16.489-7.655 15.995-16.79zm144.249.288C439.596 229.677 251.465 40.445 16.503 32.01 7.473 31.686 0 38.981 0 48.016v48.068c0 8.625 6.835 15.645 15.453 15.999 191.179 7.839 344.627 161.316 352.465 352.465.353 8.618 7.373 15.453 15.999 15.453h48.068c9.034-.001 16.329-7.474 16.005-16.504z"/></svg>
+
+</span>
+
+            </a>
+        </li>
+    
+
+</ul>
 </div>
 
-	
-	
+    <nav>
+        
+        
+        <a class="" href="https://blog.yigitcan.dev/" title="">Home</a>
+        
+        <a class="" href="https://blog.yigitcan.dev/about" title="">About</a>
+        
+    </nav>
 
-    <div class="content pure-u-1 pure-u-md-3-4">
-		<a name="top"></a>
-		
 
-		
-			
-		    <div id="toc" class="pure-u-1 pure-u-md-1-4">
-				<small class="toc-label">Contents</small>
-		   	 	<nav id="TableOfContents">
+
+
+
+
+            
+        </header>
+        <main id="main" tabindex="-1"> 
+            
+    
+
+    <article class="post h-entry">
+        <div class="post-header">
+            <header>
+                <h1 class="p-name post-title">Using Docker and Docker-Compose to setup a local working environment, ready to be scaled.</h1>
+
+                
+            </header>
+        </div>
+        
+
+
+
+
+<nav id="TableOfContents">
   <ul>
     <li><a href="#configuration">Configuration</a>
       <ul>
@@ -164,47 +253,8 @@
     </li>
   </ul>
 </nav>
-		    </div>
-		    
-	    
-  		<section class="post">
-            <h1 class="post-title">
-              <a href="/docker-compose-node/">Using Docker and Docker-Compose to setup a local working environment, ready to be scaled.</a>
-            </h1>
-            <h3 class="post-subtitle">
-            	
-            </h3>
-            
-            	<span class="post-date">
-                	<span class="post-date-day"><sup>31</sup></span><span class="post-date-separator">/</span><span class="post-date-month">Jan</span> <span class="post-date-year">2017</span>
-            	</span>
-            	
-            
-            	
-            
 
-			
-
-			
-			
-				<div class="post-categories">
-				
-					<a class="post-category post-category-devops" href="https://blog.yigitcan.dev/categories/devops">DevOps</a>
-				
-				</div>
-			
-
-			
-		    	<div class="social-sharing">
-	<a class="share-button-facebook" onClick="return popupShare(this.href);" href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.yigitcan.dev%2fdocker-compose-node%2f" target="_blank"><i class="fa fa-facebook"><span>Like</span></i></a>
-	<a class="share-button-google-plus" onClick="return popupShare(this.href);" href="https://plus.google.com/share?url=https%3a%2f%2fblog.yigitcan.dev%2fdocker-compose-node%2f" target="_blank"><i class="fa fa-google-plus"><span>Google +1</span></i></a>
-	<a class="share-button-linkedin" onClick="return popupShare(this.href);" href="http://www.linkedin.com/shareArticle?mini=true&url=https%3a%2f%2fblog.yigitcan.dev%2fdocker-compose-node%2f&title=Using%20Docker%20and%20Docker-Compose%20to%20setup%20a%20local%20working%20environment%2c%20ready%20to%20be%20scaled.&summary=Let%26rsquo%3bs%20talk%20about%20running%20your%20Node.js%20applications%2c%20in%20a%20way%20that%20makes%20it%20easier%20to%20migrate%20to%20continuous%20integration%20and%20deployment%20pipelines%20later%20on%20the%20road.%20There%20are%20too%20many%20things%20that%20you%20can%20do%20in%20DevOps%20layer%20that%20will%20make%20your%20code%20more%20readable%20and%20easier%20to%20maintain.%20For%20example%3a%0aYou%20can%20assume%20that%20every%20configuration%20is%20retrieved%20through%20a%20single%20file%2c%20then%20make%20a%20spec%20in%20your%20Kubernetes%20cluster%20to%20dynamically%20create%20this%20file%20through%20ConfigMaps%2c%20which%20would%20solve%20your%20problem%20of%20moving%2fmanaging%20configuration%20files%20on%20multiple%20servers.}&source=Yengas" target="_blank"><i class="fa fa-linkedin"><span>Share on LinkedIn</span></i></a>
-	<a class="share-button-twitter" onClick="return popupShare(this.href);" href="http://twitter.com/share?text=Using%20Docker%20and%20Docker-Compose%20to%20setup%20a%20local%20working%20environment%2c%20ready%20to%20be%20scaled.&url=https%3a%2f%2fblog.yigitcan.dev%2fdocker-compose-node%2f" target="_blank"><i class="fa fa-twitter"><span>Tweet</span></i></a>	
-</div>
-		    
-
-			
-
+        <div class="content e-content">
             <p>Let&rsquo;s talk about running your Node.js applications, in a way that makes it easier to migrate to continuous integration and deployment pipelines later on the road. There are too many things that you can do in DevOps layer that will make your code more readable and easier to maintain. For example:</p>
 <ul>
 <li>You can assume that every <strong>configuration</strong> is retrieved through a single file, then make a spec in your Kubernetes cluster to dynamically create this file through <a href="https://kubernetes.io/docs/user-guide/configmap/">ConfigMaps</a>, which would solve your problem of moving/managing configuration files on multiple servers. You can also mount these <a href="https://kubernetes.io/docs/user-guide/configmap/">ConfigMaps</a> as environment variables.</li>
@@ -216,15 +266,25 @@
 <li>You can assume that a specific folder is shared between multiple instances of your processes, then use <a href="https://github.com/kubernetes/kubernetes/tree/master/examples/volumes/nfs">NFS volume mounts</a> to have a truly shared filesystem between multiple nodes in your cluster.</li>
 </ul>
 <p>These are all helpful&hellip; but maybe hard for you to setup all at once, or you just may not have the resources. This doesn&rsquo;t mean you should code your services like you don&rsquo;t have these options. You can mostly have the juicy parts of these features just by using Docker and some clever structuring/configuration. Below i will explain how to achieve a working environment that will make it easy for you to push your services into Kubernetes.</p>
-<h2 id="configuration">Configuration</h2>
-<p>Have a single configuration file that retrieves your environment specific configurations through environment variables, and holds the other kind of information(configuration you would like to have in your source control) as hardcoded.</p>
+<h2 id="configuration" >Configuration
+<span>
+    <a href="#configuration">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h2><p>Have a single configuration file that retrieves your environment specific configurations through environment variables, and holds the other kind of information(configuration you would like to have in your source control) as hardcoded.</p>
 <p>This will make it possible for you to plug-in different kinds of environment files on different environments. You can achieve this by using <code>env_file</code> in <code>docker-compose</code> or <code>ConfigMap</code> in Kubernetes. You also have the chance to dynamically create this file in your docker entrypoint and override it with a configuration retrieved from a database or somewhere else.</p>
 <ul>
 <li>Configurations that changes from host to host or environment to environment should be retrieved as environment variables or files.</li>
 <li>Configurations that change the business logic related behaviour of the application should be stored within scm(git, svn).</li>
 </ul>
-<h3 id="single-configuration-file">Single Configuration File</h3>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75715e">// config.js
+<h3 id="single-configuration-file" >Single Configuration File
+<span>
+    <a href="#single-configuration-file">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h3><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#75715e">// config.js
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">module</span>.<span style="color:#a6e22e">exports</span> <span style="color:#f92672">=</span> {
 </span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Good old way of getting configurations.
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#a6e22e">database</span><span style="color:#f92672">:</span> { <span style="color:#a6e22e">password</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">process</span>.<span style="color:#a6e22e">env</span>.<span style="color:#a6e22e">DATABASE_PORT</span> <span style="color:#f92672">||</span> <span style="color:#ae81ff">3306</span> },
@@ -234,18 +294,33 @@
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#a6e22e">magic</span><span style="color:#f92672">:</span> { <span style="color:#a6e22e">string</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;Hello, World!&#39;</span> }
 </span></span><span style="display:flex;"><span>};
 </span></span></code></pre></div><p>After having a configuration file like this. You can create <code>.env.example</code> to hold the default values, and use specific configurations for each environments (as: <code>.env.{ENVIRONMENT}</code>). These files can be loaded with docker-compose to your container&rsquo;s <code>process.env</code>. You can also create Kubernetes spec to mount Environment Variables from <code>ConfigMaps</code>.</p>
-<h3 id="docker-envfile-example">Docker Envfile (Example)</h3>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#75715e"># docker-compose.yaml</span>
+<h3 id="docker-envfile-example" >Docker Envfile (Example)
+<span>
+    <a href="#docker-envfile-example">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h3><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#75715e"># docker-compose.yaml</span>
 </span></span><span style="display:flex;"><span><span style="color:#f92672">version</span>: <span style="color:#e6db74">&#39;2&#39;</span>
 </span></span><span style="display:flex;"><span><span style="color:#f92672">services</span>:
 </span></span><span style="display:flex;"><span>    <span style="color:#f92672">application</span>:
 </span></span><span style="display:flex;"><span>      <span style="color:#f92672">image</span>: <span style="color:#ae81ff">xxx:latest</span>
 </span></span><span style="display:flex;"><span>      <span style="color:#f92672">env_file</span>: <span style="color:#ae81ff">./.env.development</span>
-</span></span></code></pre></div><h2 id="shared-files">Shared Files</h2>
-<p>You can use docker named volumes for folders you would like to share between multiple instances of your services, or to store persistent information between container re-creates.</p>
+</span></span></code></pre></div><h2 id="shared-files" >Shared Files
+<span>
+    <a href="#shared-files">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h2><p>You can use docker named volumes for folders you would like to share between multiple instances of your services, or to store persistent information between container re-creates.</p>
 <p>There is also the ability to create named volumes backed by AWS storage or NFS. You&rsquo;re almost as flexible as you would have been with Kubernetes and it&rsquo;s much more easier.</p>
-<h3 id="named-volumes-example">Named Volumes (Example)</h3>
-<p>Example:</p>
+<h3 id="named-volumes-example" >Named Volumes (Example)
+<span>
+    <a href="#named-volumes-example">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h3><p>Example:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#75715e"># docker-compose.yaml</span>
 </span></span><span style="display:flex;"><span><span style="color:#f92672">version</span>: <span style="color:#e6db74">&#39;2&#39;</span>
 </span></span><span style="display:flex;"><span><span style="color:#f92672">volumes</span>:
@@ -255,11 +330,21 @@
 </span></span><span style="display:flex;"><span>      <span style="color:#f92672">image</span>: <span style="color:#ae81ff">mariadb:10.1</span>
 </span></span><span style="display:flex;"><span>      <span style="color:#f92672">volumes</span>:
 </span></span><span style="display:flex;"><span>        - <span style="color:#ae81ff">database-storage:/var/lib/mysql</span>
-</span></span></code></pre></div><h2 id="service-discovery">Service Discovery</h2>
-<p>You should make all of your remote dependencies host names and ports configurable. Use the suggested single configuration file strategy to hold your host name and port information. You can use static ip addresses like <code>localhost</code> or public ips in one environment configuration, and use custom hostnames like <code>database</code> in another to let it resolve through a DNS.</p>
+</span></span></code></pre></div><h2 id="service-discovery" >Service Discovery
+<span>
+    <a href="#service-discovery">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h2><p>You should make all of your remote dependencies host names and ports configurable. Use the suggested single configuration file strategy to hold your host name and port information. You can use static ip addresses like <code>localhost</code> or public ips in one environment configuration, and use custom hostnames like <code>database</code> in another to let it resolve through a DNS.</p>
 <p>Docker supports DNS resolving of containers that run in the same network. You can easily run 2 different services called <code>database</code> and <code>application</code> and both will see each other in their given name, thanks to the DNS service supplied by Docker. You can also add extra hosts with static ip resolutions using <code>extra_hosts</code>.</p>
-<h3 id="docker-networks-example">Docker Networks (Example)</h3>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#75715e"># docker-compose.yaml</span>
+<h3 id="docker-networks-example" >Docker Networks (Example)
+<span>
+    <a href="#docker-networks-example">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h3><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#75715e"># docker-compose.yaml</span>
 </span></span><span style="display:flex;"><span><span style="color:#f92672">version</span>: <span style="color:#e6db74">&#34;2&#34;</span>
 </span></span><span style="display:flex;"><span><span style="color:#f92672">networks</span>:
 </span></span><span style="display:flex;"><span>  <span style="color:#f92672">redisnetwork</span>: { <span style="color:#f92672">driver</span>: <span style="color:#ae81ff">bridge }</span>
@@ -275,21 +360,46 @@
 </span></span><span style="display:flex;"><span>    <span style="color:#75715e"># This service can resolve both application and google hostnames.</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#f92672">extra_hosts</span>: <span style="color:#75715e">*default_hosts</span>
 </span></span></code></pre></div><p>Only problem with this setup is when you would like to spin up multiple instances of a given container. You can spin up a reverse proxy container to load balance the recv requests to itself and forward them to other services defined in the docker-compose file. With Kubernetes, you can use a <code>Service</code>.</p>
-<h2 id="auto-restarting">Auto Restarting</h2>
-<p>Most of the continuous integration pipelines are built to output a single docker image that could be run as if the whole project were a single binary. This means adding your source code into the image, installing all dependencies and making the main file of your project the entrypoint. However a Dockerfile designed for this process is not very useful when working locally. Since the source code is added to the image in the <code>docker build</code> process, changes you make on your code after the build phase will not change how the containers created by the previously built images behaves.</p>
+<h2 id="auto-restarting" >Auto Restarting
+<span>
+    <a href="#auto-restarting">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h2><p>Most of the continuous integration pipelines are built to output a single docker image that could be run as if the whole project were a single binary. This means adding your source code into the image, installing all dependencies and making the main file of your project the entrypoint. However a Dockerfile designed for this process is not very useful when working locally. Since the source code is added to the image in the <code>docker build</code> process, changes you make on your code after the build phase will not change how the containers created by the previously built images behaves.</p>
 <p>This is why i have 2 different Dockerfiles, one for building <code>binary</code> images and one for development. The trick with development Dockerfile is that we add our source code into the container, not into the image. This means mounting the source directory from the Host to the Docker container. Things you need to take into consideration here is as follows;</p>
-<h3 id="docker-container-volume-mounts">Docker Container Volume Mounts</h3>
-<p>Docker containers can mount directories from where the docker engine runs, not from the machine you run the <code>docker</code> command from. Meaning if you&rsquo;re using Virtualbox or a remote server as your Docker Host, this virtual/remote machine should have access to your source code. Since we&rsquo;re talking about local development. You&rsquo;re probably running docker-engine and docker cli in the same machine, or you have your docker-engine in a virtual box.</p>
+<h3 id="docker-container-volume-mounts" >Docker Container Volume Mounts
+<span>
+    <a href="#docker-container-volume-mounts">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h3><p>Docker containers can mount directories from where the docker engine runs, not from the machine you run the <code>docker</code> command from. Meaning if you&rsquo;re using Virtualbox or a remote server as your Docker Host, this virtual/remote machine should have access to your source code. Since we&rsquo;re talking about local development. You&rsquo;re probably running docker-engine and docker cli in the same machine, or you have your docker-engine in a virtual box.</p>
 <p>In case of a Virtualbox, make sure your source code&rsquo;s root folder is shared with the guest os. This is automatically configured for Windows Toolbox. Toolbox mounts <code>C:\Users</code> into <code>/c/users</code> of the docker-engine guest os. However the docker-compose that comes with the Toolbox can&rsquo;t mount from <code>/c/users</code>. You will have a weird error about how the volume mount includes invalid characters, and you should use absolute paths. In this case you should set <code>COMPOSE_CONVERT_WINDOWS_PATHS</code> environment variable to <code>1</code> in the terminal you run docker-compose.</p>
 <p>In other scenarios like running docker-compose under Hyper-V or native Linux, there shouldn&rsquo;t be any problems.</p>
-<h3 id="dependency-installation">Dependency Installation</h3>
-<p>You should never mount your <code>node_modules</code> into a container. There are packages which require libraries that are specifically built for your operating system. In these cases, mounting an incompatible library will cause your application to not work.</p>
+<h3 id="dependency-installation" >Dependency Installation
+<span>
+    <a href="#dependency-installation">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h3><p>You should never mount your <code>node_modules</code> into a container. There are packages which require libraries that are specifically built for your operating system. In these cases, mounting an incompatible library will cause your application to not work.</p>
 <p>This is why you should run <code>npm install</code> inside the image and only mount the source code needed to run your service. This may require you to <code>build-essentials</code> into your image. If you&rsquo;re using an image that doesn&rsquo;t have it like <code>alpine-node</code>.</p>
-<h3 id="utilities">Utilities</h3>
-<p>You will need utilities to watch for code changes and restart your application. Easiest to setup utilities and most frequently used ones are <code>forever</code> and <code>nodemon</code>. However keep in mind that <code>nodemon</code> needs to exit when your application crashes, so forever will pick up that your application has been terminated, and restart it. This can be done using the <code>--exitcrash</code> flag of <code>nodemon</code>.</p>
+<h3 id="utilities" >Utilities
+<span>
+    <a href="#utilities">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h3><p>You will need utilities to watch for code changes and restart your application. Easiest to setup utilities and most frequently used ones are <code>forever</code> and <code>nodemon</code>. However keep in mind that <code>nodemon</code> needs to exit when your application crashes, so forever will pick up that your application has been terminated, and restart it. This can be done using the <code>--exitcrash</code> flag of <code>nodemon</code>.</p>
 <p>And another thing to keep in mind is that <code>nodemon</code> uses <code>inotify</code> to watch for file changes. This may not work in case you&rsquo;re using Hyper-V or Virtualbox. You can fix this by using polling.</p>
-<h3 id="development-dockerfile-example">Development Dockerfile (Example)</h3>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dockerfile" data-lang="dockerfile"><span style="display:flex;"><span><span style="color:#75715e"># Dockerfile</span><span style="color:#960050;background-color:#1e0010">
+<h3 id="development-dockerfile-example" >Development Dockerfile (Example)
+<span>
+    <a href="#development-dockerfile-example">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h3><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dockerfile" data-lang="dockerfile"><span style="display:flex;"><span><span style="color:#75715e"># Dockerfile</span><span style="color:#960050;background-color:#1e0010">
 </span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> alpine-node:6.9.1</span><span style="color:#960050;background-color:#1e0010">
 </span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">
 </span></span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> mkdir /application<span style="color:#960050;background-color:#1e0010">
@@ -316,11 +426,21 @@
 </span></span><span style="display:flex;"><span>      <span style="color:#f92672">volumes</span>:
 </span></span><span style="display:flex;"><span>       - <span style="color:#ae81ff">./application/src:/application/src </span>
 </span></span></code></pre></div><p>However you shouldn&rsquo;t use forever while building a <code>binary</code> image. The process of restarting your application once it crashes/fails should be handled in your operations layer aswell. Most of the container runtimes like <code>Docker Swarm</code> and <code>Kubernetes</code> have this option by default. Check <a href="https://docs.docker.com/compose/compose-file/#/restartpolicy">restart_policy</a> that came out with docker-compose v3 and <a href="https://kubernetes.io/docs/user-guide/deployments/">Deployments</a> in Kubernetes.</p>
-<h2 id="conclusion">Conclusion</h2>
-<p>We talked about what we can gain using DevOps. Instead of manually scripting solutions into our business logic, we can use containers and container runtimes to make it easy to reason about general problems of microservices. We showed that we didn&rsquo;t need any complex setups or configurations to start coding our services in a way that makes them more readable, and easier to migrate to a container runtimes.</p>
+<h2 id="conclusion" >Conclusion
+<span>
+    <a href="#conclusion">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h2><p>We talked about what we can gain using DevOps. Instead of manually scripting solutions into our business logic, we can use containers and container runtimes to make it easy to reason about general problems of microservices. We showed that we didn&rsquo;t need any complex setups or configurations to start coding our services in a way that makes them more readable, and easier to migrate to a container runtimes.</p>
 <p>With the advance of technologies such as Docker and Kubernetes, your services should only include code about your business logic. Not about your infrastructure.</p>
-<h3 id="a-local-working-environment-example">A local working environment (Example)</h3>
-<p>Below is an example of backend application using Mariadb database with prepopulated sql data.</p>
+<h3 id="a-local-working-environment-example" >A local working environment (Example)
+<span>
+    <a href="#a-local-working-environment-example">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h3><p>Below is an example of backend application using Mariadb database with prepopulated sql data.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#75715e"># docker-compose.yaml</span>
 </span></span><span style="display:flex;"><span><span style="color:#f92672">version</span>: <span style="color:#e6db74">&#39;2&#39;</span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># Network for creating isolated container groups</span>
@@ -370,81 +490,223 @@
 </span></span><span style="display:flex;"><span>      <span style="color:#75715e"># make sure the database starts up with application.</span>
 </span></span><span style="display:flex;"><span>      <span style="color:#75715e"># doesn&#39;t guarantee that the database will be ready before backend works.</span>
 </span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">database</span>
-</span></span></code></pre></div><h3 id="sample-project-with-a-pre-populated-database">Sample Project with a pre-populated database.</h3>
-<p>You can check <a href="https://github.com/Yengas/nodejs-docker-bootstrap">Yengas/nodejs-docker-bootstrap</a> which is a starter application i&rsquo;ve made by following the above recommendations. It also includes a samples section that shows how to deploy a Nodejs application made this way into Kubernetes.</p>
+</span></span></code></pre></div><h3 id="sample-project-with-a-pre-populated-database" >Sample Project with a pre-populated database.
+<span>
+    <a href="#sample-project-with-a-pre-populated-database">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h3><p>You can check <a href="https://github.com/Yengas/nodejs-docker-bootstrap">Yengas/nodejs-docker-bootstrap</a> which is a starter application i&rsquo;ve made by following the above recommendations. It also includes a samples section that shows how to deploy a Nodejs application made this way into Kubernetes.</p>
 
-	
-			
-		    	<div class="social-sharing">
-	<a class="share-button-facebook" onClick="return popupShare(this.href);" href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.yigitcan.dev%2fdocker-compose-node%2f" target="_blank"><i class="fa fa-facebook"><span>Like</span></i></a>
-	<a class="share-button-google-plus" onClick="return popupShare(this.href);" href="https://plus.google.com/share?url=https%3a%2f%2fblog.yigitcan.dev%2fdocker-compose-node%2f" target="_blank"><i class="fa fa-google-plus"><span>Google +1</span></i></a>
-	<a class="share-button-linkedin" onClick="return popupShare(this.href);" href="http://www.linkedin.com/shareArticle?mini=true&url=https%3a%2f%2fblog.yigitcan.dev%2fdocker-compose-node%2f&title=Using%20Docker%20and%20Docker-Compose%20to%20setup%20a%20local%20working%20environment%2c%20ready%20to%20be%20scaled.&summary=Let%26rsquo%3bs%20talk%20about%20running%20your%20Node.js%20applications%2c%20in%20a%20way%20that%20makes%20it%20easier%20to%20migrate%20to%20continuous%20integration%20and%20deployment%20pipelines%20later%20on%20the%20road.%20There%20are%20too%20many%20things%20that%20you%20can%20do%20in%20DevOps%20layer%20that%20will%20make%20your%20code%20more%20readable%20and%20easier%20to%20maintain.%20For%20example%3a%0aYou%20can%20assume%20that%20every%20configuration%20is%20retrieved%20through%20a%20single%20file%2c%20then%20make%20a%20spec%20in%20your%20Kubernetes%20cluster%20to%20dynamically%20create%20this%20file%20through%20ConfigMaps%2c%20which%20would%20solve%20your%20problem%20of%20moving%2fmanaging%20configuration%20files%20on%20multiple%20servers.}&source=Yengas" target="_blank"><i class="fa fa-linkedin"><span>Share on LinkedIn</span></i></a>
-	<a class="share-button-twitter" onClick="return popupShare(this.href);" href="http://twitter.com/share?text=Using%20Docker%20and%20Docker-Compose%20to%20setup%20a%20local%20working%20environment%2c%20ready%20to%20be%20scaled.&url=https%3a%2f%2fblog.yigitcan.dev%2fdocker-compose-node%2f" target="_blank"><i class="fa fa-twitter"><span>Tweet</span></i></a>	
-</div>
-		    
-
-			
-				<div class="tags-list">
-					<span class="dark-red">Tags</span><span class="decorative-marker">//</span>
-					
-	                <a class="post-tag post-tag-docker" href="https://blog.yigitcan.dev/tags/docker">docker</a>,
-	                
-	                <a class="post-tag post-tag-kubernetes" href="https://blog.yigitcan.dev/tags/kubernetes">kubernetes</a>,
-	                
-	                <a class="post-tag post-tag-node" href="https://blog.yigitcan.dev/tags/node">node</a>,
-	                
-	                <a class="post-tag post-tag-nodemon" href="https://blog.yigitcan.dev/tags/nodemon">nodemon</a>,
-	                
-	                <a class="post-tag post-tag-forever" href="https://blog.yigitcan.dev/tags/forever">forever</a>,
-	                
-	                <a class="post-tag post-tag-local" href="https://blog.yigitcan.dev/tags/local">local</a>,
-	                
-				</div>
-			
-
-			
-				<div class="paging">
-					<span class="paging-label">More Reading</span>
-					
-
-					
-					<div class="paging-newer">
-						<span class="dark-red">Newer</span><span class="decorative-marker">//</span>
-						<a class="paging-link" href="/personal-website/">How I Made This Blog?</a>
-		            </div>
-		            
-
-					
-					<div class="paging-older">
-						<span class="dark-red">Older</span><span class="decorative-marker">//</span>
-			            <a class="paging-link" href="/kairosdb-inner-workings/">KairosDB inner workings; how does it store data in Cassandra?</a>
-		            </div>
-		            
-	            </div>
-            
-          </section>
-          
-          	
-          
+        </div>
         
-      <div class="footer">
-	<hr class="thin" />
-	<div class="pure-menu pure-menu-horizontal pure-menu-open">
-		<ul class="footer-menu">
-		
-			<li><a href="/tr/">Blog&#39;u Türkçe oku.</a></li>
-		
-		</ul>
-	</div>
 
-	<p>&copy; 2023. All rights reserved.</p>
-</div>
+    
+
+
+
+<div class="post-info">
+    
+        <div class="post-date dt-published">
+            <a class="u-url" href="/docker-compose-node/"><time datetime="2017-01-31">2017-01-31</time></a>
+            
+        </div>
+    
+
+    <a class="post-hidden-url u-url" href="https://blog.yigitcan.dev/docker-compose-node/">https://blog.yigitcan.dev/docker-compose-node/</a>
+    <a href="https://blog.yigitcan.dev/" class="p-name p-author post-hidden-author h-card" rel="me"></a>
+
+
+    <div class="post-taxonomies">
+        
+            <ul class="post-categories">
+                
+                    
+                    <li><a href="https://blog.yigitcan.dev/categories/devops/">DevOps</a></li>
+                
+            </ul>
+        
+        
+            <ul class="post-tags">
+                
+                    
+                    <li><a href="https://blog.yigitcan.dev/tags/docker/">#docker</a></li>
+                
+                    
+                    <li><a href="https://blog.yigitcan.dev/tags/kubernetes/">#kubernetes</a></li>
+                
+                    
+                    <li><a href="https://blog.yigitcan.dev/tags/node/">#node</a></li>
+                
+                    
+                    <li><a href="https://blog.yigitcan.dev/tags/nodemon/">#nodemon</a></li>
+                
+                    
+                    <li><a href="https://blog.yigitcan.dev/tags/forever/">#forever</a></li>
+                
+                    
+                    <li><a href="https://blog.yigitcan.dev/tags/local/">#local</a></li>
+                
+            </ul>
+        
+        
     </div>
-  </div>
-	
+</div>
 
-	
+    </article>
 
+    
+
+    
+
+    
+        
+
+
+
+
+
+
+
+    
+
+        </main>
+        
+            <footer class="common-footer">
+    
+    
+        <ul class="language-select">
+    
+    
+    
+        
+    
+
+    
+        
+            <li><a href="https://blog.yigitcan.dev/tr/">Türkçe</a></li>
+        
+    
+        
+            <li>English</li>
+        
+    
+</ul>
+
+    
+
+    <div class="common-footer-bottom">
+        
+        <div class="copyright">
+            <p>© 2023<br>
+            Powered by <a target="_blank" rel="noopener noreferrer" href="https://gohugo.io/">Hugo</a>, theme <a target="_blank" rel="noopener noreferrer" href="https://github.com/mitrichius/hugo-theme-anubis">Anubis</a>.<br>
+            
+            </p>  
+        </div> 
+
+        
+
+    
+
+
+
+
+    <button class="theme-switcher">
+        Dark theme
+    </button>
+
+
+<script>
+const STORAGE_KEY = 'user-color-scheme'
+const defaultTheme = "auto"
+
+let currentTheme
+let switchButton
+let autoDefinedScheme = window.matchMedia('(prefers-color-scheme: dark)')
+
+const autoChangeScheme = e => {
+    currentTheme = e.matches ? 'dark' : 'light'
+    document.documentElement.setAttribute('data-theme', currentTheme)
+    changeButtonText()
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    switchButton = document.querySelector('.theme-switcher')
+    currentTheme = detectCurrentScheme()
+    if (currentTheme == 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark')
+    }
+    if (currentTheme == 'auto') {
+        autoChangeScheme(autoDefinedScheme);
+        autoDefinedScheme.addListener(autoChangeScheme);
+    }
+
+    if (switchButton) {
+        changeButtonText()
+        switchButton.addEventListener('click', switchTheme, false)
+    }
   
+    showContent()
+})
+
+function detectCurrentScheme() {
+    if (localStorage !== null && localStorage.getItem(STORAGE_KEY)) {
+        return localStorage.getItem(STORAGE_KEY)
+    } 
+    if (defaultTheme) {
+        return defaultTheme
+    } 
+    if (!window.matchMedia) {
+        return 'light'
+    } 
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return 'dark'
+    }
+    return 'light'
+}
+
+function changeButtonText()
+{   
+    if (switchButton) {
+        switchButton.textContent = currentTheme == 'dark' ?  "Light theme" : "Dark theme"
+    }
+}
+
+function switchTheme(e) {
+    if (currentTheme == 'dark') {
+        if (localStorage !== null)
+            localStorage.setItem(STORAGE_KEY, 'light')
+        document.documentElement.setAttribute('data-theme', 'light')
+        currentTheme = 'light'
+    } else {
+        if (localStorage !== null)
+            localStorage.setItem(STORAGE_KEY, 'dark')
+        document.documentElement.setAttribute('data-theme', 'dark')
+        currentTheme = 'dark'
+    }
+    changeButtonText()
+}
+
+function showContent() {
+    document.body.style.visibility = 'visible';
+    document.body.style.opacity = 1;
+}
+</script>
+
+   
+    </div>
+
+    <p class="h-card vcard">
+
+    <a href=https://blog.yigitcan.dev/ class="p-name u-url url fn" rel="me"></a> 
+
+    
+
+    
+</p> 
+</footer>
+
+        
+    </div>
 </body>
 </html>

@@ -243,6 +243,18 @@
   </url><url>
     <loc>https://blog.yigitcan.dev/tr/tags/async/await/</loc>
   </url><url>
+    <loc>https://blog.yigitcan.dev/tr/authors/</loc>
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="https://blog.yigitcan.dev/authors/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="tr"
+                href="https://blog.yigitcan.dev/tr/authors/"
+                />
+  </url><url>
     <loc>https://blog.yigitcan.dev/tr/series/</loc>
     <xhtml:link
                 rel="alternate"
