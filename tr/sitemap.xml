@@ -29,6 +29,16 @@
   </url><url>
     <loc>https://blog.yigitcan.dev/tr/categories/node.js/</loc>
     <lastmod>2019-08-16T12:00:00+03:00</lastmod>
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="https://blog.yigitcan.dev/categories/node.js/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="tr"
+                href="https://blog.yigitcan.dev/tr/categories/node.js/"
+                />
   </url><url>
     <loc>https://blog.yigitcan.dev/tr/tags/performance/</loc>
     <lastmod>2019-08-16T12:00:00+03:00</lastmod>
