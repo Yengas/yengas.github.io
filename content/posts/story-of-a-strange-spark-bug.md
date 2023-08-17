@@ -9,7 +9,7 @@ Tags = ["getir", "spark", "mongodb", "scala", "bugs"]
 
 > This blog post is a cross-post of the article originally published on [Medium](https://medium.com/getir/spark-at-getir-and-a-story-of-a-strange-bug-4b0e4b108b33).
 
-<center><img src="/img/articles/getir-spark/spark-logo.webp" alt="Spark Logo" style="width:70%; max-width: 600px; @media (min-width: 768px) { width: 50%; }"/></center>
+<center><img src="/img/articles/getir-spark/spark-logo.webp" alt="Spark Logo" style="width:50%; max-width: 450px; @media (min-width: 768px) { width: 35%; }"/></center>
 
 At Getir, all the decisions we make and the services we run heavily depend on data. To analyze and process this data, we have been using custom Python scripts since our early days. However as time has passed, and data has grown in volume, these scripts have been slower to respond to our needs. Data processing jobs, which we depend on to make decisions, that once only took minutes, started to take hours. They quickly became harder to maintain, because each of them was written with different paradigms as our understanding of optimization and quality changed over time.
 
