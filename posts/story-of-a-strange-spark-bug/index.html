@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+
+
+<html lang="en-us" data-theme="">
+<head>
+    
+        
+<meta charset="utf-8">
+<meta name="HandheldFriendly" content="True">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer-when-downgrade">
+
+<title>Spark at Getir and a Story of a Strange Bug - Yiğitcan UÇUM</title>
+
+<meta name="description" content="This blog post is a cross-post of the article originally published on Medium.
+At Getir, all the decisions we make and the services we run heavily depend on data. To analyze and process this data, we have been using custom Python scripts since our early days. However as time has passed, and data has grown in volume, these scripts have been slower to respond to our needs. Data processing jobs, which we depend on to make decisions, that once only took minutes, started to take hours.">
+
+
+
+
+
+<link rel="icon" type="image/x-icon" href="https://blog.yigitcan.dev/favicon.ico">
+<link rel="apple-touch-icon-precomposed" href="https://blog.yigitcan.dev/favicon.png">
+
+
+
+
+    
+
+
+
+<style>
+  body {
+    visibility: hidden;
+    opacity: 0;
+  }
+</style>
+
+<noscript>
+  <style>
+    body {
+      visibility: visible;
+      opacity: 1;
+    }
+  </style>
+</noscript>
+
+
+
+
+    
+
+
+
+
+
+    
+    
+        
+    
+    
+
+    
+        <link rel="stylesheet" href="https://blog.yigitcan.dev/css/style.min.eaefe0f95d1fe64ef0a3932347fc8e07ff4e3de4515423d0ad22b33474042778.css" integrity="sha256-6u/g&#43;V0f5k7wo5MjR/yOB/9OPeRRVCPQrSKzNHQEJ3g=">
+    
+
+
+
+
+
+    
+
+    
+
+
+
+
+
+    
+    
+        
+    
+    
+
+    
+        <script src="https://blog.yigitcan.dev/js/script.min.74bf1a3fcf1af396efa4acf3e660e876b61a2153ab9cbe1893ac24ea6d4f94ee.js" type="text/javascript" charset="utf-8" integrity="sha256-dL8aP88a85bvpKzz5mDodrYaIVOrnL4Yk6wk6m1PlO4="></script>
+    
+
+
+
+
+
+
+
+<meta property="og:title" content="Spark at Getir and a Story of a Strange Bug" />
+<meta property="og:description" content="This blog post is a cross-post of the article originally published on Medium.
+At Getir, all the decisions we make and the services we run heavily depend on data. To analyze and process this data, we have been using custom Python scripts since our early days. However as time has passed, and data has grown in volume, these scripts have been slower to respond to our needs. Data processing jobs, which we depend on to make decisions, that once only took minutes, started to take hours." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://blog.yigitcan.dev/posts/story-of-a-strange-spark-bug/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2018-11-16T12:00:00+03:00" />
+<meta property="article:modified_time" content="2018-11-16T12:00:00+03:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Spark at Getir and a Story of a Strange Bug"/>
+<meta name="twitter:description" content="This blog post is a cross-post of the article originally published on Medium.
+At Getir, all the decisions we make and the services we run heavily depend on data. To analyze and process this data, we have been using custom Python scripts since our early days. However as time has passed, and data has grown in volume, these scripts have been slower to respond to our needs. Data processing jobs, which we depend on to make decisions, that once only took minutes, started to take hours."/>
+
+
+
+
+
+
+
+
+
+
+
+
+  <link rel="canonical" href="https://medium.com/getir/spark-at-getir-and-a-story-of-a-strange-bug-4b0e4b108b33" itemprop="url" />
+
+
+    
+</head>
+<body>
+    <a class="skip-main" href="#main">Skip to main content</a>
+    <div class="container">
+        <header class="common-header"> 
+            
+                <div class="header-top">
+    <h1 class="site-title">
+    <a href="/">Yiğitcan UÇUM</a>
+</h1>
+    <ul class="social-icons">
+
+
+    
+        <li>
+            <a href="https://github.com/Yengas" title="Github" rel="me">
+            <span class="inline-svg" >
+
+
+
+
+    
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><path fill="currentColor" d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+
+</span>
+
+            </a>
+        </li>
+    
+
+    
+        <li>
+            <a href="https://linkedin.com/in/YigitcanUCUM" title="Linkedin" rel="me">
+            <span class="inline-svg" >
+
+
+
+
+    
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3zM135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5zm282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9V416z"/></svg>
+
+</span>
+
+            </a>
+        </li>
+    
+
+
+
+    <li>
+            <a href="https://blog.yigitcan.dev/index.xml" title="RSS" rel="me">
+            <span class="inline-svg" >
+
+
+
+
+    
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M128.081 415.959c0 35.369-28.672 64.041-64.041 64.041S0 451.328 0 415.959s28.672-64.041 64.041-64.041 64.04 28.673 64.04 64.041zm175.66 47.25c-8.354-154.6-132.185-278.587-286.95-286.95C7.656 175.765 0 183.105 0 192.253v48.069c0 8.415 6.49 15.472 14.887 16.018 111.832 7.284 201.473 96.702 208.772 208.772.547 8.397 7.604 14.887 16.018 14.887h48.069c9.149.001 16.489-7.655 15.995-16.79zm144.249.288C439.596 229.677 251.465 40.445 16.503 32.01 7.473 31.686 0 38.981 0 48.016v48.068c0 8.625 6.835 15.645 15.453 15.999 191.179 7.839 344.627 161.316 352.465 352.465.353 8.618 7.373 15.453 15.999 15.453h48.068c9.034-.001 16.329-7.474 16.005-16.504z"/></svg>
+
+</span>
+
+            </a>
+        </li>
+    
+
+</ul>
+</div>
+
+    <nav>
+        
+        
+        <a class="" href="https://blog.yigitcan.dev/" title="">Home</a>
+        
+        <a class="" href="https://blog.yigitcan.dev/about" title="">About</a>
+        
+    </nav>
+
+
+
+
+
+
+            
+        </header>
+        <main id="main" tabindex="-1"> 
+            
+    
+
+    <article class="post h-entry">
+        <div class="post-header">
+            <header>
+                <h1 class="p-name post-title">Spark at Getir and a Story of a Strange Bug</h1>
+
+                
+            </header>
+        </div>
+        
+
+
+
+
+<nav id="TableOfContents"></nav>
+
+        <div class="content e-content">
+            <blockquote>
+<p>This blog post is a cross-post of the article originally published on <a href="https://medium.com/getir/spark-at-getir-and-a-story-of-a-strange-bug-4b0e4b108b33">Medium</a>.</p>
+</blockquote>
+<center><img src="/img/articles/getir-spark/spark-logo.webp" alt="Spark Logo" style="width:70%; max-width: 600px; @media (min-width: 768px) { width: 50%; }"/></center>
+<p>At Getir, all the decisions we make and the services we run heavily depend on data. To analyze and process this data, we have been using custom Python scripts since our early days. However as time has passed, and data has grown in volume, these scripts have been slower to respond to our needs. Data processing jobs, which we depend on to make decisions, that once only took minutes, started to take hours. They quickly became harder to maintain, because each of them was written with different paradigms as our understanding of optimization and quality changed over time.</p>
+<p>That is why we decided to move to <a href="https://spark.apache.org/">Spark</a>. By making this change, we aimed to have an infrastructure and source/sink agnostic codebase which would help us transition into a more configurable analysis environment. This infrastructure will let us scale more efficiently and run data processing jobs in parallel, analyze and process cold stored backup files, write out to different types of storage (<a href="https://www.redshift3d.com/">Redshift</a>, <a href="https://www.mongodb.com/">Mongo</a> databases, Avro files), process our data in real-time, and create well documented visual workflows. How Spark has helped us completely improve our analytics process is a story in and of itself. That story, however, is for another time.</p>
+<p>This story is about a strange little bug, one that cost us a minor headache. We started moving our legacy scripts to Spark a month ago, and since we are in the process of moving to Redshift, some of our data that is generated by these scripts were still being written to MongoDB. So the first thought that popped into our heads was to write our Spark generated data to MongoDB as well, without disrupting our services that queried this data.</p>
+<p>So there we were, implementing minor analyze jobs with Spark, and writing the output into MongoDB, to be backward compatible. Soon enough we noticed something was wrong.</p>
+<p>Let’s say we have 2 models: Order and User</p>
+<p>And we want to save a DataSet of orders, where each one refers to a single customer that the order belongs to. E.g. <code>orders = [..., { ...otherFields, customer: ObjectId }]</code> this data gets inserted into MongoDB successfully. Each Order document, gets a customer field with a type of ObjectId.</p>
+<p>But, if we try to save a DataSet of customers, which has a one-to-many relationship to the aformentioned Order documents, with a field called orders. E.g. <code>customers = [..., { ...otherFields, orders: ObjectId[] }]</code>, instead of an array of ObjectId’s in MongoDB, we got an array of Objects that had ids of the orders as a string in a field called <code>$oid</code>! So we got: <code>{ $oid: 'abc...' }</code> instead of <code>ObjectId('abc...')</code>!</p>
+<p>Being the well-behaving programmers we were the first thing that we thought of was <a href="https://blog.codinghorror.com/the-first-rule-of-programming-its-always-your-fault/">the article “It’s Always Your Fault”</a> by Jeff Atwood. Surely there couldn’t be a bug with writing DataSets to MongoDB. Did we do something wrong? However exhausting every thought we had, and searching all over the web, we couldn’t find any clues that showed that our code was flawed.</p>
+<p>So down the rabbit hole, we went. The first stop was understanding how the DataSet was translated into a MongoDB collection. <a href="https://github.com/mongodb/mongo-spark">MongoDB Spark Connector</a> does this. Given each row in your DataSet, <a href="https://github.com/mongodb/mongo-spark/blob/r2.2.3/src/main/scala/com/mongodb/spark/sql/MapFunctions.scala#L55">it decides how to map it to a BsonDocument</a>, and then writes the results into a MongoDB collection. When doing this operation, <a href="https://github.com/mongodb/mongo-spark/blob/r2.2.3/src/main/scala/com/mongodb/spark/sql/MapFunctions.scala#L185">MongoDB types such as ObjectID are converted into structs</a> for working with a DataSet. This explained the objects that we saw inside the MongoDB collection. So perhaps there was a bug that caused the objects inside of DataSet to not get converted back to Bson types?</p>
+<p>With this understanding, we set out to reproduce our issue with as less code as possible. We wrote a small script that created a constant DataSet which had fields that contained ObjectId and wrote them to a local MongoDB.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#66d9ef">import</span> org.apache.spark.sql.types._
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">import</span> org.apache.spark.sql.functions._
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">case</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Order</span><span style="color:#f92672">(</span>id<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">String</span><span style="color:#f92672">,</span> userName<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">String</span><span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">val</span> orders <span style="color:#66d9ef">=</span> <span style="color:#a6e22e">Seq</span><span style="color:#f92672">(</span><span style="color:#a6e22e">Order</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;5b85bda7685ca053517a948b&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;Ahmet&#34;</span><span style="color:#f92672">),</span> <span style="color:#a6e22e">Order</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;5b85bda764d8194a675a546d&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;Mehmet&#34;</span><span style="color:#f92672">),</span> <span style="color:#a6e22e">Order</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;5b85bda812c1e568bc6596dc&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;Ahmet&#34;</span><span style="color:#f92672">)).</span>toDS<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>orders
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">.</span>groupBy<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;userName&#34;</span><span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">.</span>agg<span style="color:#f92672">(</span>
+</span></span><span style="display:flex;"><span>    first<span style="color:#f92672">(</span>struct<span style="color:#f92672">(</span>$<span style="color:#e6db74">&#34;id&#34;</span> as <span style="color:#e6db74">&#34;oid&#34;</span><span style="color:#f92672">))</span> as <span style="color:#e6db74">&#34;firstOrder&#34;</span><span style="color:#f92672">,</span>
+</span></span><span style="display:flex;"><span>    collect_list<span style="color:#f92672">(</span>struct<span style="color:#f92672">(</span>$<span style="color:#e6db74">&#34;id&#34;</span> as <span style="color:#e6db74">&#34;oid&#34;</span><span style="color:#f92672">))</span> as <span style="color:#e6db74">&#34;orders&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">.</span>write
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">.</span>format<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;com.mongodb.spark.sql.DefaultSource&#34;</span><span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">.</span>option<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;spark.mongodb.output.uri&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;mongodb://localhost:27017/local.test&#34;</span><span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">.</span>save<span style="color:#f92672">()</span>
+</span></span></code></pre></div><p>Just as we suspected, this small script produced the same unexpected result. The structs inside the DataSet were not converted to Bson type when they were inside an array. The collection that was created by this script can be seen below:</p>
+<center><img src="/img/articles/getir-spark/mongodb-results.png" alt="MongoDB GUI Client showcasing unexpected result" style="width:70%; max-width: 600px; @media (min-width: 768px) { width: 50%; }"/></center>
+<p>Even though the firstOrder field has the type of ObjectId, the orders field is an array of Objects instead of ObjectIds. Now we were sure that something was wrong with the connector. We started inspecting the connector source code, and soon enough we noticed that the recursive function that handled Array and Map types for the DataSet had two small bugs, that caused it to not convert the MongoDB types inside array or maps. We double checked our results and <a href="https://github.com/Yengas/mongo-spark/commit/75e607f31d33252d4d32b2a821feae977d553174">created a branch</a> that worked as we expected.</p>
+<p>After opening a Jira issue for the connector, <a href="https://jira.mongodb.org/projects/SPARK/issues/SPARK-197">we talked with the author</a> about how to merge our fixes into the project and opened a PR for the fix.</p>
+<p>Also when inspecting the code further, we noticed that the DataSet schema to BsonDocument conversion could be optimized further. The Scala code was doing the schema to Bson type inferring for each row, but since the DataSet schema is static for a given list of records, this could be a one time process to infer how to convert the DataSet rows into Bson types. So we did some changes. The code that explains this optimization is below:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#75715e">// Previous approach to conversion
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// definition
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">def</span> rowToDocument<span style="color:#f92672">(</span>row<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Row</span><span style="color:#f92672">)</span><span style="color:#66d9ef">:</span> <span style="color:#66d9ef">BsonDocument</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// usage
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>rowToDocument<span style="color:#f92672">(</span>row<span style="color:#f92672">)</span> <span style="color:#75715e">// for each line
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// The (micro) optimized approach
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// definition
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">def</span> rowToDocumentMapper<span style="color:#f92672">(</span>schema<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">StructType</span><span style="color:#f92672">)</span><span style="color:#66d9ef">:</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">Row</span><span style="color:#f92672">)</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">BsonDocument</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// usage
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">val</span> mapper <span style="color:#66d9ef">=</span> rowToDocumentMapper<span style="color:#f92672">(</span>dataSet<span style="color:#f92672">.</span>schema<span style="color:#f92672">)</span> <span style="color:#75715e">// one time, before starting the row writing
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>mapper<span style="color:#f92672">(</span>row<span style="color:#f92672">)</span> <span style="color:#75715e">// for each line
+</span></span></span></code></pre></div><p>We made a POC for this in <a href="https://github.com/Yengas/mongo-spark/commit/a32c8ad7c6dac914cba98f1d46fa064b55ed8e15">another branch</a> and talked about the possibility of merging this into the connector with the author of MongoDB Spark Connector as well.</p>
+<p>Both the bug fix and the optimization we did was merged into the MongoDB Spark Connector code. The changes were published with the 2.1.3, 2.2.4 and 2.3.0 versions of the connector. This time it was us that spotted the unicorn or the leprechaun with the pot full of gold. We hope we will be as lucky in the future. See you then.</p>
+<blockquote>
+<p>Thanks to Ross Lawley, the author of MongoDB Spark Connector, for his quick response to our issue and his help in merging our changes into the connector.</p>
+</blockquote>
+
+        </div>
+        
+
+    
+
+
+
+<div class="post-info">
+    
+        <div class="post-date dt-published">
+            <a class="u-url" href="/posts/story-of-a-strange-spark-bug/"><time datetime="2018-11-16">2018-11-16</time></a>
+            
+        </div>
+    
+
+    <a class="post-hidden-url u-url" href="https://blog.yigitcan.dev/posts/story-of-a-strange-spark-bug/">https://blog.yigitcan.dev/posts/story-of-a-strange-spark-bug/</a>
+    <a href="https://blog.yigitcan.dev/" class="p-name p-author post-hidden-author h-card" rel="me"></a>
+
+
+    <div class="post-taxonomies">
+        
+            <ul class="post-categories">
+                
+                    
+                    <li><a href="https://blog.yigitcan.dev/categories/data/">Data</a></li>
+                
+            </ul>
+        
+        
+            <ul class="post-tags">
+                
+                    
+                    <li><a href="https://blog.yigitcan.dev/tags/getir/">#getir</a></li>
+                
+                    
+                    <li><a href="https://blog.yigitcan.dev/tags/spark/">#spark</a></li>
+                
+                    
+                    <li><a href="https://blog.yigitcan.dev/tags/mongodb/">#mongodb</a></li>
+                
+                    
+                    <li><a href="https://blog.yigitcan.dev/tags/scala/">#scala</a></li>
+                
+                    
+                    <li><a href="https://blog.yigitcan.dev/tags/bugs/">#bugs</a></li>
+                
+            </ul>
+        
+        
+    </div>
+</div>
+
+    </article>
+
+    
+
+    
+
+    
+        
+
+
+
+
+
+
+
+    
+
+        </main>
+        
+            <footer class="common-footer">
+    
+    
+        <ul class="language-select">
+    
+    
+    
+        
+    
+
+    
+        
+            <li><a href="https://blog.yigitcan.dev/tr/">Türkçe</a></li>
+        
+    
+        
+            <li>English</li>
+        
+    
+</ul>
+
+    
+
+    <div class="common-footer-bottom">
+        
+        <div class="copyright">
+            <p>© 2023<br>
+            Powered by <a target="_blank" rel="noopener noreferrer" href="https://gohugo.io/">Hugo</a>, theme <a target="_blank" rel="noopener noreferrer" href="https://github.com/mitrichius/hugo-theme-anubis">Anubis</a>.<br>
+            
+            </p>  
+        </div> 
+
+        
+
+    
+
+
+
+
+    <button class="theme-switcher">
+        Dark theme
+    </button>
+
+
+<script>
+const STORAGE_KEY = 'user-color-scheme'
+const defaultTheme = "auto"
+
+let currentTheme
+let switchButton
+let autoDefinedScheme = window.matchMedia('(prefers-color-scheme: dark)')
+
+const autoChangeScheme = e => {
+    currentTheme = e.matches ? 'dark' : 'light'
+    document.documentElement.setAttribute('data-theme', currentTheme)
+    changeButtonText()
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    switchButton = document.querySelector('.theme-switcher')
+    currentTheme = detectCurrentScheme()
+    if (currentTheme == 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark')
+    }
+    if (currentTheme == 'auto') {
+        autoChangeScheme(autoDefinedScheme);
+        autoDefinedScheme.addListener(autoChangeScheme);
+    }
+
+    if (switchButton) {
+        changeButtonText()
+        switchButton.addEventListener('click', switchTheme, false)
+    }
+  
+    showContent()
+})
+
+function detectCurrentScheme() {
+    if (localStorage !== null && localStorage.getItem(STORAGE_KEY)) {
+        return localStorage.getItem(STORAGE_KEY)
+    } 
+    if (defaultTheme) {
+        return defaultTheme
+    } 
+    if (!window.matchMedia) {
+        return 'light'
+    } 
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return 'dark'
+    }
+    return 'light'
+}
+
+function changeButtonText()
+{   
+    if (switchButton) {
+        switchButton.textContent = currentTheme == 'dark' ?  "Light theme" : "Dark theme"
+    }
+}
+
+function switchTheme(e) {
+    if (currentTheme == 'dark') {
+        if (localStorage !== null)
+            localStorage.setItem(STORAGE_KEY, 'light')
+        document.documentElement.setAttribute('data-theme', 'light')
+        currentTheme = 'light'
+    } else {
+        if (localStorage !== null)
+            localStorage.setItem(STORAGE_KEY, 'dark')
+        document.documentElement.setAttribute('data-theme', 'dark')
+        currentTheme = 'dark'
+    }
+    changeButtonText()
+}
+
+function showContent() {
+    document.body.style.visibility = 'visible';
+    document.body.style.opacity = 1;
+}
+</script>
+
+   
+    </div>
+
+    <p class="h-card vcard">
+
+    <a href=https://blog.yigitcan.dev/ class="p-name u-url url fn" rel="me"></a> 
+
+    
+
+    
+</p> 
+</footer>
+
+        
+    </div>
+</body>
+</html>

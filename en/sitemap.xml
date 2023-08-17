@@ -2,11 +2,8 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://blog.yigitcan.dev/tags/cassandra/</loc>
-    <lastmod>2017-08-03T16:10:00+03:00</lastmod>
-  </url><url>
-    <loc>https://blog.yigitcan.dev/categories/cassandra/</loc>
-    <lastmod>2017-08-03T16:10:00+03:00</lastmod>
+    <loc>https://blog.yigitcan.dev/tags/bugs/</loc>
+    <lastmod>2018-11-16T12:00:00+03:00</lastmod>
   </url><url>
     <loc>https://blog.yigitcan.dev/categories/</loc>
     <lastmod>2023-08-16T17:30:00+03:00</lastmod>
@@ -20,6 +17,59 @@
                 hreflang="en"
                 href="https://blog.yigitcan.dev/categories/"
                 />
+  </url><url>
+    <loc>https://blog.yigitcan.dev/categories/data/</loc>
+    <lastmod>2018-11-16T12:00:00+03:00</lastmod>
+  </url><url>
+    <loc>https://blog.yigitcan.dev/tags/getir/</loc>
+    <lastmod>2018-11-16T12:00:00+03:00</lastmod>
+  </url><url>
+    <loc>https://blog.yigitcan.dev/tags/mongodb/</loc>
+    <lastmod>2018-11-16T12:00:00+03:00</lastmod>
+  </url><url>
+    <loc>https://blog.yigitcan.dev/posts/</loc>
+    <lastmod>2018-11-16T12:00:00+03:00</lastmod>
+  </url><url>
+    <loc>https://blog.yigitcan.dev/tags/scala/</loc>
+    <lastmod>2018-11-16T12:00:00+03:00</lastmod>
+  </url><url>
+    <loc>https://blog.yigitcan.dev/tags/spark/</loc>
+    <lastmod>2018-11-16T12:00:00+03:00</lastmod>
+  </url><url>
+    <loc>https://blog.yigitcan.dev/posts/story-of-a-strange-spark-bug/</loc>
+    <lastmod>2018-11-16T12:00:00+03:00</lastmod>
+  </url><url>
+    <loc>https://blog.yigitcan.dev/tags/</loc>
+    <lastmod>2023-08-16T17:30:00+03:00</lastmod>
+    <xhtml:link
+                rel="alternate"
+                hreflang="tr"
+                href="https://blog.yigitcan.dev/tr/tags/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="https://blog.yigitcan.dev/tags/"
+                />
+  </url><url>
+    <loc>https://blog.yigitcan.dev/</loc>
+    <lastmod>2023-08-16T17:30:00+03:00</lastmod>
+    <xhtml:link
+                rel="alternate"
+                hreflang="tr"
+                href="https://blog.yigitcan.dev/tr/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="https://blog.yigitcan.dev/"
+                />
+  </url><url>
+    <loc>https://blog.yigitcan.dev/tags/cassandra/</loc>
+    <lastmod>2017-08-03T16:10:00+03:00</lastmod>
+  </url><url>
+    <loc>https://blog.yigitcan.dev/categories/cassandra/</loc>
+    <lastmod>2017-08-03T16:10:00+03:00</lastmod>
   </url><url>
     <loc>https://blog.yigitcan.dev/categories/database/</loc>
     <lastmod>2017-08-03T16:10:00+03:00</lastmod>
@@ -52,34 +102,8 @@
     <loc>https://blog.yigitcan.dev/tags/schema/</loc>
     <lastmod>2017-08-03T16:10:00+03:00</lastmod>
   </url><url>
-    <loc>https://blog.yigitcan.dev/tags/</loc>
-    <lastmod>2023-08-16T17:30:00+03:00</lastmod>
-    <xhtml:link
-                rel="alternate"
-                hreflang="tr"
-                href="https://blog.yigitcan.dev/tr/tags/"
-                />
-    <xhtml:link
-                rel="alternate"
-                hreflang="en"
-                href="https://blog.yigitcan.dev/tags/"
-                />
-  </url><url>
     <loc>https://blog.yigitcan.dev/tags/tips/</loc>
     <lastmod>2017-08-03T16:10:00+03:00</lastmod>
-  </url><url>
-    <loc>https://blog.yigitcan.dev/</loc>
-    <lastmod>2023-08-16T17:30:00+03:00</lastmod>
-    <xhtml:link
-                rel="alternate"
-                hreflang="tr"
-                href="https://blog.yigitcan.dev/tr/"
-                />
-    <xhtml:link
-                rel="alternate"
-                hreflang="en"
-                href="https://blog.yigitcan.dev/"
-                />
   </url><url>
     <loc>https://blog.yigitcan.dev/categories/devops/</loc>
     <lastmod>2017-01-31T03:30:00+03:00</lastmod>
