@@ -52,7 +52,7 @@ orders
 
 Just as we suspected, this small script produced the same unexpected result. The structs inside the DataSet were not converted to Bson type when they were inside an array. The collection that was created by this script can be seen below:
 
-<center><img src="/img/articles/getir-spark/mongodb-results.png" alt="MongoDB GUI Client showcasing unexpected result" style="width:70%; max-width: 600px; @media (min-width: 768px) { width: 50%; }"/></center>
+<center><img src="/img/articles/getir-spark/mongodb-results.png" alt="MongoDB GUI Client showcasing unexpected result" style="width:100%; max-width: 800px; @media (min-width: 768px) { width: 70%; }"/></center>
 
 Even though the firstOrder field has the type of ObjectId, the orders field is an array of Objects instead of ObjectIds. Now we were sure that something was wrong with the connector. We started inspecting the connector source code, and soon enough we noticed that the recursive function that handled Array and Map types for the DataSet had two small bugs, that caused it to not convert the MongoDB types inside array or maps. We double checked our results and [created a branch](https://github.com/Yengas/mongo-spark/commit/75e607f31d33252d4d32b2a821feae977d553174) that worked as we expected.
 
