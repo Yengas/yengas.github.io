@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+
+
+<html lang="en-us" data-theme="">
+<head>
+    
+        
+<meta charset="utf-8">
+<meta name="HandheldFriendly" content="True">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer-when-downgrade">
+
+<title>Micro-frontend architecture and React with Web Components - Yiğitcan UÇUM</title>
+
+<meta name="description" content="This blog post is a cross-post of the article originally published on Medium.
+Working as an army of developers divided into 10s of feature teams, one of the big topics in our company is to move to a micro frontend architecture. So every team in our company can be truly cross-functional and have an end-to-end autonomous deployment, decreasing the time to market for the features to be developed. We currently have dozens of different frontend projects developed with a variety of frontend tooling(old fashion template engines, Vue, React, Angular).">
+
+
+
+
+
+<link rel="icon" type="image/x-icon" href="https://blog.yigitcan.dev/favicon.ico">
+<link rel="apple-touch-icon-precomposed" href="https://blog.yigitcan.dev/favicon.png">
+
+
+
+
+    
+
+
+
+<style>
+  body {
+    visibility: hidden;
+    opacity: 0;
+  }
+</style>
+
+<noscript>
+  <style>
+    body {
+      visibility: visible;
+      opacity: 1;
+    }
+  </style>
+</noscript>
+
+
+
+
+    
+
+
+
+
+
+    
+    
+        
+    
+    
+
+    
+        <link rel="stylesheet" href="https://blog.yigitcan.dev/css/style.min.eaefe0f95d1fe64ef0a3932347fc8e07ff4e3de4515423d0ad22b33474042778.css" integrity="sha256-6u/g&#43;V0f5k7wo5MjR/yOB/9OPeRRVCPQrSKzNHQEJ3g=">
+    
+
+
+
+
+
+    
+
+    
+
+
+
+
+
+    
+    
+        
+    
+    
+
+    
+        <script src="https://blog.yigitcan.dev/js/script.min.74bf1a3fcf1af396efa4acf3e660e876b61a2153ab9cbe1893ac24ea6d4f94ee.js" type="text/javascript" charset="utf-8" integrity="sha256-dL8aP88a85bvpKzz5mDodrYaIVOrnL4Yk6wk6m1PlO4="></script>
+    
+
+
+
+
+
+
+
+<meta property="og:title" content="Micro-frontend architecture and React with Web Components" />
+<meta property="og:description" content="This blog post is a cross-post of the article originally published on Medium.
+Working as an army of developers divided into 10s of feature teams, one of the big topics in our company is to move to a micro frontend architecture. So every team in our company can be truly cross-functional and have an end-to-end autonomous deployment, decreasing the time to market for the features to be developed. We currently have dozens of different frontend projects developed with a variety of frontend tooling(old fashion template engines, Vue, React, Angular)." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://blog.yigitcan.dev/posts/micro-frontend-architecture-and-react-with-web-components/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2020-02-21T12:00:00+03:00" />
+<meta property="article:modified_time" content="2020-02-21T12:00:00+03:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Micro-frontend architecture and React with Web Components"/>
+<meta name="twitter:description" content="This blog post is a cross-post of the article originally published on Medium.
+Working as an army of developers divided into 10s of feature teams, one of the big topics in our company is to move to a micro frontend architecture. So every team in our company can be truly cross-functional and have an end-to-end autonomous deployment, decreasing the time to market for the features to be developed. We currently have dozens of different frontend projects developed with a variety of frontend tooling(old fashion template engines, Vue, React, Angular)."/>
+
+
+
+
+
+
+
+
+
+
+
+
+  <link rel="canonical" href="https://medium.com/trendyol-tech/micro-frontend-architecture-and-react-with-web-components-c27301c68240" itemprop="url" />
+
+
+    
+</head>
+<body>
+    <a class="skip-main" href="#main">Skip to main content</a>
+    <div class="container">
+        <header class="common-header"> 
+            
+                <div class="header-top">
+    <h1 class="site-title">
+    <a href="/">Yiğitcan UÇUM</a>
+</h1>
+    <ul class="social-icons">
+
+
+    
+        <li>
+            <a href="https://github.com/Yengas" title="Github" rel="me">
+            <span class="inline-svg" >
+
+
+
+
+    
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><path fill="currentColor" d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+
+</span>
+
+            </a>
+        </li>
+    
+
+    
+        <li>
+            <a href="https://linkedin.com/in/YigitcanUCUM" title="Linkedin" rel="me">
+            <span class="inline-svg" >
+
+
+
+
+    
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3zM135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5zm282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9V416z"/></svg>
+
+</span>
+
+            </a>
+        </li>
+    
+
+
+
+    <li>
+            <a href="https://blog.yigitcan.dev/index.xml" title="RSS" rel="me">
+            <span class="inline-svg" >
+
+
+
+
+    
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M128.081 415.959c0 35.369-28.672 64.041-64.041 64.041S0 451.328 0 415.959s28.672-64.041 64.041-64.041 64.04 28.673 64.04 64.041zm175.66 47.25c-8.354-154.6-132.185-278.587-286.95-286.95C7.656 175.765 0 183.105 0 192.253v48.069c0 8.415 6.49 15.472 14.887 16.018 111.832 7.284 201.473 96.702 208.772 208.772.547 8.397 7.604 14.887 16.018 14.887h48.069c9.149.001 16.489-7.655 15.995-16.79zm144.249.288C439.596 229.677 251.465 40.445 16.503 32.01 7.473 31.686 0 38.981 0 48.016v48.068c0 8.625 6.835 15.645 15.453 15.999 191.179 7.839 344.627 161.316 352.465 352.465.353 8.618 7.373 15.453 15.999 15.453h48.068c9.034-.001 16.329-7.474 16.005-16.504z"/></svg>
+
+</span>
+
+            </a>
+        </li>
+    
+
+</ul>
+</div>
+
+    <nav>
+        
+        
+        <a class="" href="https://blog.yigitcan.dev/" title="">Home</a>
+        
+        <a class="" href="https://blog.yigitcan.dev/about" title="">About</a>
+        
+    </nav>
+
+
+
+
+
+
+            
+        </header>
+        <main id="main" tabindex="-1"> 
+            
+    
+
+    <article class="post h-entry">
+        <div class="post-header">
+            <header>
+                <h1 class="p-name post-title">Micro-frontend architecture and React with Web Components</h1>
+
+                
+            </header>
+        </div>
+        
+
+
+
+
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#introducing-the-seller-store-pages">Introducing the Seller Store Pages</a></li>
+    <li><a href="#integrating-the-seller-store-editor-into-existing-seller-partner-panel">Integrating the Seller Store Editor into existing Seller Partner Panel</a></li>
+    <li><a href="#isolation-of-css-with-shadow-dom">Isolation of CSS with Shadow DOM</a></li>
+    <li><a href="#the-issue-with-the-global-query-selectors">The issue with the global query selectors</a></li>
+    <li><a href="#an-alternative-approach">An Alternative Approach</a></li>
+    <li><a href="#conclusion">Conclusion</a></li>
+  </ul>
+</nav>
+
+        <div class="content e-content">
+            <blockquote>
+<p>This blog post is a cross-post of the article originally published on <a href="https://medium.com/trendyol-tech/micro-frontend-architecture-and-react-with-web-components-c27301c68240">Medium</a>.</p>
+</blockquote>
+<p>Working as an army of developers divided into 10s of feature teams, one of the big topics in our company is to move to a micro frontend architecture. So every team in our company can be truly cross-functional and have an end-to-end autonomous deployment, decreasing the time to market for the features to be developed. We currently have dozens of different frontend projects developed with a variety of frontend tooling(old fashion template engines, Vue, React, Angular).</p>
+<p>This situation forced us to try out multiple ways of isolating different team’s frontend codes from each other. One of the most successful examples is <a href="https://github.com/puzzle-js/puzzle-js">puzzle.js</a>, which is powering our mobile website. However, not all projects have the tooling for micro frontend architecture ready at hand. So we have to improvise sometimes.</p>
+<p>In this article, I will tell you about a new feature we are rolling out at Trendyol, how we used web components while implementing a part of this new feature, and what we learned. Web Components is an awesome technology that lets you create atomic UI elements with any tooling you want, and then share it with other projects that use different technology stack. I hope this will give you some insight into using Web Components, and some problems with it that you may face. If you want to skip the story and see the code, see our proof-of-concept React app at <a href="https://github.com/Trendyol/react-webcomponent-poc">Trendyol/react-webcomponent-poc</a>.</p>
+<h2 id="introducing-the-seller-store-pages" >Introducing the Seller Store Pages
+<span>
+    <a href="#introducing-the-seller-store-pages">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h2><p>Trendyol is one of the biggest e-commerce marketplaces in Turkey. Marketplace sellers in our platform are first-class citizens and our team is always developing new tools to let our sellers reach their target audience.</p>
+<p>This is the story of one such tool. A custom showcase page that lets sellers showcase their products/campaigns/events. Sellers can edit and preview this page anytime that they want using the partner panel. And the customers can access this page using the product detail page or through other channels in/out of our application via deep-link.</p>
+<center style="margin: 20px 0;"><img src="/img/articles/trendyol-micro-frontend/seller-store-intro.webp" alt="Two Showcase Pages in Production (Pull&Bear Türkiye and L’Oreal Türkiye)" style="width:100%; max-width: 600px; @media (min-width: 768px) { width: 50%; }"/><span style="color: rgb(107, 107, 107); font-size: 12px;">Two Showcase Pages in Production (Pull&Bear Türkiye and L’Oreal Türkiye)</span></center>
+<p>This feature consists of two core parts:</p>
+<ul>
+<li>Implementing a dynamic component rendering system on all end-user applications (Affected Teams: Web, Mobile Web, Android, iOS)</li>
+<li>Creating an editor for our sellers where they can customize their page look, upload promotion banners, highlight their products and preview the result (Affected Teams: Seller Center)</li>
+</ul>
+<p>A nice example of why we need the Micro frontend architecture. Just a single feature that spans across 5 different teams that develop frontend applications. After consideration, a new feature team was created. The responsibilities of the team including:</p>
+<ul>
+<li>Development of the Seller Store Page Editor</li>
+<li>Implementation of dynamic component rendering for platforms using web technologies (Web, Mobile Web)</li>
+<li>Development of Backend services handling the business logic of page creation, validation and serving</li>
+</ul>
+<center style="margin: 20px 0;"><img src="/img/articles/trendyol-micro-frontend/boundries-diagram.webp" alt="Diagram Showcasing the Boundaries of the Seller Store Team" style="width:100%; max-width: 600px; @media (min-width: 768px) { width: 50%; }"/><span style="color: rgb(107, 107, 107); font-size: 12px;">Boundaries of the Seller Store Team</span></center>
+<p>The mobile team already had a dynamic component rendering system developed to be used in different sections of our applications, making it easy to deliver the initial version of this feature to our customers. As the Seller Store team, we initially created the REST APIs to be used by our mobile team and handcrafted some showcase pages to be used in the production. Also starting to develop the Seller Store Editor in parallel. To be used by our sellers in the existing Partner panel which they use for everything else.</p>
+<h2 id="integrating-the-seller-store-editor-into-existing-seller-partner-panel" >Integrating the Seller Store Editor into existing Seller Partner Panel
+<span>
+    <a href="#integrating-the-seller-store-editor-into-existing-seller-partner-panel">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h2><p>As the Seller Store team, React was our framework of choice because we wanted to get dynamic component rendering as fast as possible on web platforms (without Web Components). And those teams already have people experienced with using React to create UIs for our customers. We also wanted to use Redux, Typescript, and RxJS to craft a reactive application that has business logic separated away from UI components as much as possible.</p>
+<center style="margin: 20px 0;"><img src="/img/articles/trendyol-micro-frontend/seller-store-demo.gif" alt="GIF Demonstration of Creating Your Own Showcase Page" style="width:70%; max-width: 400px; @media (min-width: 768px) { width: 35%; }"/><span style="color: rgb(107, 107, 107); font-size: 12px;">Demonstration of Creating Your Own Showcase Page</span></center>
+<p>This was our initial challenge. We already have a panel that the sellers in our platform use to manage their Trendyol portfolio. This panel is written in Vue, and we need to embed our editor as a single page in it. In this article, we will talk about the implementation of this particular page.</p>
+<p>Our only requirement was to keep the Seller Store team as autonomous as possible. Initially, we were thinking about using iframes but we decided to give Web Components API a shot. The idea was to use as much feature(authentication, analytics, etc.) as possible from the already existing Vue panel through sync calls / async messages since both our editor and the panel code would be executing on the same page.</p>
+<p>We quickly spun up a POC. Demonstrating how to make a single page React application and expose it as a custom element. This POC had all the CSS for our application encapsulated into a shadow root, exposed itself as a custom element and used redux for routing so it would not break the routing of the original page. You could start using this application in any HTML page as follows:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#f92672">html</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;<span style="color:#f92672">head</span>&gt;
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">&lt;!-- Seller Partner Panel related code --&gt;</span>
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;$public-url/seller-store.vendor.min.js&#34;</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;text/javascript&#34;</span>&gt;&lt;/<span style="color:#f92672">script</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;$public-url/seller-store.min.js&#34;</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;text/javascript&#34;</span>&gt;&lt;/<span style="color:#f92672">script</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">head</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;<span style="color:#f92672">body</span>&gt;
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">&lt;!-- Seller Partner Panel related code --&gt;</span>
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#f92672">seller-store-editor</span> /&gt;
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">&lt;!-- Seller Partner Panel related code --&gt;</span>
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">body</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">html</span>&gt;
+</span></span></code></pre></div><p>You can find the POC we created under <a href="https://github.com/Trendyol/react-webcomponent-poc">this repository</a> for reference. Initially, this setup worked really well, however after a period of time working with this and facing some issues, we decided to move away from the web components. Let’s look at those reasons.</p>
+<h2 id="isolation-of-css-with-shadow-dom" >Isolation of CSS with Shadow DOM
+<span>
+    <a href="#isolation-of-css-with-shadow-dom">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h2><p>When you are trying to import a frontend component into your project, even if the component is written with the same technology stack, you need a way to isolate their CSS. Otherwise, you will have CSS clashes that may break your or the imported component’s styling. A popular solution to this in the React world is to use CSS-Modules. You import your CSS into JS and let Webpack rename your CSS whilst bundling your code. No more clashes!</p>
+<p>However, you will still have issues if you have global CSS selectors that affect the imported components. The web component API’s solution to this is to create a Shadow DOM. With Shadow DOM, your component will be rendered separately and will not be affected by any external CSS selectors. The same applies to styles you write as well, they won’t affect the parent container.</p>
+<p>When using Shadow DOM with React/Webpack the first issue we faced was with the <a href="https://github.com/webpack-contrib/style-loader">style-loader</a>. By default, every CSS imported by your JS files is automatically injected into <code>&lt;head&gt;</code> tag of the page. And since your Shadow DOM is not rendered as a part of the original page, your styles won’t take effect. There are some solutions to this. You either use the <a href="https://www.npmjs.com/package/to-string-loader">to-string-loader</a> and create a <code>&lt;style&gt;</code> tag inside your Shadow DOM. Or you configure style-loader to inject the styles to your Shadow DOM dynamically. We got the POC working with the <a href="https://github.com/Wildhoney/ReactShadow">ReactShadow</a> and to-string-loader libraries.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-tsx" data-lang="tsx"><span style="display:flex;"><span><span style="color:#66d9ef">import</span> <span style="color:#a6e22e">root</span> <span style="color:#66d9ef">from</span> <span style="color:#e6db74">&#39;react-shadow&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">import</span> <span style="color:#a6e22e">styles</span> <span style="color:#66d9ef">from</span> <span style="color:#e6db74">&#39;./components/index.scss&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">SellerStoreEditorWebComponent</span> <span style="color:#66d9ef">extends</span> <span style="color:#a6e22e">HTMLElement</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">getComponentToRender() {</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> (
+</span></span><span style="display:flex;"><span>      &lt;<span style="color:#f92672">root.div</span>&gt;
+</span></span><span style="display:flex;"><span>        &lt;<span style="color:#f92672">SellerStoreEditor</span> /&gt;
+</span></span><span style="display:flex;"><span>        &lt;<span style="color:#f92672">style</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;text/css&#34;</span>&gt;{<span style="color:#a6e22e">styles</span>}&lt;/<span style="color:#f92672">style</span>&gt;
+</span></span><span style="display:flex;"><span>      &lt;/<span style="color:#f92672">root.div</span>&gt;
+</span></span><span style="display:flex;"><span>    );
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>With this, we isolated our styling from the Vue panel. We used <a href="https://sass-lang.com/">SASS</a> for styling our components and imported every 3rd party components CSS to our root SCSS file. This worked fairly well until we tried to use 3rd party components that used style-loader to inject CSS to <code>&lt;head&gt;</code>. Unfortunately, we could not find a way to override the settings of these components so they would inject their CSS inside our Shadow DOM instead of <code>&lt;head&gt;</code>.</p>
+<p>This really restricted our choices when we were selecting components to work with. We either had to fork the component to make it so it won’t inject the CSS to <code>&lt;head&gt;</code>, or we would just select another component that did not do this.</p>
+<p>There can be another way of solving this issue permanently that we do not know of, however, there is another issue that is not possible to fix with Webpack tooling.</p>
+<h2 id="the-issue-with-the-global-query-selectors" >The issue with the global query selectors
+<span>
+    <a href="#the-issue-with-the-global-query-selectors">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h2><p>When we render all of our SPA inside a Shadow DOM for CSS isolation, another property of the Shadow DOM comes into play. It isolates your DOM elements so they can not be accessed by the <code>document.querySelector</code> globally. At first glance, this makes sense. We would not want another team&rsquo;s code to interfere with ours, by globally injecting functionality to our DOM elements.</p>
+<p>However, in some cases, you need this. For example when you want to re-use existing functionality like setting up analytics on button clicks. The solution to this would be creating your Shadow DOM in open mode and passing your <code>shadowRoot</code> reference as a parameter to the initialization code.</p>
+<p>The same problem is faced when you are using libraries that depend on the <code>document.querySelector</code> In our case, the problem was with the <a href="https://github.com/elrumordelaluz/reactour#usage">reactour</a> library. It uses a selector and finds the element to highlight with <code>document.querySelector</code> We had to fork the library, just to make it work. You can see similar issues with more popular packages like <a href="https://github.com/reactstrap/reactstrap/issues/1691">reactstrap</a>. Just googling <code>problem OR does not work OR broken &quot;shadow dom&quot; inurl:issues site:github.com</code> can point you to more issues.</p>
+<p>This was another problem that restricted our selection of components. It added additional complexity to our workflow. We had to fork and manage a private version of a package until our PRs get merged to the public version.</p>
+<p>So we started thinking about if the Web component/Shadow DOM was the right tool for the job. Maybe the API was better suited to be used for smaller elements and not a whole SPA application? Should we change our code to use an Iframe?</p>
+<h2 id="an-alternative-approach" >An Alternative Approach
+<span>
+    <a href="#an-alternative-approach">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h2><p>As I have said before, we have other teams in the company who are trying to adopt a Microfrontend architecture. Seller Center Team was one of them. Since the code written in their partner panel is managed by multiple teams, and the monolithic project was getting harder to maintain. They were also experimenting with a new approach to splitting the monolith while we were working on our feature.</p>
+<p>The solution they found was breaking the monolith into different projects and creating a base project that looks at the URL and decides which project to serve. The base project includes the common features(authentication, analytics, support) and the layout header/footer/a div to render your content. So if you enter <code>/product/x</code> the <strong>product</strong> project is served. If you enter <code>/seller-store</code> our project’s Javascript file is served.</p>
+<p>Since the base project they created does not include any CSS/code that would interfere with our code. This seemed like a better way to serve our SPA. We refactored the part of our codebase where we created a custom element and rendered our content into a Shadow DOM. Instead, we served an extra manifest file that points to the latest version of our JS file. And just rendered to a plain old <code>div#app</code> container.</p>
+<p>This still fitted our needs. We did not worry about the CSS isolation, we could still make calls to common features present in the base project of Seller Partner Panel and we were still autonomous. This also made it possible so we could use any React component we want. So hats off to the Seller Center Team for making this possible :)</p>
+<h2 id="conclusion" >Conclusion
+<span>
+    <a href="#conclusion">
+        <svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/></svg>
+    </a>
+</span>
+</h2><p>It’s surprisingly easy to use Web Components API with React(check out our <a href="https://github.com/Trendyol/react-webcomponent-poc">POC</a>). However, you may have problems with some 3rd party components you are using because they may inject CSS into <code>&lt;head&gt;</code> or use <code>document.querySelector</code> to try to access elements inside your Shadow DOM.</p>
+<p>Embedding a single-page React application inside a Shadow DOM let us instantly start developing a new feature inside a Vue application. We opted out of using Web Components because of the complexities it brought with it when using 3rd party components. Even if these complexities were solvable, we had a different approach that was better suited to our use case.</p>
+<p>We will be using Web Components API more selectively. We think it will be more useful in cases where a single page consists of more than one project’s components that may talk to each other through sync calls/async messages. Or in cases where you just need a small component that will be used by different technology stacks.</p>
+
+        </div>
+        
+
+    
+
+
+
+<div class="post-info">
+    
+        <div class="post-date dt-published">
+            <a class="u-url" href="/posts/micro-frontend-architecture-and-react-with-web-components/"><time datetime="2020-02-21">2020-02-21</time></a>
+            
+        </div>
+    
+
+    <a class="post-hidden-url u-url" href="https://blog.yigitcan.dev/posts/micro-frontend-architecture-and-react-with-web-components/">https://blog.yigitcan.dev/posts/micro-frontend-architecture-and-react-with-web-components/</a>
+    <a href="https://blog.yigitcan.dev/" class="p-name p-author post-hidden-author h-card" rel="me"></a>
+
+
+    <div class="post-taxonomies">
+        
+            <ul class="post-categories">
+                
+                    
+                    <li><a href="https://blog.yigitcan.dev/categories/frontend/">Frontend</a></li>
+                
+            </ul>
+        
+        
+            <ul class="post-tags">
+                
+                    
+                    <li><a href="https://blog.yigitcan.dev/tags/micro-frontends/">#micro-frontends</a></li>
+                
+                    
+                    <li><a href="https://blog.yigitcan.dev/tags/react/">#react</a></li>
+                
+                    
+                    <li><a href="https://blog.yigitcan.dev/tags/trendyol/">#trendyol</a></li>
+                
+                    
+                    <li><a href="https://blog.yigitcan.dev/tags/web-components/">#web-components</a></li>
+                
+            </ul>
+        
+        
+    </div>
+</div>
+
+    </article>
+
+    
+
+    
+
+    
+        
+
+
+
+
+
+
+
+    
+
+        </main>
+        
+            <footer class="common-footer">
+    
+    
+        <ul class="language-select">
+    
+    
+    
+        
+    
+
+    
+        
+            <li><a href="https://blog.yigitcan.dev/tr/">Türkçe</a></li>
+        
+    
+        
+            <li>English</li>
+        
+    
+</ul>
+
+    
+
+    <div class="common-footer-bottom">
+        
+        <div class="copyright">
+            <p>© 2023<br>
+            Powered by <a target="_blank" rel="noopener noreferrer" href="https://gohugo.io/">Hugo</a>, theme <a target="_blank" rel="noopener noreferrer" href="https://github.com/mitrichius/hugo-theme-anubis">Anubis</a>.<br>
+            
+            </p>  
+        </div> 
+
+        
+
+    
+
+
+
+
+    <button class="theme-switcher">
+        Dark theme
+    </button>
+
+
+<script>
+const STORAGE_KEY = 'user-color-scheme'
+const defaultTheme = "auto"
+
+let currentTheme
+let switchButton
+let autoDefinedScheme = window.matchMedia('(prefers-color-scheme: dark)')
+
+const autoChangeScheme = e => {
+    currentTheme = e.matches ? 'dark' : 'light'
+    document.documentElement.setAttribute('data-theme', currentTheme)
+    changeButtonText()
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    switchButton = document.querySelector('.theme-switcher')
+    currentTheme = detectCurrentScheme()
+    if (currentTheme == 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark')
+    }
+    if (currentTheme == 'auto') {
+        autoChangeScheme(autoDefinedScheme);
+        autoDefinedScheme.addListener(autoChangeScheme);
+    }
+
+    if (switchButton) {
+        changeButtonText()
+        switchButton.addEventListener('click', switchTheme, false)
+    }
+  
+    showContent()
+})
+
+function detectCurrentScheme() {
+    if (localStorage !== null && localStorage.getItem(STORAGE_KEY)) {
+        return localStorage.getItem(STORAGE_KEY)
+    } 
+    if (defaultTheme) {
+        return defaultTheme
+    } 
+    if (!window.matchMedia) {
+        return 'light'
+    } 
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return 'dark'
+    }
+    return 'light'
+}
+
+function changeButtonText()
+{   
+    if (switchButton) {
+        switchButton.textContent = currentTheme == 'dark' ?  "Light theme" : "Dark theme"
+    }
+}
+
+function switchTheme(e) {
+    if (currentTheme == 'dark') {
+        if (localStorage !== null)
+            localStorage.setItem(STORAGE_KEY, 'light')
+        document.documentElement.setAttribute('data-theme', 'light')
+        currentTheme = 'light'
+    } else {
+        if (localStorage !== null)
+            localStorage.setItem(STORAGE_KEY, 'dark')
+        document.documentElement.setAttribute('data-theme', 'dark')
+        currentTheme = 'dark'
+    }
+    changeButtonText()
+}
+
+function showContent() {
+    document.body.style.visibility = 'visible';
+    document.body.style.opacity = 1;
+}
+</script>
+
+   
+    </div>
+
+    <p class="h-card vcard">
+
+    <a href=https://blog.yigitcan.dev/ class="p-name u-url url fn" rel="me"></a> 
+
+    
+
+    
+</p> 
+</footer>
+
+        
+    </div>
+</body>
+</html>
